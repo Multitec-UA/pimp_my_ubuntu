@@ -2,7 +2,7 @@
 /var/log/pimp_my_ubuntu/
 *.log
 *-log
-wget-log
+wget-log*
 
 # Temporary files
 *.tmp

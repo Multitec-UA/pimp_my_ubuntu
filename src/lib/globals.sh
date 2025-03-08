@@ -49,14 +49,9 @@ readonly SHELL_RC_FILES=(
 # Global associative array for installation status
 declare -A INSTALLATION_STATUS
 
-# Common functions
-log_message() {
-    local level=$1
-    local message=$2
-    local timestamp
-    timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-    echo "[${timestamp}] [${level}] ${message}" >> "${LOG_FILE}"
-}
+# Source utility functions
+# shellcheck source=./utils.sh
+source "${LIB_DIR}/utils.sh"
 
 # Function to run commands as the real user
 run_as_user() {

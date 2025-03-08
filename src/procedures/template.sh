@@ -12,6 +12,10 @@
 # Strict mode
 set -euo pipefail
 
+# Source global variables and functions
+# shellcheck source=../lib/globals.sh
+source "$(dirname "${BASH_SOURCE[0]}")/../lib/globals.sh"
+
 # Software-specific constants
 readonly SOFTWARE_NAME="CHANGE_ME"
 readonly SOFTWARE_DESCRIPTION="CHANGE_ME"
@@ -19,6 +23,7 @@ readonly SOFTWARE_VERSION="CHANGE_ME"
 
 # Check if all required dependencies are installed
 check_dependencies() {
+    log_message "INFO" "Checking dependencies for ${SOFTWARE_NAME}"
     local dependencies=("curl" "wget")  # Add required dependencies
     local missing_deps=()
 
@@ -29,7 +34,7 @@ check_dependencies() {
     done
 
     if [[ ${#missing_deps[@]} -gt 0 ]]; then
-        echo "Installing missing dependencies: ${missing_deps[*]}"
+        log_message "INFO" "Installing missing dependencies: ${missing_deps[*]}"
         apt-get update
         apt-get install -y "${missing_deps[@]}"
     fi
@@ -44,6 +49,7 @@ check_if_installed() {
 
 # Prepare for installation
 prepare_installation() {
+    log_message "INFO" "Preparing installation of ${SOFTWARE_NAME}"
     # Add repository if needed
     # Download necessary files
     # Create required directories
@@ -52,12 +58,14 @@ prepare_installation() {
 
 # Main installation function
 install_software() {
+    log_message "INFO" "Installing ${SOFTWARE_NAME}"
     echo "Installing ${SOFTWARE_NAME}..."
     # Implement installation logic here
 }
 
 # Post-installation configuration
 post_install() {
+    log_message "INFO" "Configuring ${SOFTWARE_NAME}"
     echo "Configuring ${SOFTWARE_NAME}..."
     # Implement post-installation configuration
 }
@@ -66,14 +74,15 @@ post_install() {
 update_status() {
     local status="$1"
     INSTALLATION_STATUS["${SOFTWARE_NAME}"]="${status}"
+    log_message "INFO" "Installation status for ${SOFTWARE_NAME}: ${status}"
 }
 
 # Main procedure function
 main() {
-    echo "Starting installation of ${SOFTWARE_NAME}..."
+    log_message "INFO" "Starting installation of ${SOFTWARE_NAME}"
     
     if check_if_installed; then
-        echo "${SOFTWARE_NAME} is already installed."
+        log_message "INFO" "${SOFTWARE_NAME} is already installed"
         update_status "SKIPPED"
         return 0
     fi
@@ -84,9 +93,10 @@ main() {
     if install_software; then
         post_install
         update_status "SUCCESS"
-        echo "${SOFTWARE_NAME} installation completed successfully!"
+        log_message "INFO" "${SOFTWARE_NAME} installation completed successfully"
     else
         update_status "FAILED"
+        log_message "ERROR" "Failed to install ${SOFTWARE_NAME}"
         echo "Failed to install ${SOFTWARE_NAME}!" >&2
         return 1
     fi

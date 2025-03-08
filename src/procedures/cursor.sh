@@ -75,11 +75,6 @@ prepare_installation() {
 install_software() {
     log_message "INFO" "Installing ${SOFTWARE_NAME}"
     
-    # Download Cursor AppImage
-    log_message "INFO" "Downloading Cursor AppImage"
-    run_as_user curl -L "https://download.cursor.sh/linux/appImage/x64" -o "${CURSOR_APPIMAGE}"
-    run_as_user chmod +x "${CURSOR_APPIMAGE}"
-    
     # Install appimaged
     log_message "INFO" "Installing appimaged"
     local appimaged_url
@@ -95,6 +90,11 @@ install_software() {
         sysctl -p /etc/sysctl.d/99-cursor.conf
     fi
     
+    # Download Cursor AppImage
+    log_message "INFO" "Downloading Cursor AppImage"
+    run_as_user curl -L "https://download.cursor.sh/linux/appImage/x64" -o "${CURSOR_APPIMAGE}"
+    run_as_user chmod +x "${CURSOR_APPIMAGE}"
+
     return 0
 }
 
@@ -109,11 +109,13 @@ cursor() {
     local cursor_path=$(find $HOME/Applications -name "cursor*.AppImage" -type f | head -n 1)
     local cursor_args="--no-sandbox"
     if [ $# -eq 0 ]; then
-        "$cursor_path" $cursor_args
+        nohup "$cursor_path" $cursor_args >/dev/null 2>&1 &
+        disown
     else
         # Convert relative path to absolute
         local path=$(realpath "$1")
-        "$cursor_path" $cursor_args "$path"
+        nohup "$cursor_path" $cursor_args "$path" >/dev/null 2>&1 &
+        disown
     fi
 }'
 

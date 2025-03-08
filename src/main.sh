@@ -11,17 +11,9 @@
 
 # Strict mode
 set -euo pipefail
-
-# Global constants
-readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-readonly PROCEDURES_DIR="${SCRIPT_DIR}/procedures"
-readonly DEPENDENCIES_DIR="${SCRIPT_DIR}/dependencies"
-readonly LOG_DIR="/var/log/pimp_my_ubuntu"
-readonly LOG_FILE="${LOG_DIR}/install.log"
-readonly GITHUB_RAW_URL="https://raw.githubusercontent.com/Multitec-UA/pimp_my_ubuntu/main"
-
-# Global variables
-declare -A INSTALLATION_STATUS
+# Source global variables and functions
+# shellcheck source=./lib/globals.sh
+source "$(dirname "${BASH_SOURCE[0]}")/lib/globals.sh"
 
 # Source dependencies
 source_dependency() {
@@ -33,7 +25,7 @@ source_dependency() {
         source "${local_path}"
     else
         if ! curl -sSf "${github_path}" -o "${local_path}"; then
-            echo "Error: Failed to download dependency ${dep_name}" >&2
+            log_message "ERROR" "Failed to download dependency ${dep_name}"
             return 1
         fi
         source "${local_path}"
@@ -51,7 +43,7 @@ check_root() {
 
 # Initialize logging
 setup_logging() {
-    mkdir -p "${LOG_DIR}"
+    ensure_dir "${LOG_DIR}"
     touch "${LOG_FILE}"
     exec 3>&1 4>&2
     exec 1> >(tee -a "${LOG_FILE}") 2>&1
@@ -94,20 +86,22 @@ main() {
     check_root
     setup_logging
     
+    log_message "INFO" "Starting Pimp My Ubuntu installation script"
     echo "Pimp My Ubuntu - Installation Script"
     echo "==================================="
     
     install_basic_dependencies
     
     # Create required directories
-    mkdir -p "${PROCEDURES_DIR}"
-    mkdir -p "${DEPENDENCIES_DIR}"
+    ensure_dir "${PROCEDURES_DIR}"
+    ensure_dir "${DEPENDENCIES_DIR}"
     
     # Load and execute procedures based on user selection
     local procedures
     procedures=($(load_procedures))
     
     if [[ ${#procedures[@]} -eq 0 ]]; then
+        log_message "ERROR" "No installation procedures found"
         echo "No installation procedures found!"
         exit 1
     fi
@@ -116,10 +110,12 @@ main() {
     selected=($(show_menu "${procedures[@]}"))
     
     for selection in "${selected[@]}"; do
+        log_message "INFO" "Starting installation of ${selection}"
         echo "Installing: ${selection}"
         bash "${PROCEDURES_DIR}/${selection}.sh"
     done
     
+    log_message "INFO" "Installation complete"
     echo "Installation complete! Check ${LOG_FILE} for details."
 }
 

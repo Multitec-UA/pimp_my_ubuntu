@@ -1,0 +1,90 @@
+# Logs
+/var/log/pimp_my_ubuntu/
+*.log
+*-log
+wget-log
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*~
+
+# IDE and editor files
+.idea/
+.vscode/
+*.sublime-workspace
+*.sublime-project
+.project
+.settings/
+*.code-workspace
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Bash
+*.bash_history
+.bash_sessions/
+
+# Downloaded applications and binaries
+/Applications/
+*.AppImage
+*.deb
+*.rpm
+*.tar.gz
+*.tgz
+*.zip
+*.run
+
+# Backup files
+*.bak
+*.backup
+*.old
+*.orig
+*.previous
+*.save
+
+# Local configuration files
+.env
+.env.local
+*.local.conf
+local_settings.sh
+
+# User-specific files
+.sudo_as_admin_successful
+.profile.local
+.bashrc.local
+.zshrc.local
+
+# Cache directories
+.cache/
+__pycache__/
+*.py[cod]
+
+# Test files
+test/
+tests/
+*.test
+*.spec
+
+# Build output
+build/
+dist/
+out/
+
+# Dependencies
+node_modules/
+vendor/
+.pip-cache/
+
+# Misc
+*.pid
+*.socket
+.directory
+.nfs*

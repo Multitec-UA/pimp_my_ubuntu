@@ -1,0 +1,12 @@
+--2025-03-08 22:02:52--  https://github.com//probonopd/go-appimage/releases/download/continuous/appimaged-869-x86_64.AppImage
+Resolving github.com (github.com)... 140.82.121.4
+Connecting to github.com (github.com)|140.82.121.4|:443... connected.
+HTTP request sent, awaiting response... 302 Found
+Location: https://objects.githubusercontent.com/github-production-release-asset-2e65be/215644748/9f543806-b590-41b8-b270-1e9ecbd2b1ce?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=releaseassetproduction%2F20250308%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250308T210252Z&X-Amz-Expires=300&X-Amz-Signature=6e876580b300f3fd71d6fd4ddf5cb95fe17d34e3167c65d33cf8d3bce24d0fbd&X-Amz-SignedHeaders=host&response-content-disposition=attachment%3B%20filename%3Dappimaged-869-x86_64.AppImage&response-content-type=application%2Foctet-stream [following]
+--2025-03-08 22:02:52--  https://objects.githubusercontent.com/github-production-release-asset-2e65be/215644748/9f543806-b590-41b8-b270-1e9ecbd2b1ce?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=releaseassetproduction%2F20250308%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250308T210252Z&X-Amz-Expires=300&X-Amz-Signature=6e876580b300f3fd71d6fd4ddf5cb95fe17d34e3167c65d33cf8d3bce24d0fbd&X-Amz-SignedHeaders=host&response-content-disposition=attachment%3B%20filename%3Dappimaged-869-x86_64.AppImage&response-content-type=application%2Foctet-stream
+Resolving objects.githubusercontent.com (objects.githubusercontent.com)... 185.199.108.133, 185.199.111.133, 185.199.109.133, ...
+Connecting to objects.githubusercontent.com (objects.githubusercontent.com)|185.199.108.133|:443... connected.
+HTTP request sent, awaiting response... 416 Range Not Satisfiable
+
+    The file is already fully retrieved; nothing to do.
+

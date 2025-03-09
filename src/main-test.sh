@@ -79,7 +79,7 @@ set_procedures_info() {
         local proc_name="${name%.sh}"
         
         # Skip template.sh
-        if [[ "${name}" == "template" ]]; then
+        if [[ "${proc_name}" == "template" ]]; then
             continue
         fi
         

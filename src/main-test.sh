@@ -20,11 +20,6 @@ source_dependencies() {
 }
 
 
-echo $THIS_SCRIPT_DIR
-echo "finish"
-exit 0
-
-
 
 # Check for root privileges
 check_root() {

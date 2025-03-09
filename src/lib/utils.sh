@@ -25,15 +25,7 @@ show_progress() {
         "$message"
 }
 
-# Log a message with timestamp
-# Usage: log_message "INFO" "Starting installation"
-log_message() {
-    local level=$1
-    local message=$2
-    local timestamp
-    timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-    echo "[${timestamp}] [${level}] ${message}" >> "${LOG_FILE}"
-}
+
 
 # Check if a package is installed via apt
 # Usage: is_package_installed "package-name"

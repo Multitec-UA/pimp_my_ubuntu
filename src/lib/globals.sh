@@ -58,4 +58,14 @@ ensure_dir() {
     local dir=$1
     mkdir -p "${dir}"
     chown "${REAL_USER}:${REAL_USER}" "${dir}"
-} 
+}
+
+# Log a message with timestamp
+# Usage: log_message "INFO" "Starting installation"
+log_message() {
+    local level=$1
+    local message=$2
+    local timestamp
+    timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    echo "[${timestamp}] [${level}] ${message}" >> "${LOG_FILE}"
+}

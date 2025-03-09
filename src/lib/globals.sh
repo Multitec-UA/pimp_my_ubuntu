@@ -83,7 +83,7 @@ _check_root() {
 # Initialize logging
 
 _setup_logging() {
-    ensure_dir "${LOG_DIR}"
+    _ensure_dir "${LOG_DIR}"
     rm -f "${LOG_FILE}"
     touch "${LOG_FILE}"
     exec 3>&1 4>&2

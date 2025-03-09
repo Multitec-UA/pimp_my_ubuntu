@@ -28,6 +28,11 @@ main() {
     
     _log_message "INFO" "Setting up procedures information\n"
     set_procedures_info
+
+    # Display welcome message
+    dialog --title "Pimp My Ubuntu" --backtitle "Installation Script" \
+           --msgbox "Welcome to Pimp My Ubuntu!\n\nThis script will help you set up your Ubuntu 24.04 system with your preferred software and configurations." 10 60
+    
     # TODO: show_procedure_selector_menu
 
     log_message "INFO" "\nStarting Pimp My Ubuntu installation script\n"
@@ -49,10 +54,10 @@ install_basic_dependencies() {
 # Set up procedures information
 # Read all procedures from the repository and save them to a JSON file
 set_procedures_info() {
-    log_message "INFO" "Setting up procedures information"
+    _log_message "INFO" "Setting up procedures information"
     
     # Ensure directory exists and clean up old file
-    ensure_dir "${LOG_DIR}"
+    _ensure_dir "${LOG_DIR}"
     rm -f "${PROCEDURES_FILE}"
     touch "${PROCEDURES_FILE}"
     
@@ -102,7 +107,7 @@ EOF
     # Close JSON array
     echo "]" >> "${PROCEDURES_FILE}"
     
-    log_message "INFO" "Procedures information saved to ${PROCEDURES_FILE}"
+    _log_message "INFO" "Procedures information saved to ${PROCEDURES_FILE}"
 }
 
 

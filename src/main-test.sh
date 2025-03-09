@@ -50,7 +50,7 @@ main() {
 
     # Get user selection
     local selected
-    selected=($(show_menu "${procedures[@]}"))
+    selected=($(dialog_show_menu "${procedures[@]}"))
     
     if [[ ${#selected[@]} -eq 0 ]]; then
         dialog --title "Cancelled" --backtitle "Pimp My Ubuntu" \

@@ -18,14 +18,7 @@ dialog_show_menu() {
     
     for proc in "${procedures[@]}"; do
         local name=$(basename "${proc}" .sh)
-        local desc=""
-        
-        # Try to extract description from the file
-        if grep -q "readonly SOFTWARE_DESCRIPTION=" "${proc}"; then
-            desc=$(grep "readonly SOFTWARE_DESCRIPTION=" "${proc}" | cut -d'"' -f2)
-        fi
-        
-        cmd+=("${name}" "${desc:-"No description available"}" off)
+        cmd+=("${name}" "Select to install" off)
     done
     
     choices=$("${cmd[@]}" 2>&1 >/dev/tty)

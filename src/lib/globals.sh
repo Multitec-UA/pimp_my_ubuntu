@@ -28,7 +28,6 @@ fi
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 readonly LIB_DIR="${SCRIPT_DIR}/lib"
 readonly PROCEDURES_DIR="${SCRIPT_DIR}/procedures"
-readonly DEPENDENCIES_DIR="${SCRIPT_DIR}/dependencies"
 readonly LOG_DIR="/var/log/pimp_my_ubuntu"
 readonly LOG_FILE="${LOG_DIR}/install.log"
 
@@ -49,9 +48,6 @@ readonly SHELL_RC_FILES=(
 # Global associative array for installation status
 declare -A INSTALLATION_STATUS
 
-# Source utility functions
-# shellcheck source=./utils.sh
-source "${LIB_DIR}/utils.sh"
 
 # Function to run commands as the real user
 run_as_user() {

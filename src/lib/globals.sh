@@ -49,10 +49,6 @@ readonly SHELL_RC_FILES=(
 # Global associative array for installation status
 declare -A INSTALLATION_STATUS
 
-# Source utility functions
-# shellcheck source=./utils.sh
-source "${LIB_DIR}/utils.sh"
-
 # Function to run commands as the real user
 run_as_user() {
     sudo -u "${REAL_USER}" "$@"

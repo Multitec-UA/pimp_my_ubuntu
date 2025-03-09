@@ -18,29 +18,27 @@ REPOSITORY_LIB_URL="${REPOSITORY_URL}/src/lib"
 REPOSITORY_PROCEDURES_URL="${REPOSITORY_URL}/src/procedures"
 
 
+main() {
+    source_dependencies
+    _check_root
+    _setup_logging
+
+    _log_message "INFO" "Installing basic dependencies\n"
+    install_basic_dependencies
+    
+    _log_message "INFO" "Setting up procedures information\n"
+    set_procedures_info
+    # TODO: show_procedure_selector_menu
+
+    log_message "INFO" "\nStarting Pimp My Ubuntu installation script\n"
+}
+
+
 source_dependencies() {
     # Source global variables and functions
     source <(curl -H "Accept: application/vnd.github.v3.raw" -s "${REPOSITORY_LIB_URL}/globals.sh")
 }
 
-
-# Check for root privileges
-check_root() {
-    if [[ $EUID -ne 0 ]]; then
-        echo "This script must be run as root" >&2
-        echo "Please run: sudo $0" >&2
-        exit 1
-    fi
-}
-
-# Initialize logging
-setup_logging() {
-    ensure_dir "${LOG_DIR}"
-    rm -f "${LOG_FILE}"
-    touch "${LOG_FILE}"
-    exec 3>&1 4>&2
-    exec 1> >(tee -a "${LOG_FILE}") 2>&1
-}
 
 # Install basic dependencies
 install_basic_dependencies() {
@@ -49,6 +47,7 @@ install_basic_dependencies() {
 }
 
 # Set up procedures information
+# Read all procedures from the repository and save them to a JSON file
 set_procedures_info() {
     log_message "INFO" "Setting up procedures information"
     
@@ -106,18 +105,6 @@ EOF
     log_message "INFO" "Procedures information saved to ${PROCEDURES_FILE}"
 }
 
-main() {
-    source_dependencies
-    check_root
-    setup_logging
 
-    log_message "INFO" "Installing basic dependencies\n"
-    install_basic_dependencies
-    
-    log_message "INFO" "Setting up procedures information\n"
-    set_procedures_info
-
-    log_message "INFO" "\nStarting Pimp My Ubuntu installation script\n"
-}
 
 main "$@"

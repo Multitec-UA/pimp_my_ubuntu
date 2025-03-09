@@ -50,12 +50,12 @@ readonly SHELL_RC_FILES=(
 declare -A INSTALLATION_STATUS
 
 # Function to run commands as the real user
-run_as_user() {
+_run_as_user() {
     sudo -u "${REAL_USER}" "$@"
 }
 
 # Function to ensure a directory exists and has correct ownership
-ensure_dir() {
+_ensure_dir() {
     local dir=$1
     mkdir -p "${dir}"
     chown "${REAL_USER}:${REAL_USER}" "${dir}"
@@ -63,10 +63,29 @@ ensure_dir() {
 
 # Log a message with timestamp
 # Usage: log_message "INFO" "Starting installation"
-log_message() {
+_log_message() {
     local level=$1
     local message=$2
     local timestamp
     timestamp=$(date '+%Y-%m-%d %H:%M:%S')
     echo -e "[${timestamp}] [${level}] ${message}" >> "${LOG_FILE}"
+}
+
+# Check for root privileges
+_check_root() {
+    if [[ $EUID -ne 0 ]]; then
+        echo "This script must be run as root" >&2
+        echo "Please run: sudo $0" >&2
+        exit 1
+    fi
+}
+
+# Initialize logging
+
+_setup_logging() {
+    ensure_dir "${LOG_DIR}"
+    rm -f "${LOG_FILE}"
+    touch "${LOG_FILE}"
+    exec 3>&1 4>&2
+    exec 1> >(tee -a "${LOG_FILE}") 2>&1
 }

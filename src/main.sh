@@ -167,8 +167,8 @@ main() {
     
     
     # Create required directories
-    ensure_dir "${PROCEDURES_DIR}"
-    ensure_dir "${DEPENDENCIES_DIR}"
+    _ensure_dir "${PROCEDURES_DIR}"
+    _ensure_dir "${DEPENDENCIES_DIR}"
     
     # Load and execute procedures based on user selection
     local procedures
@@ -177,7 +177,7 @@ main() {
     if [[ ${#procedures[@]} -eq 0 ]]; then
         dialog --title "Error" --backtitle "Pimp My Ubuntu" \
                --msgbox "No installation procedures found!" 8 40
-        log_message "ERROR" "No installation procedures found"
+        _log_message "ERROR" "No installation procedures found"
         exit 1
     fi
     

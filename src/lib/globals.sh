@@ -89,3 +89,83 @@ _setup_logging() {
     exec 3>&1 4>&2
     exec 1> >(tee -a "${LOG_FILE}") 2>&1
 }
+
+# Set up procedures information
+# Read all procedures from the repository and save them to a JSON file
+_set_procedures_info() {
+    _log_message "INFO" "Setting up procedures information"
+    
+    # Ensure directory exists and clean up old file
+    _ensure_dir "${LOG_DIR}"
+    rm -f "${PROCEDURES_FILE}"
+    touch "${PROCEDURES_FILE}"
+    
+    # Fetch procedures from GitHub repository
+    local procedures_json
+    procedures_json=$(curl -s -H "Accept: application/vnd.github.v3+json" "${REPOSITORY_PROCEDURES_URL}")
+    
+    # Initialize JSON array
+    echo "[" > "${PROCEDURES_FILE}"
+    
+    # Process each procedure
+    local first=true
+    echo "${procedures_json}" | jq -c '.[]' | while read -r procedure; do
+        # Skip if not a file or not a .sh file
+        local type=$(echo "${procedure}" | jq -r '.type')
+        local name=$(echo "${procedure}" | jq -r '.name')
+        
+        if [[ "${type}" != "file" || ! "${name}" =~ \.sh$ ]]; then
+            continue
+        fi
+        
+        # Extract procedure name without extension
+        local proc_name="${name%.sh}"
+        
+        # Skip template.sh
+        if [[ "${proc_name}" == "template" ]]; then
+            continue
+        fi
+        
+        # Add comma for all but the first entry
+        if [[ "${first}" == "true" ]]; then
+            first=false
+        else
+            echo "," >> "${PROCEDURES_FILE}"
+        fi
+        
+        # Add procedure entry to JSON
+        cat << EOF >> "${PROCEDURES_FILE}"
+{
+  "name": "${proc_name}",
+  "selected": false,
+  "status": "PENDING"
+}
+EOF
+    done
+    
+    # Close JSON array
+    echo "]" >> "${PROCEDURES_FILE}"
+    
+    _log_message "INFO" "Procedures information saved to ${PROCEDURES_FILE}"
+}
+
+# Get procedure names from the procedures JSON file
+# Returns a space-separated list of procedure names
+_get_procedure_names() {
+    _log_message "INFO" "Getting procedure names from ${PROCEDURES_FILE}"
+    
+    # Check if procedures file exists
+    if [[ ! -f "${PROCEDURES_FILE}" ]]; then
+        _log_message "ERROR" "Procedures file not found: ${PROCEDURES_FILE}"
+        return 1
+    fi
+    
+    # Use jq to extract the name field from each procedure in the JSON array
+    local names
+    names=$(jq -r '.[].name' "${PROCEDURES_FILE}")
+    
+    # Return the names as a space-separated list
+    echo "${names}"
+    
+    _log_message "INFO" "Retrieved procedure names successfully"
+}

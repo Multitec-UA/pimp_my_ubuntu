@@ -19,29 +19,60 @@ REPOSITORY_PROCEDURES_URL="${REPOSITORY_URL}/src/procedures"
 
 
 main() {
-    source_dependencies
+    source_dependencies ${REPOSITORY_LIB_URL} "globals.sh"
+    source_dependencies ${REPOSITORY_LIB_URL} "dialog.sh"
+
+    # Check if the script is running with root privileges
     _check_root
+
+    # Initialize logging
     _setup_logging
 
     _log_message "INFO" "Installing basic dependencies\n"
     install_basic_dependencies
     
     _log_message "INFO" "Setting up procedures information\n"
-    set_procedures_info
+    _set_procedures_info
+    procedures=($(get_procedure_names))
 
     # Display welcome message
     dialog --title "Pimp My Ubuntu" --backtitle "Installation Script" \
-           --msgbox "Welcome to Pimp My Ubuntu!\n\nThis script will help you set up your Ubuntu 24.04 system with your preferred software and configurations." 10 60
+           --msgbox "Welcome to Pimp My Ubuntu!\n\nThis script will help you set up your Ubuntu system with your preferred software and configurations." 10 60
     
     # TODO: show_procedure_selector_menu
+    if [[ ${#procedures[@]} -eq 0 ]]; then
+        dialog --title "Error" --backtitle "Pimp My Ubuntu" \
+               --msgbox "No installation procedures found!" 8 40
+        _log_message "ERROR" "No installation procedures found"
+        exit 1
+    fi
 
-    log_message "INFO" "\nStarting Pimp My Ubuntu installation script\n"
+    # Get user selection
+    local selected
+    selected=($(show_menu "${procedures[@]}"))
+    
+    if [[ ${#selected[@]} -eq 0 ]]; then
+        dialog --title "Cancelled" --backtitle "Pimp My Ubuntu" \
+               --msgbox "No software selected. Installation cancelled." 8 40
+        _log_message "INFO" "No software selected. Installation cancelled."
+        exit 0
+    fi
+
+    _log_message "INFO" "\nStarting Pimp My Ubuntu installation script\n"
 }
 
 
 source_dependencies() {
-    # Source global variables and functions
-    source <(curl -H "Accept: application/vnd.github.v3.raw" -s "${REPOSITORY_LIB_URL}/globals.sh")
+    local path="${1:-${REPOSITORY_LIB_URL}}"
+    local file="${2:-}"
+    local header="Accept: application/vnd.github.v3.raw"
+    
+    if [[ -n "${file}" ]]; then
+        source <(curl -H "${header}" -s "${path}/${file}")
+    else
+        echo "Error: No file specified" >&2
+        exit 1
+    fi
 }
 
 
@@ -49,65 +80,6 @@ source_dependencies() {
 install_basic_dependencies() {
     apt-get update
     apt-get install -y curl git dialog jq
-}
-
-# Set up procedures information
-# Read all procedures from the repository and save them to a JSON file
-set_procedures_info() {
-    _log_message "INFO" "Setting up procedures information"
-    
-    # Ensure directory exists and clean up old file
-    _ensure_dir "${LOG_DIR}"
-    rm -f "${PROCEDURES_FILE}"
-    touch "${PROCEDURES_FILE}"
-    
-    # Fetch procedures from GitHub repository
-    local procedures_json
-    procedures_json=$(curl -s -H "Accept: application/vnd.github.v3+json" "${REPOSITORY_PROCEDURES_URL}")
-    
-    # Initialize JSON array
-    echo "[" > "${PROCEDURES_FILE}"
-    
-    # Process each procedure
-    local first=true
-    echo "${procedures_json}" | jq -c '.[]' | while read -r procedure; do
-        # Skip if not a file or not a .sh file
-        local type=$(echo "${procedure}" | jq -r '.type')
-        local name=$(echo "${procedure}" | jq -r '.name')
-        
-        if [[ "${type}" != "file" || ! "${name}" =~ \.sh$ ]]; then
-            continue
-        fi
-        
-        # Extract procedure name without extension
-        local proc_name="${name%.sh}"
-        
-        # Skip template.sh
-        if [[ "${proc_name}" == "template" ]]; then
-            continue
-        fi
-        
-        # Add comma for all but the first entry
-        if [[ "${first}" == "true" ]]; then
-            first=false
-        else
-            echo "," >> "${PROCEDURES_FILE}"
-        fi
-        
-        # Add procedure entry to JSON
-        cat << EOF >> "${PROCEDURES_FILE}"
-{
-  "name": "${proc_name}",
-  "selected": false,
-  "status": "PENDING"
-}
-EOF
-    done
-    
-    # Close JSON array
-    echo "]" >> "${PROCEDURES_FILE}"
-    
-    _log_message "INFO" "Procedures information saved to ${PROCEDURES_FILE}"
 }
 
 

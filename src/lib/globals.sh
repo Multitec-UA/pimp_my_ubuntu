@@ -48,7 +48,6 @@ readonly SHELL_RC_FILES=(
 # Global associative array for installation status
 declare -A INSTALLATION_STATUS
 
-
 # Function to run commands as the real user
 run_as_user() {
     sudo -u "${REAL_USER}" "$@"

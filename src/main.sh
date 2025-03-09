@@ -157,6 +157,7 @@ install_software() {
 main() {
     check_root
     setup_logging
+    install_basic_dependencies
     
     log_message "INFO" "Starting Pimp My Ubuntu installation script"
     
@@ -164,7 +165,6 @@ main() {
     dialog --title "Pimp My Ubuntu" --backtitle "Installation Script" \
            --msgbox "Welcome to Pimp My Ubuntu!\n\nThis script will help you set up your Ubuntu 24.04 system with your preferred software and configurations." 10 60
     
-    install_basic_dependencies
     
     # Create required directories
     ensure_dir "${PROCEDURES_DIR}"

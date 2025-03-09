@@ -15,6 +15,15 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     exit 1
 fi
 
+
+# Global paths
+readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+readonly LOG_DIR="/var/log/pimp_my_ubuntu"
+readonly LOG_FILE="${LOG_DIR}/install.log"
+readonly PROCEDURES_FILE="${LOG_DIR}/procedures.json"
+
+
+
 # Get the real user's home directory (works with sudo)
 if [[ -n "${SUDO_USER:-}" ]]; then
     REAL_USER="${SUDO_USER}"
@@ -24,20 +33,12 @@ else
     REAL_HOME="${HOME}"
 fi
 
-# Global paths
-readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-readonly LIB_DIR="${SCRIPT_DIR}/lib"
-readonly PROCEDURES_DIR="${SCRIPT_DIR}/procedures"
-readonly LOG_DIR="/var/log/pimp_my_ubuntu"
-readonly LOG_FILE="${LOG_DIR}/install.log"
 
 # User specific paths
 readonly USER_LOCAL_DIR="${REAL_HOME}/.local"
 readonly USER_CONFIG_DIR="${REAL_HOME}/.config"
 readonly APPLICATIONS_DIR="${REAL_HOME}/Applications"
 
-# GitHub repository information
-readonly GITHUB_RAW_URL="https://raw.githubusercontent.com/Multitec-UA/pimp_my_ubuntu/main"
 
 # Shell configuration files
 readonly SHELL_RC_FILES=(

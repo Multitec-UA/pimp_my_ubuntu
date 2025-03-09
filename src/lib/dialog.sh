@@ -21,8 +21,12 @@ dialog_show_menu() {
         cmd+=("${name}" "Select to install" off)
     done
     
-    choices=$("${cmd[@]}" 2>&1 >/dev/tty)
+    # Run dialog and capture both output and exit status
+    choices=$("${cmd[@]}" 2>&1 >/dev/tty) || return $?
+    
+    # Return the selected choices
     echo "${choices}"
+    return 0
 }
 
 # Display a progress bar

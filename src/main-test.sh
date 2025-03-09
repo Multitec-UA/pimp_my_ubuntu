@@ -30,7 +30,7 @@ main() {
 
     # Install basic dependencies
     global_log_message "INFO" "Installing basic dependencies\n"
-    install_basic_dependencies
+    #install_basic_dependencies
     
     global_log_message "INFO" "Setting up procedures information\n"
     global_set_procedures_info
@@ -48,16 +48,35 @@ main() {
         exit 1
     fi
 
-    # Get user selection
-    local selected
-    selected=($(dialog_show_menu "${procedures[@]}"))
+    # Get user selection menu
+    # Loop to let user select software or exit
+    local selected=()
+    local exit_flag=false
     
-    if [[ ${#selected[@]} -eq 0 ]]; then
-        dialog --title "Cancelled" --backtitle "Pimp My Ubuntu" \
-               --msgbox "No software selected. Installation cancelled." 8 40
-        global_log_message "INFO" "No software selected. Installation cancelled."
-        exit 0
-    fi
+    while [[ "$exit_flag" == "false" ]]; do
+        # Call dialog_show_menu and capture its output and exit status
+        selected=($(dialog_show_menu "${procedures[@]}"))
+        local menu_status=$?
+        
+        # Check if user pressed Cancel/Esc
+        if [[ $menu_status -ne 0 ]]; then
+            dialog --title "Cancelled" --backtitle "Pimp My Ubuntu" \
+                   --msgbox "Installation cancelled by user." 8 40
+            global_log_message "INFO" "User cancelled the installation."
+            exit 0
+        fi
+        
+        # Check if user made a selection
+        if [[ ${#selected[@]} -eq 0 ]]; then
+            dialog --title "No Selection" --backtitle "Pimp My Ubuntu" \
+                   --msgbox "Please select at least one software to continue." 8 50
+            global_log_message "INFO" "No software selected. Prompting again."
+        else
+            # User made a valid selection, exit the loop
+            exit_flag=true
+            global_log_message "INFO" "User selected: ${selected[*]}"
+        fi
+    done
 
     global_log_message "INFO" "\nStarting Pimp My Ubuntu installation script\n"
 }

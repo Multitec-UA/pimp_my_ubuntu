@@ -9,9 +9,32 @@
 # License: MIT
 # =============================================================================
 
+
+# Display menu and get user selection
+dialog_show_menu() {
+    local procedures=("$@")
+    local choices=()
+    local cmd=(dialog --title "Pimp My Ubuntu" --backtitle "Software Selection" --separate-output --checklist "Select software to install:" 22 76 16)
+    
+    for proc in "${procedures[@]}"; do
+        local name=$(basename "${proc}" .sh)
+        local desc=""
+        
+        # Try to extract description from the file
+        if grep -q "readonly SOFTWARE_DESCRIPTION=" "${proc}"; then
+            desc=$(grep "readonly SOFTWARE_DESCRIPTION=" "${proc}" | cut -d'"' -f2)
+        fi
+        
+        cmd+=("${name}" "${desc:-"No description available"}" off)
+    done
+    
+    choices=$("${cmd[@]}" 2>&1 >/dev/tty)
+    echo "${choices}"
+}
+
 # Display a progress bar
 # Usage: show_progress 45 "Installing..."
-show_progress() {
+dialog_show_progress() {
     local percent=$1
     local message=${2:-""}
     local w=50 # Width of the progress bar
@@ -29,7 +52,7 @@ show_progress() {
 
 # Get user confirmation
 # Usage: if get_confirmation "Do you want to proceed?"; then echo "Proceeding..."; fi
-get_confirmation() {
+dialog_get_confirmation() {
     local prompt=${1:-"Do you want to continue?"}
     local response
     

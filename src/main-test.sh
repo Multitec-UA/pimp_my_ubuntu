@@ -23,17 +23,18 @@ main() {
     source_dependencies ${REPOSITORY_LIB_URL} "dialog.sh"
 
     # Check if the script is running with root privileges
-    _check_root
+    global_check_root
 
     # Initialize logging
-    _setup_logging
+    global_setup_logging
 
-    _log_message "INFO" "Installing basic dependencies\n"
+    # Install basic dependencies
+    global_log_message "INFO" "Installing basic dependencies\n"
     install_basic_dependencies
     
-    _log_message "INFO" "Setting up procedures information\n"
-    _set_procedures_info
-    procedures=($(get_procedure_names))
+    global_log_message "INFO" "Setting up procedures information\n"
+    global_set_procedures_info
+    procedures=($(global_get_procedure_names))
 
     # Display welcome message
     dialog --title "Pimp My Ubuntu" --backtitle "Installation Script" \
@@ -43,7 +44,7 @@ main() {
     if [[ ${#procedures[@]} -eq 0 ]]; then
         dialog --title "Error" --backtitle "Pimp My Ubuntu" \
                --msgbox "No installation procedures found!" 8 40
-        _log_message "ERROR" "No installation procedures found"
+        global_log_message "ERROR" "No installation procedures found"
         exit 1
     fi
 
@@ -54,16 +55,16 @@ main() {
     if [[ ${#selected[@]} -eq 0 ]]; then
         dialog --title "Cancelled" --backtitle "Pimp My Ubuntu" \
                --msgbox "No software selected. Installation cancelled." 8 40
-        _log_message "INFO" "No software selected. Installation cancelled."
+        global_log_message "INFO" "No software selected. Installation cancelled."
         exit 0
     fi
 
-    _log_message "INFO" "\nStarting Pimp My Ubuntu installation script\n"
+    global_log_message "INFO" "\nStarting Pimp My Ubuntu installation script\n"
 }
 
 
 source_dependencies() {
-    local path="${1:-${REPOSITORY_LIB_URL}}"
+    local path="${1:-}"
     local file="${2:-}"
     local header="Accept: application/vnd.github.v3.raw"
     

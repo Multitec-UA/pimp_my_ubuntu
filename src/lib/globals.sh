@@ -67,5 +67,5 @@ log_message() {
     local message=$2
     local timestamp
     timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-    echo "[${timestamp}] [${level}] ${message}" >> "${LOG_FILE}"
+    echo -e "[${timestamp}] [${level}] ${message}" >> "${LOG_FILE}"
 }

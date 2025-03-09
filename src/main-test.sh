@@ -33,6 +33,7 @@ check_root() {
 # Initialize logging
 setup_logging() {
     ensure_dir "${LOG_DIR}"
+    rm -f "${LOG_FILE}"
     touch "${LOG_FILE}"
     exec 3>&1 4>&2
     exec 1> >(tee -a "${LOG_FILE}") 2>&1
@@ -48,6 +49,8 @@ main() {
     source_dependencies
     check_root
     setup_logging
+
+    log_message "INFO" "Installing basic dependencies\n"
     install_basic_dependencies
     
 

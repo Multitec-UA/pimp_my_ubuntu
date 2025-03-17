@@ -216,8 +216,8 @@ global_install_apt_package() {
 global_add_apt_repository() {
     local repo=$1
     if ! grep -q "^deb.*${repo}" /etc/apt/sources.list /etc/apt/sources.list.d/*; then
-        add-apt-repository -y "$repo"
-        apt update
+        add-apt-repository -y "$repo" > /dev/null 2>&1
+        apt update > /dev/null 2>&1
     fi
 }
 

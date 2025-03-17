@@ -40,6 +40,34 @@ global_run_as_user() {
     sudo -u "${REAL_USER}" "$@"
 }
 
+
+# Update installation status
+global_set_status() {
+    local software_command="$1"
+    local status="$2"
+    # Check if INSTALLATION_STATUS exists before using it
+    if declare -p INSTALLATION_STATUS >/dev/null 2>&1; then
+        INSTALLATION_STATUS["${software_command}"]="${status}"
+        global_log_message "INFO" "Installation status for ${software_command}: ${status}"
+    else
+        global_log_message "WARNING" "INSTALLATION_STATUS array not available, status not updated"
+    fi
+}
+
+# Get installation status for a software
+# Usage: global_get_status "software_name"
+global_get_status() {
+    local software_command="$1"
+    # Check if INSTALLATION_STATUS exists before using it
+    if declare -p INSTALLATION_STATUS >/dev/null 2>&1; then
+        echo "${INSTALLATION_STATUS["${software_command}"]:-UNKNOWN}"
+    else
+        global_log_message "WARNING" "INSTALLATION_STATUS array not available, returning UNKNOWN status"
+        echo "UNKNOWN"
+    fi
+}
+
+
 # Function to ensure a directory exists and has correct ownership
 global_ensure_dir() {
     local dir=$1

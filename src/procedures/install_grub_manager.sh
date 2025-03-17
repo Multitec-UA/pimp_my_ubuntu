@@ -14,6 +14,10 @@ readonly _SOFTWARE_COMMAND="grub-customizer"
 readonly _SOFTWARE_DESCRIPTION="Grub Customizer is a tool for managing GRUB bootloader settings"
 readonly _SOFTWARE_VERSION="1.0.0"
 
+# Declare INSTALLATION_STATUS if not already declared
+if ! declare -p INSTALLATION_STATUS >/dev/null 2>&1; then
+    declare -A INSTALLATION_STATUS
+fi
 
 # Strict mode
 set -euo pipefail
@@ -27,16 +31,26 @@ main() {
     
     global_check_root
 
+
+
     _step_init_procedure
+
+    if [ "$(global_get_status "${_SOFTWARE_COMMAND}")" == "SKIPPED" ]; then
+        global_log_message "INFO" "${_SOFTWARE_COMMAND} is already installed"
+        return 0
+    fi
+
     _step_install_dependencies
 
     if _step_install_software; then
         _step_post_install
         global_log_message "INFO" "${_SOFTWARE_COMMAND} installation completed successfully"
+        global_set_status "${_SOFTWARE_COMMAND}" "SUCCESS"
         _step_cleanup
         return 0
     else
         global_log_message "ERROR" "Failed to install ${_SOFTWARE_COMMAND}"
+        global_set_status "${_SOFTWARE_COMMAND}" "FAILED"
         _step_cleanup
         return 1
     fi
@@ -81,12 +95,6 @@ _step_post_install() {
     # Implement post-installation configuration
 }
 
-# Update installation status
-_step_update_status() {
-    local status="$1"
-    INSTALLATION_STATUS["${_SOFTWARE_COMMAND}"]="${status}"
-    global_log_message "INFO" "Installation status for ${_SOFTWARE_COMMAND}: ${status}"
-}
 
 # Prepare for installation
 _step_init_procedure() {
@@ -94,7 +102,7 @@ _step_init_procedure() {
     
     if global_check_if_installed "${_SOFTWARE_COMMAND}"; then
         global_log_message "INFO" "${_SOFTWARE_COMMAND} is already installed"
-        _step_update_status "SKIPPED"
+        global_set_status "${_SOFTWARE_COMMAND}" "SKIPPED"
         return 0
     fi
 }

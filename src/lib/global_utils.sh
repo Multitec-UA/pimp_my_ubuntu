@@ -8,6 +8,8 @@
 # Repository: https://github.com/Multitec-UA/pimp_my_ubuntu
 # License: MIT
 # =============================================================================
+# Debug flag - set to true to enable debug messages
+readonly DEBUG=${DEBUG:-true}
 
 
 # Ensure this script is sourced, not executed
@@ -29,12 +31,7 @@ else
 fi
 
 
-# Debug echo function that only prints if DEBUG is true
-global_debug_echo() {
-    if [[ "${DEBUG}" == "true" ]]; then
-        echo "[DEBUG] $*" >&2
-    fi
-}
+
 
 # Function to run commands as the real user
 global_run_as_user() {
@@ -48,6 +45,14 @@ global_ensure_dir() {
     chown "${REAL_USER}:${REAL_USER}" "${dir}"
 }
 
+# Print last lines of the log file
+global_debug_echo() {
+    if [[ "${DEBUG}" == "true" ]]; then
+        tail -n 1 "${LOG_FILE}"
+    fi
+}
+
+
 # Log a message with timestamp
 # Usage: log_message "INFO" "Starting installation"
 global_log_message() {
@@ -56,6 +61,7 @@ global_log_message() {
     local timestamp
     timestamp=$(date '+%Y-%m-%d %H:%M:%S')
     echo -e "[${timestamp}] [${level}] ${message}" >> "${LOG_FILE}"
+    global_debug_echo
 }
 
 # Initialize logging

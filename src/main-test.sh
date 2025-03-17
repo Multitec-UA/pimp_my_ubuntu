@@ -25,10 +25,10 @@ main() {
     main_setup_logging
 
     # Install basic dependencies
-    main_log_message "INFO" "Installing basic dependencies\n"
+    main_log_message "INFO" "Installing basic dependencies"
     #install_basic_dependencies
     
-    main_log_message "INFO" "Setting up procedures information\n"
+    main_log_message "INFO" "Setting up procedures information"
     main_set_procedures_info
     procedures=($(main_get_procedure_names))
 

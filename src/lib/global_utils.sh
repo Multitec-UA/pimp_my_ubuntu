@@ -212,12 +212,12 @@ global_install_apt_package() {
 #--------------------------
 
 # Add an APT repository safely
-# Usage: add_apt_repository "ppa:user/repo-name"
+# Usage: global_add_apt_repository "ppa:user/repo-name"
 global_add_apt_repository() {
     local repo=$1
     if ! grep -q "^deb.*${repo}" /etc/apt/sources.list /etc/apt/sources.list.d/*; then
         add-apt-repository -y "$repo"
-        apt-get update
+        apt update
     fi
 }
 

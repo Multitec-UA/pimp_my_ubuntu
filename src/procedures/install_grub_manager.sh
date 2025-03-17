@@ -27,23 +27,20 @@ main() {
     
     global_check_root
 
-    echo "I'm here for you see me"
-
     _step_init_procedure
     _step_install_dependencies
 
     if _step_install_software; then
         _step_post_install
-        _step_update_status "SUCCESS"
         global_log_message "INFO" "${_SOFTWARE_COMMAND} installation completed successfully"
+        _step_cleanup
+        return 0
     else
-        _step_update_status "FAILED"
         global_log_message "ERROR" "Failed to install ${_SOFTWARE_COMMAND}"
-        echo "Failed to install ${_SOFTWARE_COMMAND}!" >&2
+        _step_cleanup
         return 1
     fi
 
-    _step_cleanup
 }
 
 # Necessary function to source libraries
@@ -60,18 +57,6 @@ _source_lib() {
     fi
 }
 
-
-# Prepare for installation
-_step_init_procedure() {
-    global_log_message "INFO" "Starting installation of ${_SOFTWARE_COMMAND}"
-    
-    if global_check_if_installed "${_SOFTWARE_COMMAND}"; then
-        global_log_message "INFO" "${_SOFTWARE_COMMAND} is already installed"
-        _step_update_status "SKIPPED"
-        return 0
-    fi
-}
-
 # Main installation function
 _step_install_dependencies() {
     global_log_message "INFO" "Installing dependencies for ${_SOFTWARE_COMMAND}"
@@ -83,15 +68,16 @@ _step_install_dependencies() {
 # Install the software
 _step_install_software() {
     global_log_message "INFO" "Installing ${_SOFTWARE_COMMAND}"
-    echo "Installing ${_SOFTWARE_COMMAND}..."
-    # Implement installation logic here
+    
+    global_add_apt_repository "ppa:danielrichter2007/grub-customizer"
+    global_install_apt_package "grub-customizer"
+
 }
 
 
 # Post-installation configuration
 _step_post_install() {
-    global_log_message "INFO" "Configuring ${_SOFTWARE_COMMAND}"
-    echo "Configuring ${_SOFTWARE_COMMAND}..."
+    global_log_message "INFO" "Post installation of ${_SOFTWARE_COMMAND}"
     # Implement post-installation configuration
 }
 
@@ -100,6 +86,17 @@ _step_update_status() {
     local status="$1"
     INSTALLATION_STATUS["${_SOFTWARE_COMMAND}"]="${status}"
     global_log_message "INFO" "Installation status for ${_SOFTWARE_COMMAND}: ${status}"
+}
+
+# Prepare for installation
+_step_init_procedure() {
+    global_log_message "INFO" "Starting installation of ${_SOFTWARE_COMMAND}"
+    
+    if global_check_if_installed "${_SOFTWARE_COMMAND}"; then
+        global_log_message "INFO" "${_SOFTWARE_COMMAND} is already installed"
+        _step_update_status "SKIPPED"
+        return 0
+    fi
 }
 
 # Cleanup after installation

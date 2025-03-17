@@ -94,7 +94,7 @@ _step_init_procedure() {
     
     if global_check_if_installed "${_SOFTWARE_COMMAND}"; then
         global_log_message "INFO" "${_SOFTWARE_COMMAND} is already installed"
-        #_step_update_status "SKIPPED"
+        _step_update_status "SKIPPED"
         return 0
     fi
 }

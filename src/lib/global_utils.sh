@@ -9,6 +9,26 @@
 # License: MIT
 # =============================================================================
 
+
+# Ensure this script is sourced, not executed
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    echo "This script should be sourced, not executed directly"
+    exit 1
+fi
+
+readonly LOG_DIR="/var/log/pimp_my_ubuntu"
+readonly LOG_FILE="${LOG_DIR}/install.log"
+
+# Get the real user's home directory (works with sudo)
+if [[ -n "${SUDO_USER:-}" ]]; then
+    REAL_USER="${SUDO_USER}"
+    REAL_HOME=$(getent passwd "${SUDO_USER}" | cut -d: -f6)
+else
+    REAL_USER="${USER}"
+    REAL_HOME="${HOME}"
+fi
+
+
 # Debug echo function that only prints if DEBUG is true
 global_debug_echo() {
     if [[ "${DEBUG}" == "true" ]]; then
@@ -18,14 +38,14 @@ global_debug_echo() {
 
 # Function to run commands as the real user
 global_run_as_user() {
-    sudo -u "${G_REAL_USER}" "$@"
+    sudo -u "${REAL_USER}" "$@"
 }
 
 # Function to ensure a directory exists and has correct ownership
 global_ensure_dir() {
     local dir=$1
     mkdir -p "${dir}"
-    chown "${G_REAL_USER}:${G_REAL_USER}" "${dir}"
+    chown "${REAL_USER}:${REAL_USER}" "${dir}"
 }
 
 # Log a message with timestamp
@@ -35,16 +55,16 @@ global_log_message() {
     local message=$2
     local timestamp
     timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-    echo -e "[${timestamp}] [${level}] ${message}" >> "${G_LOG_FILE}"
+    echo -e "[${timestamp}] [${level}] ${message}" >> "${LOG_FILE}"
 }
 
 # Initialize logging
 global_setup_logging() {
-    global_ensure_dir "${G_LOG_DIR}"
-    rm -f "${G_LOG_FILE}"
-    touch "${G_LOG_FILE}"
+    global_ensure_dir "${LOG_DIR}"
+    rm -f "${LOG_FILE}"
+    touch "${LOG_FILE}"
     exec 3>&1 4>&2
-    exec 1> >(tee -a "${G_LOG_FILE}") 2>&1
+    exec 1> >(tee -a "${LOG_FILE}") 2>&1
 }
 
 

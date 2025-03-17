@@ -24,7 +24,8 @@ set -euo pipefail
 
 # Main procedure function
 main() {
-    
+    global_check_root
+
     # Source global variables and functions
     _source_lib "/src/lib/global_utils.sh"
     echo "I'm here for you see me"

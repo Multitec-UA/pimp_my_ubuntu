@@ -76,7 +76,7 @@ _step_init_procedure() {
 _step_install_dependencies() {
     global_log_message "INFO" "Installing dependencies for ${_SOFTWARE_COMMAND}"
 
-    global_install_apt_package "curl" "wget" "tail"
+    global_install_apt_package "curl" "wget" "coreutils"
     
 }
 

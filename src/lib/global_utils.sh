@@ -160,6 +160,12 @@ global_install_apt_package() {
     local failed_packages=()
     
     for package in "${packages[@]}"; do
+        # First check if the package is already installed
+        if global_check_if_installed "${package}"; then
+            global_log_message "INFO" "Package ${package} is already installed, skipping"
+            continue
+        fi
+        
         local attempt=1
         local installed=false
         

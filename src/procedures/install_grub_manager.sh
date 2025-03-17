@@ -68,7 +68,7 @@ _step_install_dependencies() {
 # Install the software
 _step_install_software() {
     global_log_message "INFO" "Installing ${_SOFTWARE_COMMAND}"
-    
+
     global_add_apt_repository "ppa:danielrichter2007/grub-customizer"
     global_install_apt_package "grub-customizer"
 
@@ -94,7 +94,7 @@ _step_init_procedure() {
     
     if global_check_if_installed "${_SOFTWARE_COMMAND}"; then
         global_log_message "INFO" "${_SOFTWARE_COMMAND} is already installed"
-        _step_update_status "SKIPPED"
+        #_step_update_status "SKIPPED"
         return 0
     fi
 }

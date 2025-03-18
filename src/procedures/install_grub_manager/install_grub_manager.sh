@@ -32,6 +32,9 @@ main() {
     
     global_check_root
 
+
+    echo "$HOME"
+    echo "$REAL_HOME"
     #_step_init_procedure
 
     global_download_media "/src/procedures/install_grub_manager/media/crt-amber-theme.zip"

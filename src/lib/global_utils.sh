@@ -170,7 +170,7 @@ global_check_if_installed() {
     
     # Method 8: Check desktop entries
     if [ -f "/usr/share/applications/${software}.desktop" ] || \
-       [ -f "$HOME/.local/share/applications/${software}.desktop" ]; then
+       [ -f "$REAL_HOME/.local/share/applications/${software}.desktop" ]; then
         global_log_message "INFO" "${log_prefix}: Found desktop entry"
         return 0
     fi
@@ -244,7 +244,7 @@ global_install_apt_package() {
 global_download_media() {
     local header="Accept: application/vnd.github.v3.raw"
     local file="${1:-}"
-    local destination_dir="$HOME/documents/pimp_my_ubuntu"
+    local destination_dir="$REAL_HOME/Documents/pimp_my_ubuntu"
     
     # Create destination directory if it doesn't exist
     mkdir -p "${destination_dir}"

@@ -239,65 +239,22 @@ global_install_apt_package() {
     return 0
 }
 
-#--------------------------
 
-# Add an APT repository safely
-# Usage: global_add_apt_repository "ppa:user/repo-name"
-global_add_apt_repository() {
-    local repo=$1
-    if ! grep -q "^deb.*${repo}" /etc/apt/sources.list /etc/apt/sources.list.d/*; then
-        add-apt-repository -y "$repo" > /dev/null 2>&1
-        apt update > /dev/null 2>&1
-    fi
-}
-
-# Download a file with progress
-# Usage: download_file "https://example.com/file.tar.gz" "/tmp/file.tar.gz"
-global_download_file() {
-    local url=$1
-    local output=$2
-    wget --progress=bar:force -O "$output" "$url" 2>&1
-}
-
-# Check if running inside a terminal
-# Usage: if is_terminal; then echo "Running in terminal"; fi
-global_is_terminal() {
-    [ -t 0 ]
-}
-
-
-# Create a backup of a file
-# Usage: backup_file "/etc/example.conf"
-global_backup_file() {
-    local file=$1
-    local backup="${file}.bak.$(date +%Y%m%d_%H%M%S)"
+# Function to download media files from repo
+global_download_media() {
+    local header="Accept: application/vnd.github.v3.raw"
+    local file="${1:-}"
+    local destination_dir="$HOME/documents/pimp_my_ubuntu"
     
-    if [[ -f "$file" ]]; then
-        cp "$file" "$backup"
-        global_log_message "INFO" "Created backup of ${file} at ${backup}"
-    fi
-}
-
-# Check system requirements
-# Usage: check_system_requirements "20.04"
-global_check_system_requirements() {
-    local required_version=$1
-    local current_version
+    # Create destination directory if it doesn't exist
+    mkdir -p "${destination_dir}"
     
-    current_version=$(lsb_release -rs)
-    if [[ "${current_version}" != "${required_version}" ]]; then
-        global_log_message "ERROR" "Unsupported Ubuntu version: ${current_version}. Required: ${required_version}"
+    if [[ -n "${file}" ]]; then
+        global_log_message "INFO" "Downloading media file: ${file}"
+        curl -H "${header}" -s "${_REPOSITORY_URL}/${file}" -o "${destination_dir}/$(basename "${file}")"
+        return $?
+    else
+        global_log_message "ERROR" "No media file specified to download"
         return 1
     fi
-    return 0
 }
-
-# Clean up temporary files
-# Usage: cleanup "/tmp/installation-files"
-global_cleanup() {
-    local dir=$1
-    if [[ -d "$dir" ]]; then
-        rm -rf "$dir"
-        global_log_message "INFO" "Cleaned up temporary directory: ${dir}"
-    fi
-} 

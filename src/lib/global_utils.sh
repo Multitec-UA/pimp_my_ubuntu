@@ -239,7 +239,6 @@ global_install_apt_package() {
     return 0
 }
 
-
 # Function to download media files from repo
 global_download_media() {
     local header="Accept: application/vnd.github.v3.raw"
@@ -249,10 +248,19 @@ global_download_media() {
     # Create destination directory if it doesn't exist
     mkdir -p "${destination_dir}"
     
+    # Ensure the directory is owned by the real user
+    chown "${REAL_USER}:${REAL_USER}" "${destination_dir}"
+    
     if [[ -n "${file}" ]]; then
         global_log_message "INFO" "Downloading media file: ${file}"
-        curl -H "${header}" -s "${_REPOSITORY_URL}/${file}" -o "${destination_dir}/$(basename "${file}")"
-        return $?
+        local output_file="${destination_dir}/$(basename "${file}")"
+        curl -H "${header}" -s "${_REPOSITORY_URL}/${file}" -o "${output_file}"
+        local curl_status=$?
+        
+        # Ensure the downloaded file is owned by the real user
+        chown "${REAL_USER}:${REAL_USER}" "${output_file}"
+        
+        return $curl_status
     else
         global_log_message "ERROR" "No media file specified to download"
         return 1

@@ -15,9 +15,9 @@ readonly _SOFTWARE_COMMAND="grub-customizer"
 readonly _SOFTWARE_DESCRIPTION="Grub Customizer is a tool for managing GRUB bootloader settings"
 readonly _SOFTWARE_VERSION="1.0.0"
 
-# Declare INSTALLATION_STATUS if not already declared
-if ! declare -p INSTALLATION_STATUS >/dev/null 2>&1; then
-    declare -A INSTALLATION_STATUS
+# Declare GLOBAL_INSTALLATION_STATUS if not already declared
+if ! declare -p GLOBAL_INSTALLATION_STATUS >/dev/null 2>&1; then
+    declare -A GLOBAL_INSTALLATION_STATUS
 fi
 
 # Strict mode
@@ -32,13 +32,12 @@ main() {
     
     global_check_root
 
-
-    echo "$HOME"
-    echo "$REAL_HOME"
-    #_step_init_procedure
-
-    global_download_media "/src/procedures/install_grub_manager/media/crt-amber-theme.zip"
+    # TODO REMOVE THIS
+    _step_post_install
     exit 0
+
+    _step_init_procedure
+
 
     if [ "$(global_get_status "${_SOFTWARE_COMMAND}")" == "SKIPPED" ]; then
         global_log_message "INFO" "${_SOFTWARE_COMMAND} is already installed"
@@ -106,7 +105,35 @@ _step_install_software() {
 # Post-installation configuration
 _step_post_install() {
     global_log_message "INFO" "Post installation of ${_SOFTWARE_COMMAND}"
-    # Implement post-installation configuration
+    
+    global_log_message "INFO" "Installing grub theme"
+    # Install GRUB theme
+    _install_grub_theme
+}
+
+# Install GRUB theme
+_install_grub_theme() {
+    # Download and extract theme
+    global_log_message "INFO" "Downloading and extracting GRUB theme"
+    global_download_media "/src/procedures/install_grub_manager/media/crt-amber-theme.zip"
+    
+    # Create themes directory if it doesn't exist
+    global_log_message "INFO" "Creating GRUB themes directory"
+    sudo mkdir -p /boot/grub/themes
+    
+    # Extract theme to GRUB themes directory
+    global_log_message "INFO" "Extracting theme to GRUB themes directory"
+    sudo unzip -o "${GLOBAL_DOWNLOAD_DIR}/crt-amber-theme.zip" -d /boot/grub/themes/
+    
+    # Edit GRUB configuration
+    global_log_message "INFO" "Configuring GRUB theme"
+    sudo sed -i 's/#GRUB_THEME=.*/#GRUB_THEME="\/boot\/grub\/themes\/crt-amber-theme\/theme.txt"/' /etc/default/grub
+    
+    # Update GRUB
+    global_log_message "INFO" "Updating GRUB configuration"
+    sudo update-grub
+    
+    global_log_message "INFO" "GRUB theme installation completed. Changes will take effect after next reboot."
 }
 
 # Cleanup after installation

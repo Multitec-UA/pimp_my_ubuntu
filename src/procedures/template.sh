@@ -73,7 +73,7 @@ post_install() {
 # Update installation status
 update_status() {
     local status="$1"
-    INSTALLATION_STATUS["${SOFTWARE_NAME}"]="${status}"
+    GLOBAL_INSTALLATION_STATUS["${SOFTWARE_NAME}"]="${status}"
     log_message "INFO" "Installation status for ${SOFTWARE_NAME}: ${status}"
 }
 

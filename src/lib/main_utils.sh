@@ -18,36 +18,36 @@ fi
 
 # Global paths
 readonly M_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-readonly M_LOG_DIR="/var/log/pimp_my_ubuntu"
-readonly M_LOG_FILE="${M_LOG_DIR}/install.log"
-readonly M_PROCEDURES_FILE="${M_LOG_DIR}/procedures.json"
+readonly M_GLOBAL_LOG_DIR="/var/log/pimp_my_ubuntu"
+readonly M_LOG_FILE="${M_GLOBAL_LOG_DIR}/install.log"
+readonly M_PROCEDURES_FILE="${M_GLOBAL_LOG_DIR}/procedures.json"
 
 
 
 # Get the real user's home directory (works with sudo)
 if [[ -n "${SUDO_USER:-}" ]]; then
-    M_REAL_USER="${SUDO_USER}"
-    M_REAL_HOME=$(getent passwd "${SUDO_USER}" | cut -d: -f6)
+    M_GLOBAL_REAL_USER="${SUDO_USER}"
+    M_GLOBAL_REAL_HOME=$(getent passwd "${SUDO_USER}" | cut -d: -f6)
 else
-    M_REAL_USER="${USER}"
-    M_REAL_HOME="${HOME}"
+    M_GLOBAL_REAL_USER="${USER}"
+    M_GLOBAL_REAL_HOME="${HOME}"
 fi
 
 
 # User specific paths
-readonly M_USER_LOCAL_DIR="${M_REAL_HOME}/.local"
-readonly M_USER_CONFIG_DIR="${M_REAL_HOME}/.config"
-readonly M_APPLICATIONS_DIR="${M_REAL_HOME}/Applications"
+readonly M_USER_LOCAL_DIR="${M_GLOBAL_REAL_HOME}/.local"
+readonly M_USER_CONFIG_DIR="${M_GLOBAL_REAL_HOME}/.config"
+readonly M_APPLICATIONS_DIR="${M_GLOBAL_REAL_HOME}/Applications"
 
 
 # Shell configuration files
 readonly M_SHELL_RC_FILES=(
-    "${M_REAL_HOME}/.bashrc"
-    "${M_REAL_HOME}/.zshrc"
+    "${M_GLOBAL_REAL_HOME}/.bashrc"
+    "${M_GLOBAL_REAL_HOME}/.zshrc"
 )
 
 # Global associative array for installation status
-declare -A M_INSTALLATION_STATUS
+declare -A M_GLOBAL_INSTALLATION_STATUS
 
 
 # Set up procedures information
@@ -56,7 +56,7 @@ main_set_procedures_info() {
     global_log_message "INFO" "Setting up procedures information"
     
     # Ensure directory exists and clean up old file
-    global_ensure_dir "${M_LOG_DIR}"
+    global_ensure_dir "${M_GLOBAL_LOG_DIR}"
     rm -f "${M_PROCEDURES_FILE}"
     touch "${M_PROCEDURES_FILE}"
     

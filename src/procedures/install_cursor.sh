@@ -123,14 +123,14 @@ cursor() {
         if [[ -f "${rc_file}" ]]; then
             if ! grep -q "cursor()" "${rc_file}"; then
                 echo "${cursor_function}" >> "${rc_file}"
-                chown "${REAL_USER}:${REAL_USER}" "${rc_file}"
+                chown "${GLOBAL_REAL_USER}:${GLOBAL_REAL_USER}" "${rc_file}"
             fi
         fi
     done
     
     # Start appimaged
     log_message "INFO" "Starting appimaged"
-    run_as_user XDG_RUNTIME_DIR="/run/user/$(id -u ${REAL_USER})" "${APPLICATIONS_DIR}"/appimaged-*.AppImage &
+    run_as_user XDG_RUNTIME_DIR="/run/user/$(id -u ${GLOBAL_REAL_USER})" "${APPLICATIONS_DIR}"/appimaged-*.AppImage &
     
     log_message "INFO" "Installation of ${SOFTWARE_NAME} completed"
     echo "Installation completed! You can now run Cursor by typing 'cursor' in your terminal."
@@ -140,7 +140,7 @@ cursor() {
 # Update installation status
 update_status() {
     local status="$1"
-    INSTALLATION_STATUS["${SOFTWARE_NAME}"]="${status}"
+    GLOBAL_INSTALLATION_STATUS["${SOFTWARE_NAME}"]="${status}"
     log_message "INFO" "Installation status for ${SOFTWARE_NAME}: ${status}"
 }
 

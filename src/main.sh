@@ -44,7 +44,7 @@ check_root() {
 
 # Initialize logging
 setup_logging() {
-    ensure_dir "${LOG_DIR}"
+    ensure_dir "${GLOBAL_LOG_DIR}"
     touch "${LOG_FILE}"
     exec 3>&1 4>&2
     exec 1> >(tee -a "${LOG_FILE}") 2>&1
@@ -93,7 +93,7 @@ show_menu() {
 initialize_status() {
     local selected=("$@")
     for selection in "${selected[@]}"; do
-        INSTALLATION_STATUS["${selection}"]="QUEUED"
+        GLOBAL_INSTALLATION_STATUS["${selection}"]="QUEUED"
     done
 }
 
@@ -106,8 +106,8 @@ update_status_display() {
     {
         echo "STATUS          SOFTWARE"
         echo "------          --------"
-        for software in "${!INSTALLATION_STATUS[@]}"; do
-            local status="${INSTALLATION_STATUS[$software]}"
+        for software in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
+            local status="${GLOBAL_INSTALLATION_STATUS[$software]}"
             local status_display
             
             case "${status}" in
@@ -137,7 +137,7 @@ install_software() {
     local selection=$1
     
     # Update status
-    INSTALLATION_STATUS["${selection}"]="IN_PROGRESS"
+    GLOBAL_INSTALLATION_STATUS["${selection}"]="IN_PROGRESS"
     update_status_display
     
     # Run the installation script
@@ -146,7 +146,7 @@ install_software() {
         log_message "INFO" "Installation of ${selection} completed successfully"
     else
         log_message "ERROR" "Installation of ${selection} failed"
-        INSTALLATION_STATUS["${selection}"]="FAILED"
+        GLOBAL_INSTALLATION_STATUS["${selection}"]="FAILED"
     fi
     
     # Update status display again

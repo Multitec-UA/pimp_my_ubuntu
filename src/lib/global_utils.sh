@@ -8,10 +8,13 @@
 # Repository: https://github.com/Multitec-UA/pimp_my_ubuntu
 # License: MIT
 # =============================================================================
+
+# Global Variables --------------------------------
+
 # Debug flag - set to true to enable debug messages
 readonly DEBUG=${DEBUG:-true}
 
-declare -A INSTALLATION_STATUS
+declare -A GLOBAL_INSTALLATION_STATUS
 
 
 # Ensure this script is sourced, not executed
@@ -20,24 +23,26 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     exit 1
 fi
 
-readonly LOG_DIR="/var/log/pimp_my_ubuntu"
-readonly LOG_FILE="${LOG_DIR}/install.log"
+readonly GLOBAL_LOG_DIR="/var/log/pimp_my_ubuntu"
+readonly LOG_FILE="${GLOBAL_LOG_DIR}/install.log"
 
 # Get the real user's home directory (works with sudo)
 if [[ -n "${SUDO_USER:-}" ]]; then
-    REAL_USER="${SUDO_USER}"
-    REAL_HOME=$(getent passwd "${SUDO_USER}" | cut -d: -f6)
+    GLOBAL_REAL_USER="${SUDO_USER}"
+    GLOBAL_REAL_HOME=$(getent passwd "${SUDO_USER}" | cut -d: -f6)
 else
-    REAL_USER="${USER}"
-    REAL_HOME="${HOME}"
+    GLOBAL_REAL_USER="${USER}"
+    GLOBAL_REAL_HOME="${HOME}"
 fi
 
+readonly GLOBAL_DOWNLOAD_DIR="$GLOBAL_REAL_HOME/Documents/pimp_my_ubuntu"
 
 
+# Gloabl functions --------------------------------
 
 # Function to run commands as the real user
 global_run_as_user() {
-    sudo -u "${REAL_USER}" "$@"
+    sudo -u "${GLOBAL_REAL_USER}" "$@"
 }
 
 
@@ -45,12 +50,12 @@ global_run_as_user() {
 global_set_status() {
     local software_command="$1"
     local status="$2"
-    # Check if INSTALLATION_STATUS exists before using it
-    if declare -p INSTALLATION_STATUS >/dev/null 2>&1; then
-        INSTALLATION_STATUS["${software_command}"]="${status}"
+    # Check if GLOBAL_INSTALLATION_STATUS exists before using it
+    if declare -p GLOBAL_INSTALLATION_STATUS >/dev/null 2>&1; then
+        GLOBAL_INSTALLATION_STATUS["${software_command}"]="${status}"
         global_log_message "INFO" "Installation status for ${software_command}: ${status}"
     else
-        global_log_message "WARNING" "INSTALLATION_STATUS array not available, status not updated"
+        global_log_message "WARNING" "GLOBAL_INSTALLATION_STATUS array not available, status not updated"
     fi
 }
 
@@ -58,11 +63,11 @@ global_set_status() {
 # Usage: global_get_status "software_name"
 global_get_status() {
     local software_command="$1"
-    # Check if INSTALLATION_STATUS exists before using it
-    if declare -p INSTALLATION_STATUS >/dev/null 2>&1; then
-        echo "${INSTALLATION_STATUS["${software_command}"]:-UNKNOWN}"
+    # Check if GLOBAL_INSTALLATION_STATUS exists before using it
+    if declare -p GLOBAL_INSTALLATION_STATUS >/dev/null 2>&1; then
+        echo "${GLOBAL_INSTALLATION_STATUS["${software_command}"]:-UNKNOWN}"
     else
-        global_log_message "WARNING" "INSTALLATION_STATUS array not available, returning UNKNOWN status"
+        global_log_message "WARNING" "GLOBAL_INSTALLATION_STATUS array not available, returning UNKNOWN status"
         echo "UNKNOWN"
     fi
 }
@@ -72,7 +77,7 @@ global_get_status() {
 global_ensure_dir() {
     local dir=$1
     mkdir -p "${dir}"
-    chown "${REAL_USER}:${REAL_USER}" "${dir}"
+    chown "${GLOBAL_REAL_USER}:${GLOBAL_REAL_USER}" "${dir}"
 }
 
 # Print last lines of the log file
@@ -96,7 +101,7 @@ global_log_message() {
 
 # Initialize logging
 global_setup_logging() {
-    global_ensure_dir "${LOG_DIR}"
+    global_ensure_dir "${GLOBAL_LOG_DIR}"
     rm -f "${LOG_FILE}"
     touch "${LOG_FILE}"
     exec 3>&1 4>&2
@@ -154,23 +159,15 @@ global_check_if_installed() {
         return 0
     fi
     
-    # Method 6: Check common installation directories
-    #for dir in "/usr/bin" "/usr/local/bin" "/opt/${software}" "/usr/share/${software}"; do
-    #    if [ -d "${dir}" ] || [ -f "${dir}/${software}" ] || [ -f "${dir}" ]; then
-    #        global_log_message "INFO" "${log_prefix}: Found in ${dir}"
-    #        return 0
-    #    fi
-    #done
-    
-    # Method 7: Check systemd services
+    # Method 6: Check systemd services
     if systemctl list-unit-files --type=service 2>/dev/null | grep -q "${software}.service"; then
         global_log_message "INFO" "${log_prefix}: Found as systemd service"
         return 0
     fi
     
-    # Method 8: Check desktop entries
+    # Method 7: Check desktop entries
     if [ -f "/usr/share/applications/${software}.desktop" ] || \
-       [ -f "$REAL_HOME/.local/share/applications/${software}.desktop" ]; then
+       [ -f "$GLOBAL_REAL_HOME/.local/share/applications/${software}.desktop" ]; then
         global_log_message "INFO" "${log_prefix}: Found desktop entry"
         return 0
     fi
@@ -243,22 +240,22 @@ global_install_apt_package() {
 global_download_media() {
     local header="Accept: application/vnd.github.v3.raw"
     local file="${1:-}"
-    local destination_dir="$REAL_HOME/Documents/pimp_my_ubuntu"
+    local destination_dir="$GLOBAL_REAL_HOME/Documents/pimp_my_ubuntu"
     
     # Create destination directory if it doesn't exist
-    mkdir -p "${destination_dir}"
+    mkdir -p "${GLOBAL_DOWNLOAD_DIR}"
     
     # Ensure the directory is owned by the real user
-    chown "${REAL_USER}:${REAL_USER}" "${destination_dir}"
+    chown "${GLOBAL_REAL_USER}:${GLOBAL_REAL_USER}" "${GLOBAL_DOWNLOAD_DIR}"
     
     if [[ -n "${file}" ]]; then
         global_log_message "INFO" "Downloading media file: ${file}"
-        local output_file="${destination_dir}/$(basename "${file}")"
+        local output_file="${GLOBAL_DOWNLOAD_DIR}/$(basename "${file}")"
         curl -H "${header}" -s "${_REPOSITORY_URL}/${file}" -o "${output_file}"
         local curl_status=$?
         
         # Ensure the downloaded file is owned by the real user
-        chown "${REAL_USER}:${REAL_USER}" "${output_file}"
+        chown "${GLOBAL_REAL_USER}:${GLOBAL_REAL_USER}" "${output_file}"
         
         return $curl_status
     else

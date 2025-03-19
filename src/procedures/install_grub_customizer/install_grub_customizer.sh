@@ -27,6 +27,7 @@ readonly _SOFTWARE_VERSION="1.0.0"
 # Options: monterey-theme, crt-amber-theme, solarized-theme, cybergrub-theme
 # More themes in https://www.gnome-look.org/ Add .zip with theme.txt file inside to media folder
 readonly _THEME_NAME="crt-amber-theme"
+readonly _MEDIA_PATH="/src/procedures/install_grub_customizer/media"
 
 # Declare GLOBAL_INSTALLATION_STATUS if not already declared
 if ! declare -p GLOBAL_INSTALLATION_STATUS >/dev/null 2>&1; then
@@ -149,7 +150,7 @@ _install_grub_theme() {
     
     # Download and extract theme
     global_log_message "INFO" "Downloading and extracting GRUB theme"
-    global_download_media "/src/procedures/install_grub_customizer/media/${_THEME_NAME}.zip"
+    global_download_media "${_MEDIA_PATH}/${_THEME_NAME}.zip"
     
     # Create themes directory if it doesn't exist
     global_log_message "INFO" "Creating GRUB themes directory"

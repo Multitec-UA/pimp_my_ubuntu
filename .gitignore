@@ -32,15 +32,6 @@ Thumbs.db
 *.bash_history
 .bash_sessions/
 
-# Downloaded applications and binaries
-/Applications/
-*.AppImage
-*.deb
-*.rpm
-*.tar.gz
-*.tgz
-*.zip
-*.run
 
 # Backup files
 *.bak

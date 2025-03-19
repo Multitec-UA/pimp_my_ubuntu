@@ -23,8 +23,9 @@ An automated setup script for fresh Ubuntu 24.04 installations. This tool helps 
 Execute his command to use de Pimp My Ubuntu main menu.
 
 ```bash
+#WIP
 curl -H "Accept: application/vnd.github.v3.raw" \
--s https://api.github.com/repos/Multitec-UA/pimp_my_ubuntu/contents/src/main.sh | bash
+-s https://api.github.com/repos/Multitec-UA/pimp_my_ubuntu/contents/src/main.sh | sudo bash
 ```
 
 ### Install Cursor
@@ -35,6 +36,11 @@ curl -H "Accept: application/vnd.github.v3.raw" \
 -s https://api.github.com/repos/Multitec-UA/pimp_my_ubuntu/contents/src/procedures/cursor/install_cursor.sh | sudo bash
 ```
 
+### Install zsh
+```bash
+#WIP
+```
+
 ### Install Grub Customizer
 Update Grub, install grub-customizer and add theme.
 
@@ -43,8 +49,7 @@ curl -H "Accept: application/vnd.github.v3.raw" \
 -s https://api.github.com/repos/Multitec-UA/pimp_my_ubuntu/contents/src/procedures/grub_customizer/install_grub_customizer.sh | sudo bash
 ```
 
-
-## How to develop
+# How contribute
 
 ## Directory Structure
 

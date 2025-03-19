@@ -27,6 +27,14 @@ curl -H "Accept: application/vnd.github.v3.raw" \
 -s https://api.github.com/repos/Multitec-UA/pimp_my_ubuntu/contents/src/main.sh | bash
 ```
 
+### Install Cursor
+Download cursor, install appimaged and add cursor command to bashrc and zshrc
+
+```bash
+curl -H "Accept: application/vnd.github.v3.raw" \
+-s https://api.github.com/repos/Multitec-UA/pimp_my_ubuntu/contents/src/procedures/cursor/install_cursor.sh | sudo bash
+```
+
 ### Install Grub Customizer
 Update Grub, install grub-customizer and add theme.
 

@@ -135,7 +135,7 @@ _install_grub_theme() {
     
     # Edit GRUB configuration
     global_log_message "INFO" "Configuring GRUB theme"
-    sudo sed -i "s/#GRUB_THEME=.*/#GRUB_THEME=\"\/boot\/grub\/themes\/${_THEME_NAME}\/theme.txt\"/" /etc/default/grub
+    sudo sed -i "s/^.*GRUB_THEME=.*/GRUB_THEME=\"\/boot\/grub\/themes\/${_THEME_NAME}\/theme.txt\"/" /etc/default/grub
     
     # Update GRUB
     global_log_message "INFO" "Updating GRUB configuration"

@@ -9,11 +9,17 @@
 # License: MIT
 # =============================================================================
 
-# Software-specific constants
+# Debug flag - set to true to enable debug messages
+readonly DEBUG=${DEBUG:-true}
+
+# Software-common constants
 readonly _REPOSITORY_URL="https://api.github.com/repos/Multitec-UA/pimp_my_ubuntu/contents"
 readonly _SOFTWARE_COMMAND="grub-customizer"
-readonly _SOFTWARE_DESCRIPTION="Grub Customizer is a tool for managing GRUB bootloader settings"
+readonly _SOFTWARE_DESCRIPTION="Grub Customizer is a tool for managing GRUB bootloader settings and install a theme"
 readonly _SOFTWARE_VERSION="1.0.0"
+
+# Software-specific constants
+readonly _THEME_NAME="crt-amber-theme"
 
 # Declare GLOBAL_INSTALLATION_STATUS if not already declared
 if ! declare -p GLOBAL_INSTALLATION_STATUS >/dev/null 2>&1; then
@@ -108,14 +114,16 @@ _step_post_install() {
     
     global_log_message "INFO" "Installing grub theme"
     # Install GRUB theme
-    _install_grub_theme
+    #_install_grub_theme
 }
 
 # Install GRUB theme
 _install_grub_theme() {
+    
+    
     # Download and extract theme
     global_log_message "INFO" "Downloading and extracting GRUB theme"
-    global_download_media "/src/procedures/install_grub_manager/media/crt-amber-theme.zip"
+    global_download_media "/src/procedures/install_grub_manager/media/${_THEME_NAME}.zip"
     
     # Create themes directory if it doesn't exist
     global_log_message "INFO" "Creating GRUB themes directory"
@@ -123,11 +131,11 @@ _install_grub_theme() {
     
     # Extract theme to GRUB themes directory
     global_log_message "INFO" "Extracting theme to GRUB themes directory"
-    sudo unzip -o "${GLOBAL_DOWNLOAD_DIR}/crt-amber-theme.zip" -d /boot/grub/themes/
+    sudo unzip -o "${GLOBAL_DOWNLOAD_DIR}/${_THEME_NAME}.zip" -d /boot/grub/themes/
     
     # Edit GRUB configuration
     global_log_message "INFO" "Configuring GRUB theme"
-    sudo sed -i 's/#GRUB_THEME=.*/#GRUB_THEME="\/boot\/grub\/themes\/crt-amber-theme\/theme.txt"/' /etc/default/grub
+    sudo sed -i "s/#GRUB_THEME=.*/#GRUB_THEME=\"\/boot\/grub\/themes\/${_THEME_NAME}\/theme.txt\"/" /etc/default/grub
     
     # Update GRUB
     global_log_message "INFO" "Updating GRUB configuration"

@@ -11,11 +11,7 @@
 
 # Global Variables --------------------------------
 
-# Debug flag - set to true to enable debug messages
-readonly DEBUG=${DEBUG:-true}
-
 declare -A GLOBAL_INSTALLATION_STATUS
-
 
 # Ensure this script is sourced, not executed
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then

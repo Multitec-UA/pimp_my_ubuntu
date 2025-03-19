@@ -8,29 +8,34 @@ An automated setup script for fresh Ubuntu 24.04 installations. This tool helps 
 - 📦 Modular installation procedures
 - 🔄 Automatic dependency management
 - 📝 Detailed logging
-- ⚡ Parallel installation support
 - 🔒 Safe execution with error handling
 - 🎨 Beautiful progress indicators
 
 ## Requirements
 
-- Ubuntu 24.04 LTS
+- Ubuntu >= 24.04 LTS
 - Root/sudo privileges
 - Internet connection
 
-## Quick Start
+## How to use
+
+### Pimp My Ubuntu
+Execute his command to use de Pimp My Ubuntu main menu
 
 ```bash
-# Clone the repository
-git clone https://github.com/Multitec-UA/pimp_my_ubuntu.git
-cd pimp_my_ubuntu
-
-# Make the main script executable
-chmod +x src/main.sh
-
-# Run the installation script
-sudo ./src/main.sh
+   curl -H "Accept: application/vnd.github.v3.raw" \
+   -s https://api.github.com/repos/Multitec-UA/pimp_my_ubuntu/contents/src/main.sh | bash
 ```
+
+### Install Grub Customizer
+
+```bash
+   curl -H "Accept: application/vnd.github.v3.raw" \
+   -s https://api.github.com/repos/Multitec-UA/pimp_my_ubuntu/contents/src/procedures/install_grub_customizer/install_grub_customizer.sh | bash
+```
+
+
+## How to develop
 
 ## Directory Structure
 

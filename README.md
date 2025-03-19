@@ -32,7 +32,7 @@ Update Grub, install grub-customizer and add theme.
 
 ```bash
 curl -H "Accept: application/vnd.github.v3.raw" \
--s https://api.github.com/repos/Multitec-UA/pimp_my_ubuntu/contents/src/procedures/install_grub_customizer/install_grub_customizer.sh | sudo bash
+-s https://api.github.com/repos/Multitec-UA/pimp_my_ubuntu/contents/src/procedures/grub_customizer/install_grub_customizer.sh | sudo bash
 ```
 
 

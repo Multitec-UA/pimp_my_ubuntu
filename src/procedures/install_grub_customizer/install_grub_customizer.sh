@@ -149,7 +149,7 @@ _install_grub_theme() {
     
     # Download and extract theme
     global_log_message "INFO" "Downloading and extracting GRUB theme"
-    global_download_media "/src/procedures/install_grub_manager/media/${_THEME_NAME}.zip"
+    global_download_media "/src/procedures/install_grub_customizer/media/${_THEME_NAME}.zip"
     
     # Create themes directory if it doesn't exist
     global_log_message "INFO" "Creating GRUB themes directory"

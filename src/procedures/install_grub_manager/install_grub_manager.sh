@@ -7,6 +7,11 @@
 # Author: Multitec-UA
 # Repository: https://github.com/Multitec-UA/pimp_my_ubuntu
 # License: MIT
+#
+# COMMON INSTRUCTIONS:
+# 1. Dont use echo. Use global_log_message instead.
+# 2. Send all output to log file. command >>"${LOG_FILE}" 2>&1
+# 3. Reboot your system
 # =============================================================================
 
 # Debug flag - set to true to enable debug messages
@@ -19,8 +24,9 @@ readonly _SOFTWARE_DESCRIPTION="Grub Customizer is a tool for managing GRUB boot
 readonly _SOFTWARE_VERSION="1.0.0"
 
 # Software-specific constants
-# Options: crt-amber-theme, monterey-theme
-readonly _THEME_NAME="monterey-theme"
+# Options: monterey-theme, crt-amber-theme, solarized-theme, cybergrub-theme
+# More themes in https://www.gnome-look.org/ Add .zip with theme.txt file inside to media folder
+readonly _THEME_NAME="crt-amber-theme"
 
 # Declare GLOBAL_INSTALLATION_STATUS if not already declared
 if ! declare -p GLOBAL_INSTALLATION_STATUS >/dev/null 2>&1; then

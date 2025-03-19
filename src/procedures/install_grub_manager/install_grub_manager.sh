@@ -19,7 +19,8 @@ readonly _SOFTWARE_DESCRIPTION="Grub Customizer is a tool for managing GRUB boot
 readonly _SOFTWARE_VERSION="1.0.0"
 
 # Software-specific constants
-readonly _THEME_NAME="crt-amber-theme"
+# Options: crt-amber-theme, monterey-theme
+readonly _THEME_NAME="monterey-theme"
 
 # Declare GLOBAL_INSTALLATION_STATUS if not already declared
 if ! declare -p GLOBAL_INSTALLATION_STATUS >/dev/null 2>&1; then
@@ -113,8 +114,7 @@ _step_post_install() {
     global_log_message "INFO" "Post installation of ${_SOFTWARE_COMMAND}"
     
     global_log_message "INFO" "Installing grub theme"
-    # Install GRUB theme
-    #_install_grub_theme
+    _install_grub_theme
 }
 
 # Install GRUB theme

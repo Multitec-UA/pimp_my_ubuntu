@@ -20,18 +20,19 @@ An automated setup script for fresh Ubuntu 24.04 installations. This tool helps 
 ## How to use
 
 ### Pimp My Ubuntu
-Execute his command to use de Pimp My Ubuntu main menu
+Execute his command to use de Pimp My Ubuntu main menu.
 
 ```bash
-   curl -H "Accept: application/vnd.github.v3.raw" \
-   -s https://api.github.com/repos/Multitec-UA/pimp_my_ubuntu/contents/src/main.sh | bash
+curl -H "Accept: application/vnd.github.v3.raw" \
+-s https://api.github.com/repos/Multitec-UA/pimp_my_ubuntu/contents/src/main.sh | bash
 ```
 
 ### Install Grub Customizer
+Update Grub, install grub-customizer and add theme.
 
 ```bash
-   curl -H "Accept: application/vnd.github.v3.raw" \
-   -s https://api.github.com/repos/Multitec-UA/pimp_my_ubuntu/contents/src/procedures/install_grub_customizer/install_grub_customizer.sh | bash
+curl -H "Accept: application/vnd.github.v3.raw" \
+-s https://api.github.com/repos/Multitec-UA/pimp_my_ubuntu/contents/src/procedures/install_grub_customizer/install_grub_customizer.sh | sudo bash
 ```
 
 

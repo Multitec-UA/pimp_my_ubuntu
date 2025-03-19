@@ -235,7 +235,7 @@ global_install_apt_package() {
 # Function to download media files from repo
 global_download_media() {
     local header="Accept: application/vnd.github.v3.raw"
-    local file="${1:-}"
+    local file_path="${1:-}"
     local destination_dir="$GLOBAL_REAL_HOME/Documents/pimp_my_ubuntu"
     
     # Create destination directory if it doesn't exist
@@ -244,10 +244,13 @@ global_download_media() {
     # Ensure the directory is owned by the real user
     chown "${GLOBAL_REAL_USER}:${GLOBAL_REAL_USER}" "${GLOBAL_DOWNLOAD_DIR}"
     
-    if [[ -n "${file}" ]]; then
-        global_log_message "INFO" "Downloading media file: ${file}"
-        local output_file="${GLOBAL_DOWNLOAD_DIR}/$(basename "${file}")"
-        curl -H "${header}" -s "${_REPOSITORY_URL}/${file}" -o "${output_file}"
+    if [[ -n "${file_path}" ]]; then
+        global_log_message "INFO" "Downloading media file: ${file_path}"
+        local output_file="${GLOBAL_DOWNLOAD_DIR}/$(basename "${file_path}")"
+
+        # Use raw URL for GitHub content instead of API
+        local raw_url="https://raw.githubusercontent.com/Multitec-UA/pimp_my_ubuntu/master${file_path}"
+        curl -L -s "${raw_url}" -o "${output_file}"
         local curl_status=$?
         
         # Ensure the downloaded file is owned by the real user

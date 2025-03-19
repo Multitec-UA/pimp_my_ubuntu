@@ -20,7 +20,7 @@ readonly _SOFTWARE_VERSION="1.0.0"
 
 # Software-specific constants
 # Options: crt-amber-theme, monterey-theme
-readonly _THEME_NAME="monterey-theme"
+readonly _THEME_NAME="crt-amber-theme"
 
 # Declare GLOBAL_INSTALLATION_STATUS if not already declared
 if ! declare -p GLOBAL_INSTALLATION_STATUS >/dev/null 2>&1; then
@@ -131,6 +131,7 @@ _install_grub_theme() {
     
     # Extract theme to GRUB themes directory
     global_log_message "INFO" "Extracting theme to GRUB themes directory"
+    ls -la "${GLOBAL_DOWNLOAD_DIR}"
     sudo unzip -o "${GLOBAL_DOWNLOAD_DIR}/${_THEME_NAME}.zip" -d /boot/grub/themes/
     
     # Edit GRUB configuration

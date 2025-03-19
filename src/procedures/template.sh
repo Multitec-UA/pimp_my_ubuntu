@@ -1,106 +1,177 @@
 #!/usr/bin/env bash
 
 # =============================================================================
-# Pimp My Ubuntu - Installation Procedure Template
+# Pimp My Ubuntu - PROCEDURE_NAME
 # =============================================================================
-# Description: Template for creating new software installation procedures
+# Description: DESCRIPTION_HERE
 # Author: Multitec-UA
 # Repository: https://github.com/Multitec-UA/pimp_my_ubuntu
 # License: MIT
+#
+# COMMON INSTRUCTIONS:
+# 1. Dont use echo. Use global_log_message instead.
+# 2. Send all output to log file. command >>"${LOG_FILE}" 2>&1
+# 3. Reboot your system if needed
 # =============================================================================
+
+# Debug flag - set to true to enable debug messages
+readonly DEBUG=${DEBUG:-true}
+
+# Software-common constants
+readonly _REPOSITORY_URL="https://api.github.com/repos/Multitec-UA/pimp_my_ubuntu/contents"
+readonly _SOFTWARE_COMMAND="SOFTWARE_COMMAND_HERE"
+readonly _SOFTWARE_DESCRIPTION="SOFTWARE_DESCRIPTION_HERE"
+readonly _SOFTWARE_VERSION="1.0.0"
+
+# Software-specific constants
+# Add any software-specific constants here
+readonly _EXAMPLE_CONFIG_VALUE="example_value"
+
+# Declare GLOBAL_INSTALLATION_STATUS if not already declared
+if ! declare -p GLOBAL_INSTALLATION_STATUS >/dev/null 2>&1; then
+    declare -A GLOBAL_INSTALLATION_STATUS
+fi
 
 # Strict mode
 set -euo pipefail
 
-# Source global variables and functions
-# shellcheck source=../lib/globals.sh
-source "$(dirname "${BASH_SOURCE[0]}")/../lib/globals.sh"
-
-# Software-specific constants
-readonly SOFTWARE_NAME="CHANGE_ME"
-readonly SOFTWARE_DESCRIPTION="CHANGE_ME"
-readonly SOFTWARE_VERSION="CHANGE_ME"
-
-# Check if all required dependencies are installed
-check_dependencies() {
-    log_message "INFO" "Checking dependencies for ${SOFTWARE_NAME}"
-    local dependencies=("curl" "wget")  # Add required dependencies
-    local missing_deps=()
-
-    for dep in "${dependencies[@]}"; do
-        if ! command -v "${dep}" &> /dev/null; then
-            missing_deps+=("${dep}")
-        fi
-    done
-
-    if [[ ${#missing_deps[@]} -gt 0 ]]; then
-        log_message "INFO" "Installing missing dependencies: ${missing_deps[*]}"
-        apt-get update
-        apt-get install -y "${missing_deps[@]}"
-    fi
-}
-
-# Check if software is already installed
-check_if_installed() {
-    # Implement check logic here
-    # Return 0 if installed, 1 if not installed
-    return 1
-}
-
-# Prepare for installation
-prepare_installation() {
-    log_message "INFO" "Preparing installation of ${SOFTWARE_NAME}"
-    # Add repository if needed
-    # Download necessary files
-    # Create required directories
-    echo "Preparing installation..."
-}
-
-# Main installation function
-install_software() {
-    log_message "INFO" "Installing ${SOFTWARE_NAME}"
-    echo "Installing ${SOFTWARE_NAME}..."
-    # Implement installation logic here
-}
-
-# Post-installation configuration
-post_install() {
-    log_message "INFO" "Configuring ${SOFTWARE_NAME}"
-    echo "Configuring ${SOFTWARE_NAME}..."
-    # Implement post-installation configuration
-}
-
-# Update installation status
-update_status() {
-    local status="$1"
-    GLOBAL_INSTALLATION_STATUS["${SOFTWARE_NAME}"]="${status}"
-    log_message "INFO" "Installation status for ${SOFTWARE_NAME}: ${status}"
-}
-
 # Main procedure function
 main() {
-    log_message "INFO" "Starting installation of ${SOFTWARE_NAME}"
+
+    # Source global variables and functions
+    _source_lib "/src/lib/global_utils.sh"
     
-    if check_if_installed; then
-        log_message "INFO" "${SOFTWARE_NAME} is already installed"
-        update_status "SKIPPED"
+    global_check_root
+
+    _step_init_procedure
+
+    if [ "$(global_get_status "${_SOFTWARE_COMMAND}")" == "SKIPPED" ]; then
+        global_log_message "INFO" "${_SOFTWARE_COMMAND} is already installed"
+        _step_post_install
+        _step_cleanup
         return 0
     fi
 
-    check_dependencies
-    prepare_installation
-    
-    if install_software; then
-        post_install
-        update_status "SUCCESS"
-        log_message "INFO" "${SOFTWARE_NAME} installation completed successfully"
+    _step_install_dependencies
+
+    if _step_install_software; then
+        _step_post_install
+        global_log_message "INFO" "${_SOFTWARE_COMMAND} installation completed successfully"
+        global_set_status "${_SOFTWARE_COMMAND}" "SUCCESS"
+        _step_cleanup
+        return 0
     else
-        update_status "FAILED"
-        log_message "ERROR" "Failed to install ${SOFTWARE_NAME}"
-        echo "Failed to install ${SOFTWARE_NAME}!" >&2
+        global_log_message "ERROR" "Failed to install ${_SOFTWARE_COMMAND}"
+        global_set_status "${_SOFTWARE_COMMAND}" "FAILED"
+        _step_cleanup
         return 1
     fi
+
 }
+
+# Necessary function to source libraries
+_source_lib() {
+    local header="Accept: application/vnd.github.v3.raw"
+    local file="${1:-}"
+    
+    if [[ -n "${file}" ]]; then
+        source <(curl -H "${header}" -s "${_REPOSITORY_URL}/${file}")
+    else
+        echo "Error: No library file specified to source" >&2
+        exit 1
+    fi
+}
+
+
+# Prepare for installation
+_step_init_procedure() {
+    global_log_message "INFO" "Starting installation of ${_SOFTWARE_COMMAND}"
+    
+    if global_check_if_installed "${_SOFTWARE_COMMAND}"; then
+        global_set_status "${_SOFTWARE_COMMAND}" "SKIPPED"
+        return 0
+    fi
+}
+
+# Install dependencies
+_step_install_dependencies() {
+    global_log_message "INFO" "Installing dependencies for ${_SOFTWARE_COMMAND}"
+
+    # Replace with actual dependencies
+    global_install_apt_package "dependency1" "dependency2" "dependency3"
+    
+    # Example for adding a PPA if needed
+    # global_add_apt_repository "ppa:example/ppa"
+}
+
+# Install the software
+_step_install_software() {
+    global_log_message "INFO" "Installing ${_SOFTWARE_COMMAND}"
+
+    # Replace with actual installation commands
+    # Example for APT install:
+    # global_install_apt_package "${_SOFTWARE_COMMAND}"
+    
+    # Example for manual installation:
+    # mkdir -p "/tmp/${_SOFTWARE_COMMAND}" >>"${LOG_FILE}" 2>&1
+    # cd "/tmp/${_SOFTWARE_COMMAND}" >>"${LOG_FILE}" 2>&1
+    # wget "https://example.com/${_SOFTWARE_COMMAND}.tar.gz" >>"${LOG_FILE}" 2>&1
+    # tar -xzf "${_SOFTWARE_COMMAND}.tar.gz" >>"${LOG_FILE}" 2>&1
+    # ./configure >>"${LOG_FILE}" 2>&1
+    # make >>"${LOG_FILE}" 2>&1
+    # make install >>"${LOG_FILE}" 2>&1
+    
+    # Return true if installation succeeded
+    return 0
+}
+
+# Post-installation configuration
+_step_post_install() {
+    global_log_message "INFO" "Post installation of ${_SOFTWARE_COMMAND}"
+    
+    # Add any post-installation steps here
+    # Example:
+    # global_log_message "INFO" "Configuring ${_SOFTWARE_COMMAND}"
+    # _configure_software
+}
+
+# Cleanup after installation
+_step_cleanup() {
+    global_log_message "INFO" "Cleaning up after installation of ${_SOFTWARE_COMMAND}"
+    
+    # Remove downloaded files if any
+    if [[ -f "${GLOBAL_DOWNLOAD_DIR}/${_SOFTWARE_COMMAND}.tar.gz" ]]; then
+        global_log_message "DEBUG" "Removing downloaded files"
+        rm -f "${GLOBAL_DOWNLOAD_DIR}/${_SOFTWARE_COMMAND}.tar.gz" >>"${LOG_FILE}" 2>&1
+    fi
+    
+    # Clean any temporary files
+    if [[ -d "/tmp/${_SOFTWARE_COMMAND}" ]]; then
+        global_log_message "DEBUG" "Removing temporary files"
+        rm -rf "/tmp/${_SOFTWARE_COMMAND}" >>"${LOG_FILE}" 2>&1
+    fi
+    
+    # Clean apt cache if we installed new packages
+    if [[ "$(global_get_status "${_SOFTWARE_COMMAND}")" == "SUCCESS" ]]; then
+        global_log_message "DEBUG" "Cleaning apt cache"
+        apt-get clean >>"${LOG_FILE}" 2>&1
+    fi
+}
+
+# Add any additional helper functions here
+# _configure_software() {
+#     # Example configuration function
+#     global_log_message "INFO" "Configuring software settings"
+#     
+#     # Create config directory if it doesn't exist
+#     sudo mkdir -p /etc/${_SOFTWARE_COMMAND}/
+#     
+#     # Copy configuration file
+#     sudo cp "${GLOBAL_DOWNLOAD_DIR}/config.example" "/etc/${_SOFTWARE_COMMAND}/config" >>"${LOG_FILE}" 2>&1
+#     
+#     # Modify configuration
+#     sudo sed -i "s/default_value/${_EXAMPLE_CONFIG_VALUE}/" "/etc/${_SOFTWARE_COMMAND}/config" >>"${LOG_FILE}" 2>&1
+# }
 
 # Execute main function
 main "$@" 

@@ -36,7 +36,6 @@ fi
 # Strict mode
 set -euo pipefail
 
-
 # Main procedure function
 main() {
 
@@ -45,15 +44,13 @@ main() {
     
     global_check_root
 
-    # TODO REMOVE THIS
-    _step_post_install
-    exit 0
-
     _step_init_procedure
 
 
     if [ "$(global_get_status "${_SOFTWARE_COMMAND}")" == "SKIPPED" ]; then
         global_log_message "INFO" "${_SOFTWARE_COMMAND} is already installed"
+        _step_post_install
+        _step_cleanup
         return 0
     fi
 
@@ -123,6 +120,29 @@ _step_post_install() {
     _install_grub_theme
 }
 
+# Cleanup after installation
+_step_cleanup() {
+    global_log_message "INFO" "Cleaning up after installation of ${_SOFTWARE_COMMAND}"
+    
+    # Remove downloaded theme file if it exists
+    if [[ -f "${GLOBAL_DOWNLOAD_DIR}/${_THEME_NAME}.zip" ]]; then
+        global_log_message "DEBUG" "Removing downloaded theme file"
+        rm -f "${GLOBAL_DOWNLOAD_DIR}/${_THEME_NAME}.zip" >>"${LOG_FILE}" 2>&1
+    fi
+    
+    # Clean any temporary files that might have been created
+    if [[ -d "/tmp/grub-customizer-temp" ]]; then
+        global_log_message "DEBUG" "Removing temporary files"
+        rm -rf "/tmp/grub-customizer-temp" >>"${LOG_FILE}" 2>&1
+    fi
+    
+    # Clean apt cache if we installed new packages
+    if [[ "$(global_get_status "${_SOFTWARE_COMMAND}")" == "SUCCESS" ]]; then
+        global_log_message "DEBUG" "Cleaning apt cache"
+        apt-get clean >>"${LOG_FILE}" 2>&1
+    fi
+}
+
 # Install GRUB theme
 _install_grub_theme() {
     
@@ -149,12 +169,6 @@ _install_grub_theme() {
     sudo update-grub >>"${LOG_FILE}" 2>&1
     
     global_log_message "INFO" "GRUB theme installation completed. Changes will take effect after next reboot."
-}
-
-# Cleanup after installation
-_step_cleanup() {
-    global_log_message "INFO" "Cleaning up after installation of ${_SOFTWARE_COMMAND}"
-    # Add cleanup logic here if needed
 }
 
 # Execute main function

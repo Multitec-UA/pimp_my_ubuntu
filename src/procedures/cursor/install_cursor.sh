@@ -180,11 +180,25 @@ cursor() {
     fi
 }'
 
+    # Loop through each shell RC file (bashrc, zshrc)
     for rc_file in "${_SHELL_RC_FILES[@]}"; do
+        # Check if the RC file exists
         if [[ -f "${rc_file}" ]]; then
+            # Check if the cursor function is already defined in the RC file
             if ! grep -q "cursor()" "${rc_file}"; then
+                # Append the cursor function to the RC file if not already present
                 echo "${cursor_function}" >> "${rc_file}"
+                # Ensure the RC file has the correct ownership
                 chown "${GLOBAL_REAL_USER}:${GLOBAL_REAL_USER}" "${rc_file}" >>"${LOG_FILE}" 2>&1
+                
+                # Verify the function was added correctly
+                if grep -q "cursor()" "${rc_file}"; then
+                    global_log_message "INFO" "Successfully added cursor function to ${rc_file}"
+                else
+                    global_log_message "WARNING" "Failed to add cursor function to ${rc_file}"
+                fi
+            else
+                global_log_message "INFO" "Cursor function already exists in ${rc_file}"
             fi
         fi
     done

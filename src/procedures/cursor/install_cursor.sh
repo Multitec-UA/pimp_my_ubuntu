@@ -28,6 +28,7 @@ readonly _APPLICATIONS_DIR="${GLOBAL_REAL_HOME}/Applications"
 readonly _CURSOR_APPIMAGE="${_APPLICATIONS_DIR}/cursor.AppImage"
 readonly _USER_CONFIG_DIR="${GLOBAL_REAL_HOME}/.config"
 readonly _USER_LOCAL_DIR="${GLOBAL_REAL_HOME}/.local"
+readonly _SHELL_RC_FILES=("${GLOBAL_REAL_HOME}/.bashrc" "${GLOBAL_REAL_HOME}/.zshrc")
 
 # Declare GLOBAL_INSTALLATION_STATUS if not already declared
 if ! declare -p GLOBAL_INSTALLATION_STATUS >/dev/null 2>&1; then
@@ -179,7 +180,7 @@ cursor() {
     fi
 }'
 
-    for rc_file in "${GLOBAL_SHELL_RC_FILES[@]}"; do
+    for rc_file in "${_SHELL_RC_FILES[@]}"; do
         if [[ -f "${rc_file}" ]]; then
             if ! grep -q "cursor()" "${rc_file}"; then
                 echo "${cursor_function}" >> "${rc_file}"

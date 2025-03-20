@@ -87,6 +87,7 @@ global_debug_echo() {
 # Log a message with timestamp
 # Usage: log_message "INFO" "Starting installation"
 global_log_message() {
+    global_ensure_dir "${GLOBAL_LOG_DIR}"
     local level=$1
     local message=$2
     local timestamp
@@ -95,7 +96,15 @@ global_log_message() {
     global_debug_echo
 }
 
-# Initialize logging
+# Initialize logging system for the application
+# This function:
+# 1. Ensures the log directory exists with proper permissions
+# 2. Removes any existing log file to start fresh
+# 3. Creates a new empty log file
+# 4. Saves the original stdout (file descriptor 1) to fd 3
+# 5. Saves the original stderr (file descriptor 2) to fd 4
+# 6. Redirects stdout and stderr to both the terminal and the log file using tee
+# Usage: global_setup_logging
 global_setup_logging() {
     global_ensure_dir "${GLOBAL_LOG_DIR}"
     rm -f "${LOG_FILE}"

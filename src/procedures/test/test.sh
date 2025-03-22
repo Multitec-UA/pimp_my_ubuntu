@@ -48,6 +48,7 @@ main() {
     global_check_root
 
     echo "HEEELLLLLLLOWW!!"
+    echo "GLOBAL_INSTALLATION_STATUS: ${GLOBAL_INSTALLATION_STATUS[@]}"
     
     for software in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
         global_log_message "INFO" "${software}: ${GLOBAL_INSTALLATION_STATUS[$software]}"

@@ -13,6 +13,46 @@
 
 declare -A GLOBAL_INSTALLATION_STATUS
 
+# Function to serialize and export the installation status array
+# Usage: global_export_installation_status
+global_export_installation_status() {
+  local serialized=""
+  for key in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
+    # Create a string like "key1:value1;key2:value2"
+    serialized+="${key}:${GLOBAL_INSTALLATION_STATUS[$key]};"
+  done
+  # Export as a normal environment variable
+  export PMU_INSTALLATION_STATUS="$serialized"
+  global_log_message "INFO" "Exported installation status: ${serialized}"
+}
+
+# Function to import and deserialize the installation status array
+# Usage: global_import_installation_status
+global_import_installation_status() {
+  # Create a local associative array
+  declare -A local_status
+  
+  if [[ -n "${PMU_INSTALLATION_STATUS:-}" ]]; then
+    local IFS=";"
+    for pair in $PMU_INSTALLATION_STATUS; do
+      if [[ -n "$pair" ]]; then
+        key="${pair%%:*}"
+        value="${pair#*:}"
+        local_status["$key"]="$value"
+        global_log_message "INFO" "Imported status: ${key}=${value}"
+      fi
+    done
+  else
+    global_log_message "WARNING" "No installation status found in environment"
+  fi
+  
+  # Make the array available globally
+  GLOBAL_INSTALLATION_STATUS=()
+  for key in "${!local_status[@]}"; do
+    GLOBAL_INSTALLATION_STATUS["$key"]="${local_status[$key]}"
+  done
+}
+
 # Ensure this script is sourced, not executed
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     echo "This script should be sourced, not executed directly"

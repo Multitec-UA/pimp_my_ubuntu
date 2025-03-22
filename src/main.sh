@@ -49,6 +49,10 @@ main() {
     _procedure_selector_screen
     echo "Selected procedures: ${_PROCEDURES_SELECTED[*]}"
 
+    # Make status array available to child scripts
+    global_export_installation_status
+
+
     while IFS= read -r procedure; do
         _run_procedure "${procedure}"
     done <<< "${_PROCEDURES_SELECTED[@]}"
@@ -89,8 +93,7 @@ _init_procedures_info() {
     local procedures_json
     procedures_json=$(curl -s -H "Accept: application/vnd.github.v3+json" "${_PROCEDURES_PATH}")
     
-    # Make status array available to child scripts
-    export GLOBAL_INSTALLATION_STATUS
+
     
     # Parse procedure names from JSON response and filter out template.sh
     local names
@@ -162,11 +165,14 @@ _procedure_selector_screen() {
 _run_procedure() {
     local procedure="${1:-}"
     global_log_message "INFO" "Starting procedure: ${procedure}"
+    echo "GLOBAL_INSTALLATION_STATUS: ${GLOBAL_INSTALLATION_STATUS[@]}"
 
     curl -H "Accept: application/vnd.github.v3.raw" -s "${_PROCEDURES_PATH}/${procedure}/${procedure}.sh" | sudo bash
+
+
+#curl -H "Accept: application/vnd.github.v3.raw" \
+#-s https://api.github.com/repos/Multitec-UA/pimp_my_ubuntu/contents/src/procedures/test/test.sh | sudo bash
 }
-curl -H "Accept: application/vnd.github.v3.raw" \
--s https://api.github.com/repos/Multitec-UA/pimp_my_ubuntu/contents/src/procedures/test/test.sh | sudo bash
 
 
 main "$@"

@@ -48,6 +48,9 @@ main() {
 
     global_import_installation_status
 
+    GLOBAL_INSTALLATION_STATUS["${_SOFTWARE_COMMAND}"]="SUCCESS"
+    global_export_installation_status
+    exit 0
 }
 
 # Necessary function to source libraries

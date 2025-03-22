@@ -37,20 +37,15 @@ main() {
     # Check if the script is running with root privileges
     global_check_root
 
-    
-    # Initialize main menu
     _step_init
   
     _init_procedures_info
 
     _welcome_screen
 
-
     _procedure_selector_screen
-    echo "Selected procedures: ${GLOBAL_INSTALLATION_STATUS[*]}"
 
-    exit 0
-
+    # Run procedures in the order of selection
     while IFS= read -r procedure; do
         _run_procedure "${procedure}"
     done <<< "${GLOBAL_INSTALLATION_STATUS[*]}"
@@ -174,13 +169,20 @@ _procedure_selector_screen() {
 
     # Make status array available to child scripts
     global_export_installation_status
+    clear
 }
 
 
 _run_procedure() {
     local procedure="${1:-}"
+
+        # Print all installation statuses
+    global_log_message "INFO" "Current installation status:"
+    for proc_name in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
+        global_log_message "INFO" "  ${proc_name}: ${GLOBAL_INSTALLATION_STATUS[$proc_name]}"
+    done
+
     global_log_message "INFO" "Starting procedure: ${procedure}"
-    echo "GLOBAL_INSTALLATION_STATUS: ${GLOBAL_INSTALLATION_STATUS[@]}"
 
     curl -H "Accept: application/vnd.github.v3.raw" -s "${_PROCEDURES_PATH}/${procedure}/${procedure}.sh" | sudo -E bash
 

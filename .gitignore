@@ -58,11 +58,6 @@ local_settings.sh
 __pycache__/
 *.py[cod]
 
-# Test files
-test/
-tests/
-*.test
-*.spec
 
 # Build output
 build/

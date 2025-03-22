@@ -90,16 +90,14 @@ _init_procedures_info() {
     local procedures_json
     procedures_json=$(curl -s -H "Accept: application/vnd.github.v3+json" "${_PROCEDURES_PATH}")
     
-
-    
     # Parse procedure names from JSON response and filter out template.sh
     local names
     names=$(echo "${procedures_json}" | jq -r '.[].name | select(. != "template.sh")')
     
     # Initialize each procedure's status as pending
-    while IFS= read -r name; do
-        GLOBAL_INSTALLATION_STATUS["${name}"]="INIT"
-        global_log_message "INFO" "Added procedure '${name}' with status 'INIT'"
+    while IFS= read -r proc_name; do
+        GLOBAL_INSTALLATION_STATUS["${proc_name}"]="INIT"
+        global_log_message "INFO" "Added procedure '${proc_name}' with status 'INIT'"
     done <<< "${names}"
     
     global_log_message "INFO" "All procedures initialized with INIT status"
@@ -127,9 +125,9 @@ _procedure_selector_screen() {
     while [[ "$exit_flag" == "false" ]]; do
         # Build menu items from GLOBAL_INSTALLATION_STATUS
         local menu_items=()
-        for software in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
-            local status="${GLOBAL_INSTALLATION_STATUS[$software]}"
-            menu_items+=("$software")
+        for proc_name in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
+            local status="${GLOBAL_INSTALLATION_STATUS[$proc_name]}"
+            menu_items+=("$proc_name")
         done
         
         # Call dialog_show_menu and capture its output and exit status

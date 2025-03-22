@@ -23,7 +23,6 @@ An automated setup script for fresh Ubuntu 24.04 installations. This tool helps 
 Execute his command to use de Pimp My Ubuntu main menu.
 
 ```bash
-#WIP
 curl -H "Accept: application/vnd.github.v3.raw" \
 -s https://api.github.com/repos/Multitec-UA/pimp_my_ubuntu/contents/src/main.sh | sudo bash
 ```

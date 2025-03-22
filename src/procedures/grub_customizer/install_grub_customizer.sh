@@ -24,9 +24,10 @@ readonly _SOFTWARE_DESCRIPTION="Grub Customizer is a tool for managing GRUB boot
 readonly _SOFTWARE_VERSION="1.0.0"
 
 # Software-specific constants
-# Options: monterey-theme, crt-amber-theme, solarized-theme, cybergrub-theme
 # More themes in https://www.gnome-look.org/ Add .zip with theme.txt file inside to media folder
-readonly _THEME_NAME="crt-amber-theme"
+readonly _THEME_OPTIONS=("monterey-theme" "crt-amber-theme" "solarized-theme" "cybergrub-theme") # Available theme options
+readonly _THEME_POSITION=${1:-0} #Default theme position, can be overridden by command line argument
+readonly _THEME_NAME="${_THEME_OPTIONS[_THEME_POSITION]}"
 readonly _MEDIA_PATH="/src/procedures/grub_customizer/media"
 
 # Declare GLOBAL_INSTALLATION_STATUS if not already declared
@@ -163,10 +164,13 @@ _install_grub_theme() {
     # Edit GRUB configuration
     global_log_message "INFO" "Configuring GRUB theme"
     sudo sed -i "s/^.*GRUB_THEME=.*/GRUB_THEME=\"\/boot\/grub\/themes\/${_THEME_NAME}\/theme.txt\"/" /etc/default/grub
+    global_log_message "INFO" "Configuring GRUB Resolution to 1920x1080x24"    
+    sudo sed -i "s/^.*GRUB_GFXMODE=.*/GRUB_GFXMODE=\"1920x1080x24\"/" /etc/default/grub
+    global_log_message "INFO" "Configuring GRUB SAVEDEFAULT to true"
+    sudo sed -i "s/^.*GRUB_SAVEDEFAULT=.*/GRUB_SAVEDEFAULT=\"true\"/" /etc/default/grub
     
     # Update GRUB
     global_log_message "INFO" "Updating GRUB configuration"
-    # If DEBUG is true, show the output of the update-grub command
     sudo update-grub >>"${LOG_FILE}" 2>&1
     
     global_log_message "INFO" "GRUB theme installation completed. Changes will take effect after next reboot."

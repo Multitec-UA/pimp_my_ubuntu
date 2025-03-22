@@ -46,13 +46,8 @@ main() {
     
     global_check_root
 
-    echo "THIS IS A EXAMPLECOMENT, deleteme!!"
     global_import_installation_status
-    echo "GLOBAL_INSTALLATION_STATUS: ${GLOBAL_INSTALLATION_STATUS[@]}"
-    
-    for software in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
-        global_log_message "INFO" "${software}: ${GLOBAL_INSTALLATION_STATUS[$software]}"
-    done
+
 }
 
 # Necessary function to source libraries
@@ -74,7 +69,7 @@ _step_init() {
     global_log_message "INFO" "Starting installation of ${_SOFTWARE_COMMAND}"
     
     if global_check_if_installed "${_SOFTWARE_COMMAND}"; then
-        global_set_status "${_SOFTWARE_COMMAND}" "SKIPPED"
+        GLOBAL_INSTALLATION_STATUS "${_SOFTWARE_COMMAND}" "SKIPPED"
         return 0
     fi
 }
@@ -120,7 +115,7 @@ _step_cleanup() {
     fi
     
     # Clean apt cache if we installed new packages
-    if [[ "$(global_get_status "${_SOFTWARE_COMMAND}")" == "SUCCESS" ]]; then
+    if [[ "$(GLOBAL_INSTALLATION_STATUS "${_SOFTWARE_COMMAND}")" == "SUCCESS" ]]; then
         global_log_message "DEBUG" "Cleaning apt cache"
         apt-get clean >>"${LOG_FILE}" 2>&1
     fi

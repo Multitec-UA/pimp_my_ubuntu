@@ -48,8 +48,7 @@ main() {
 
     _step_init
 
-
-    if [ "$(global_get_status "${_SOFTWARE_COMMAND}")" == "SKIPPED" ]; then
+    if [ "${GLOBAL_INSTALLATION_STATUS["${_SOFTWARE_COMMAND}"]}" == "SKIPPED" ]; then
         global_log_message "INFO" "${_SOFTWARE_COMMAND} is already installed"
         _step_post_install
         _step_cleanup
@@ -61,12 +60,12 @@ main() {
     if _step_install_software; then
         _step_post_install
         global_log_message "INFO" "${_SOFTWARE_COMMAND} installation completed successfully"
-        global_set_status "${_SOFTWARE_COMMAND}" "SUCCESS"
+        GLOBAL_INSTALLATION_STATUS["${_SOFTWARE_COMMAND}"]="SUCCESS"
         _step_cleanup
         return 0
     else
         global_log_message "ERROR" "Failed to install ${_SOFTWARE_COMMAND}"
-        global_set_status "${_SOFTWARE_COMMAND}" "FAILED"
+        GLOBAL_INSTALLATION_STATUS["${_SOFTWARE_COMMAND}"]="FAILED"
         _step_cleanup
         return 1
     fi
@@ -86,13 +85,15 @@ _source_lib() {
     fi
 }
 
-
 # Prepare for installation
 _step_init() {
+    # Import installation status from environment
+    global_import_installation_status
+    
     global_log_message "INFO" "Starting installation of ${_SOFTWARE_COMMAND}"
     
     if global_check_if_installed "${_SOFTWARE_COMMAND}"; then
-        global_set_status "${_SOFTWARE_COMMAND}" "SKIPPED"
+        GLOBAL_INSTALLATION_STATUS["${_SOFTWARE_COMMAND}"]="SKIPPED"
         return 0
     fi
 }
@@ -138,7 +139,7 @@ _step_cleanup() {
     fi
     
     # Clean apt cache if we installed new packages
-    if [[ "$(global_get_status "${_SOFTWARE_COMMAND}")" == "SUCCESS" ]]; then
+    if [[ "${GLOBAL_INSTALLATION_STATUS["${_SOFTWARE_COMMAND}"]}" == "SUCCESS" ]]; then
         global_log_message "DEBUG" "Cleaning apt cache"
         apt-get clean >>"${LOG_FILE}" 2>&1
     fi
@@ -176,4 +177,7 @@ _install_grub_theme() {
 }
 
 # Execute main function
-main "$@" 
+main "$@"
+
+# Export installation status at the end to propagate changes back to parent
+global_export_installation_status 

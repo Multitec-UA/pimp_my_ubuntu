@@ -38,33 +38,22 @@ main() {
     global_check_root
 
     
-    GLOBAL_INSTALLATION_STATUS["test"]="INIT"
-    echo "GLOBAL_INSTALLATION_STATUS: ${GLOBAL_INSTALLATION_STATUS[@]}"
-    global_export_installation_status
-    exit 0
-
     # Initialize main menu
     _step_init
-
-
   
-    
-    global_log_message "INFO" "Initializing procedures information"
     _init_procedures_info
 
     _welcome_screen
 
-    _PROCEDURES_SELECTED=()
+
     _procedure_selector_screen
-    echo "Selected procedures: ${_PROCEDURES_SELECTED[*]}"
+    echo "Selected procedures: ${GLOBAL_INSTALLATION_STATUS[*]}"
 
-    # Make status array available to child scripts
-    global_export_installation_status
-
+    exit 0
 
     while IFS= read -r procedure; do
         _run_procedure "${procedure}"
-    done <<< "${_PROCEDURES_SELECTED[@]}"
+    done <<< "${GLOBAL_INSTALLATION_STATUS[*]}"
 
 
 
@@ -96,7 +85,7 @@ _step_init() {
 # Initialize procedures information
 # Fetches procedures from repository and initializes their status
 _init_procedures_info() {
-    global_log_message "INFO" "Setting up procedures information"
+    global_log_message "INFO" "Initializing procedures information"
         
     # Get procedures list from GitHub API
     local procedures_json
@@ -112,6 +101,7 @@ _init_procedures_info() {
         global_log_message "INFO" "Added procedure '${proc_name}' with status 'INIT'"
     done <<< "${names}"
     
+    global_export_installation_status
     global_log_message "INFO" "All procedures initialized with INIT status"
 }
 
@@ -133,6 +123,7 @@ _procedure_selector_screen() {
     # Get user selection menu
     # Loop to let user select software or exit
     local exit_flag=false
+    local procedures_selected=()
     
     while [[ "$exit_flag" == "false" ]]; do
         # Build menu items from GLOBAL_INSTALLATION_STATUS
@@ -143,7 +134,7 @@ _procedure_selector_screen() {
         done
         
         # Call dialog_show_menu and capture its output and exit status
-        _PROCEDURES_SELECTED=($(dialog_show_menu "${menu_items[@]}"))
+        procedures_selected=($(dialog_show_menu "${menu_items[@]}"))
         local menu_status=$?
         
         # Check if user pressed Cancel/Esc
@@ -155,17 +146,34 @@ _procedure_selector_screen() {
         fi
         
         # Check if user made a selection
-        if [[ ${#_PROCEDURES_SELECTED[@]} -eq 0 ]]; then
+        if [[ ${#procedures_selected[@]} -eq 0 ]]; then
             dialog --title "No Selection" --backtitle "Pimp My Ubuntu" \
                    --msgbox "Please select at least one software to continue." 8 50
             global_log_message "INFO" "No software selected. Prompting again."
         else
             # User made a valid selection, exit the loop
             exit_flag=true
-            global_log_message "INFO" "User selected: ${_PROCEDURES_SELECTED[*]}"
+            global_log_message "INFO" "User selected: ${procedures_selected[*]}"
         fi
     done
 
+    # Remove procedures not selected from GLOBAL_INSTALLATION_STATUS
+    local all_procedures=("${!GLOBAL_INSTALLATION_STATUS[@]}")
+    for proc in "${all_procedures[@]}"; do
+        if [[ ! " ${procedures_selected[@]} " =~ " ${proc} " ]]; then
+            unset "GLOBAL_INSTALLATION_STATUS[$proc]"
+            global_log_message "INFO" "Removed $proc from installation status"
+        fi
+    done
+
+    # Set all remaining procedures to PENDING status
+    for proc in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
+        GLOBAL_INSTALLATION_STATUS["$proc"]="PENDING"
+        global_log_message "INFO" "Set $proc status to PENDING"
+    done
+
+    # Make status array available to child scripts
+    global_export_installation_status
 }
 
 
@@ -177,8 +185,6 @@ _run_procedure() {
     curl -H "Accept: application/vnd.github.v3.raw" -s "${_PROCEDURES_PATH}/${procedure}/${procedure}.sh" | sudo -E bash
 
 
-#curl -H "Accept: application/vnd.github.v3.raw" \
-#-s https://api.github.com/repos/Multitec-UA/pimp_my_ubuntu/contents/src/procedures/test/test.sh | sudo bash
 }
 
 

@@ -9,10 +9,7 @@
 # License: MIT
 # =============================================================================
 
-# Global Variables --------------------------------
 
-declare -A GLOBAL_INSTALLATION_STATUS
-export GLOBAL_INSTALLATION_STATUS
 
 # Function to serialize and export the installation status array
 # Usage: global_export_installation_status
@@ -80,33 +77,6 @@ readonly GLOBAL_DOWNLOAD_DIR="$GLOBAL_REAL_HOME/Documents/pimp_my_ubuntu"
 # Function to run commands as the real user
 global_run_as_user() {
     sudo -u "${GLOBAL_REAL_USER}" "$@"
-}
-
-
-# Update installation status
-global_set_status() {
-    local software_command="$1"
-    local status="$2"
-    # Check if GLOBAL_INSTALLATION_STATUS exists before using it
-    if declare -p GLOBAL_INSTALLATION_STATUS >/dev/null 2>&1; then
-        GLOBAL_INSTALLATION_STATUS["${software_command}"]="${status}"
-        global_log_message "INFO" "Installation status for ${software_command}: ${status}"
-    else
-        global_log_message "WARNING" "GLOBAL_INSTALLATION_STATUS array not available, status not updated"
-    fi
-}
-
-# Get installation status for a software
-# Usage: global_get_status "software_name"
-global_get_status() {
-    local software_command="$1"
-    # Check if GLOBAL_INSTALLATION_STATUS exists before using it
-    if declare -p GLOBAL_INSTALLATION_STATUS >/dev/null 2>&1; then
-        echo "${GLOBAL_INSTALLATION_STATUS["${software_command}"]:-UNKNOWN}"
-    else
-        global_log_message "WARNING" "GLOBAL_INSTALLATION_STATUS array not available, returning UNKNOWN status"
-        echo "UNKNOWN"
-    fi
 }
 
 

@@ -22,9 +22,6 @@ readonly _DEPENDENCIES=("curl" "wget" "dialog" "jq")
 # Software-specific constants
 readonly _PROCEDURES_PATH="${_REPOSITORY_URL}/src/procedures"
 
-# Declare the global installation status array
-declare -A GLOBAL_INSTALLATION_STATUS
-
 # Strict mode
 set -euo pipefail
 
@@ -167,7 +164,7 @@ _run_procedure() {
     global_log_message "INFO" "Starting procedure: ${procedure}"
     echo "GLOBAL_INSTALLATION_STATUS: ${GLOBAL_INSTALLATION_STATUS[@]}"
 
-    curl -H "Accept: application/vnd.github.v3.raw" -s "${_PROCEDURES_PATH}/${procedure}/${procedure}.sh" | sudo bash
+    curl -H "Accept: application/vnd.github.v3.raw" -s "${_PROCEDURES_PATH}/${procedure}/${procedure}.sh" | sudo -E bash
 
 
 #curl -H "Accept: application/vnd.github.v3.raw" \

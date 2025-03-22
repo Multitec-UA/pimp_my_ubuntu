@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 # =============================================================================
-# Pimp My Ubuntu - PROCEDURE_NAME
+# Pimp My Ubuntu - Procedure Template
 # =============================================================================
-# Description: DESCRIPTION_HERE
+# Description: Template for procedure scripts
 # Author: Multitec-UA
 # Repository: https://github.com/Multitec-UA/pimp_my_ubuntu
 # License: MIT
@@ -27,10 +27,8 @@ readonly _DEPENDENCIES=("dependency1" "dependency2" "dependency3")
 # Add any software-specific constants here
 readonly _EXAMPLE_CONFIG_VALUE="example_value"
 
-# Declare GLOBAL_INSTALLATION_STATUS if not already declared
-if ! declare -p GLOBAL_INSTALLATION_STATUS >/dev/null 2>&1; then
-    declare -A GLOBAL_INSTALLATION_STATUS
-fi
+# Note: GLOBAL_INSTALLATION_STATUS is now managed via global_import_installation_status/global_export_installation_status
+# and should not be declared directly in procedure scripts
 
 # Strict mode
 set -euo pipefail
@@ -40,6 +38,9 @@ main() {
 
     # Source global variables and functions
     _source_lib "/src/lib/global_utils.sh"
+    
+    # Import installation status from environment
+    global_import_installation_status
     
     global_check_root
 
@@ -174,4 +175,10 @@ _step_cleanup() {
 # }
 
 # Execute main function
-main "$@" 
+main "$@"
+
+# Export installation status at the end to propagate changes back to parent
+global_export_installation_status
+
+# Exit with success
+exit 0 

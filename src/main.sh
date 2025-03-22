@@ -9,6 +9,9 @@
 # License: MIT
 # =============================================================================
 
+# Declare the global installation status array
+declare -A GLOBAL_INSTALLATION_STATUS
+
 # Debug flag - set to true to enable debug messages
 readonly DEBUG=${DEBUG:-true}
 
@@ -22,6 +25,7 @@ readonly _DEPENDENCIES=("curl" "wget" "dialog" "jq")
 # Software-specific constants
 readonly _PROCEDURES_PATH="${_REPOSITORY_URL}/src/procedures"
 
+
 # Strict mode
 set -euo pipefail
 
@@ -33,8 +37,11 @@ main() {
     # Check if the script is running with root privileges
     global_check_root
 
+    
     GLOBAL_INSTALLATION_STATUS["test"]="INIT"
     echo "GLOBAL_INSTALLATION_STATUS: ${GLOBAL_INSTALLATION_STATUS[@]}"
+    global_export_installation_status
+    exit 0
 
     # Initialize main menu
     _step_init

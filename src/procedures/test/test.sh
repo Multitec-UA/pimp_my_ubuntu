@@ -40,14 +40,14 @@ set -euo pipefail
 
 # Main procedure function
 main() {
-    echo "HEEELLLLLLLOWW!!"
 
     # Source global variables and functions
     _source_lib "/src/lib/global_utils.sh"
     
     global_check_root
 
-    echo "HEEELLLLLLLOWW!!"
+    echo "THIS IS A EXAMPLECOMENT, deleteme!!"
+    global_import_installation_status
     echo "GLOBAL_INSTALLATION_STATUS: ${GLOBAL_INSTALLATION_STATUS[@]}"
     
     for software in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do

@@ -46,15 +46,14 @@ main() {
     _procedure_selector_screen
 
     # Run procedures in the order of selection
-    while IFS= read -r procedure; do
+    for procedure in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
         _run_procedure "${procedure}"
-    done <<< "${!GLOBAL_INSTALLATION_STATUS[@]}"
-
-
-
-    global_log_message "INFO" "\nStarting Pimp My Ubuntu installation script\n"
+    done
 
     _print_global_installation_status
+    
+    global_log_message "INFO" "Finished Pimp My Ubuntu installation script\n"
+
     
 }
 
@@ -176,10 +175,11 @@ _procedure_selector_screen() {
 }
 
 _print_global_installation_status() {
-    global_log_message "INFO" "Current installation status:"
+    global_log_message "INFO" "\nCurrent installation status:"
     for proc_name in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
         global_log_message "INFO" "  ${proc_name}: ${GLOBAL_INSTALLATION_STATUS[$proc_name]}"
     done
+    global_log_message "INFO" "for more details, check the log file ${GLOBAL_LOG_FILE}"
 }
 
 _run_procedure() {

@@ -10,7 +10,7 @@
 #
 # COMMON INSTRUCTIONS:
 # 1. Dont use echo. Use global_log_message instead.
-# 2. Send all output to log file. command >>"${LOG_FILE}" 2>&1
+# 2. Send all output to log file. command >>"${GLOBAL_LOG_FILE}" 2>&1
 # =============================================================================
 
 # Debug flag - set to true to enable debug messages
@@ -119,13 +119,13 @@ _step_install_software() {
     # global_install_apt_package "${_SOFTWARE_COMMAND}"
     
     # Example for manual installation:
-    # mkdir -p "/tmp/${_SOFTWARE_COMMAND}" >>"${LOG_FILE}" 2>&1
-    # cd "/tmp/${_SOFTWARE_COMMAND}" >>"${LOG_FILE}" 2>&1
-    # wget "https://example.com/${_SOFTWARE_COMMAND}.tar.gz" >>"${LOG_FILE}" 2>&1
-    # tar -xzf "${_SOFTWARE_COMMAND}.tar.gz" >>"${LOG_FILE}" 2>&1
-    # ./configure >>"${LOG_FILE}" 2>&1
-    # make >>"${LOG_FILE}" 2>&1
-    # make install >>"${LOG_FILE}" 2>&1
+    # mkdir -p "/tmp/${_SOFTWARE_COMMAND}" >>"${GLOBAL_LOG_FILE}" 2>&1
+    # cd "/tmp/${_SOFTWARE_COMMAND}" >>"${GLOBAL_LOG_FILE}" 2>&1
+    # wget "https://example.com/${_SOFTWARE_COMMAND}.tar.gz" >>"${GLOBAL_LOG_FILE}" 2>&1
+    # tar -xzf "${_SOFTWARE_COMMAND}.tar.gz" >>"${GLOBAL_LOG_FILE}" 2>&1
+    # ./configure >>"${GLOBAL_LOG_FILE}" 2>&1
+    # make >>"${GLOBAL_LOG_FILE}" 2>&1
+    # make install >>"${GLOBAL_LOG_FILE}" 2>&1
     
     # Return true if installation succeeded
     return 0
@@ -148,19 +148,19 @@ _step_cleanup() {
     # Remove downloaded files if any
     if [[ -f "${GLOBAL_DOWNLOAD_DIR}/${_SOFTWARE_COMMAND}.tar.gz" ]]; then
         global_log_message "DEBUG" "Removing downloaded files"
-        rm -f "${GLOBAL_DOWNLOAD_DIR}/${_SOFTWARE_COMMAND}.tar.gz" >>"${LOG_FILE}" 2>&1
+        rm -f "${GLOBAL_DOWNLOAD_DIR}/${_SOFTWARE_COMMAND}.tar.gz" >>"${GLOBAL_LOG_FILE}" 2>&1
     fi
     
     # Clean any temporary files
     if [[ -d "/tmp/${_SOFTWARE_COMMAND}" ]]; then
         global_log_message "DEBUG" "Removing temporary files"
-        rm -rf "/tmp/${_SOFTWARE_COMMAND}" >>"${LOG_FILE}" 2>&1
+        rm -rf "/tmp/${_SOFTWARE_COMMAND}" >>"${GLOBAL_LOG_FILE}" 2>&1
     fi
     
     # Clean apt cache if we installed new packages
     if [[ "${GLOBAL_INSTALLATION_STATUS["${_SOFTWARE_COMMAND}"]}" == "SUCCESS" ]]; then
         global_log_message "DEBUG" "Cleaning apt cache"
-        apt-get clean >>"${LOG_FILE}" 2>&1
+        apt-get clean >>"${GLOBAL_LOG_FILE}" 2>&1
     fi
 }
 
@@ -173,10 +173,10 @@ _step_cleanup() {
 #     sudo mkdir -p /etc/${_SOFTWARE_COMMAND}/
 #     
 #     # Copy configuration file
-#     sudo cp "${GLOBAL_DOWNLOAD_DIR}/config.example" "/etc/${_SOFTWARE_COMMAND}/config" >>"${LOG_FILE}" 2>&1
+#     sudo cp "${GLOBAL_DOWNLOAD_DIR}/config.example" "/etc/${_SOFTWARE_COMMAND}/config" >>"${GLOBAL_LOG_FILE}" 2>&1
 #     
 #     # Modify configuration
-#     sudo sed -i "s/default_value/${_EXAMPLE_CONFIG_VALUE}/" "/etc/${_SOFTWARE_COMMAND}/config" >>"${LOG_FILE}" 2>&1
+#     sudo sed -i "s/default_value/${_EXAMPLE_CONFIG_VALUE}/" "/etc/${_SOFTWARE_COMMAND}/config" >>"${GLOBAL_LOG_FILE}" 2>&1
 # }
 
 # Execute main function

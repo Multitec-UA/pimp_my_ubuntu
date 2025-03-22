@@ -10,6 +10,88 @@
 # =============================================================================
 
 
+# Ensure this script is sourced, not executed
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    echo "This script should be sourced, not executed directly"
+    exit 1
+fi
+
+readonly GLOBAL_LOG_DIR="/var/log/pimp_my_ubuntu"
+readonly GLOBAL_LOG_FILE="${GLOBAL_LOG_DIR}/install.log"
+
+# Get the real user's home directory (works with sudo)
+if [[ -n "${SUDO_USER:-}" ]]; then
+    GLOBAL_REAL_USER="${SUDO_USER}"
+    GLOBAL_REAL_HOME=$(getent passwd "${SUDO_USER}" | cut -d: -f6)
+else
+    GLOBAL_REAL_USER="${USER}"
+    GLOBAL_REAL_HOME="${HOME}"
+fi
+
+readonly GLOBAL_DOWNLOAD_DIR="$GLOBAL_REAL_HOME/Documents/pimp_my_ubuntu"
+
+
+# Gloabl functions --------------------------------
+
+# Function to run commands as the real user
+global_run_as_user() {
+    sudo -u "${GLOBAL_REAL_USER}" "$@"
+}
+
+
+# Function to ensure a directory exists and has correct ownership
+global_ensure_dir() {
+    local dir=$1
+    mkdir -p "${dir}"
+    chown "${GLOBAL_REAL_USER}:${GLOBAL_REAL_USER}" "${dir}"
+}
+
+# Print last lines of the log file
+global_debug_echo() {
+    if [[ "${DEBUG}" == "true" ]]; then
+        tail -n 1 "${GLOBAL_LOG_FILE}"
+    fi
+}
+
+
+# Log a message with timestamp
+# Usage: log_message "INFO" "Starting installation"
+global_log_message() {
+    global_ensure_dir "${GLOBAL_LOG_DIR}"
+    local level=$1
+    local message=$2
+    local timestamp
+    timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    echo -e "[${timestamp}] [${level}] ${message}" >> "${GLOBAL_LOG_FILE}"
+    global_debug_echo
+}
+
+# Initialize logging system for the application
+# This function:
+# 1. Ensures the log directory exists with proper permissions
+# 2. Removes any existing log file to start fresh
+# 3. Creates a new empty log file
+# 4. Saves the original stdout (file descriptor 1) to fd 3
+# 5. Saves the original stderr (file descriptor 2) to fd 4
+# 6. Redirects stdout and stderr to both the terminal and the log file using tee
+# Usage: global_setup_logging
+global_setup_logging() {
+    global_ensure_dir "${GLOBAL_LOG_DIR}"
+    rm -f "${GLOBAL_LOG_FILE}"
+    touch "${GLOBAL_LOG_FILE}"
+    exec 3>&1 4>&2
+    exec 1> >(tee -a "${GLOBAL_LOG_FILE}") 2>&1
+}
+
+
+# Check for root privileges
+global_check_root() {
+    if [[ $EUID -ne 0 ]]; then
+        echo "This script must be run as root" >&2
+        echo "Please run: sudo $0" >&2
+        exit 1
+    fi
+}
 
 # Function to serialize and export the installation status array
 # Usage: global_export_installation_status
@@ -59,89 +141,6 @@ global_import_installation_status() {
   for key in "${!local_status[@]}"; do
     GLOBAL_INSTALLATION_STATUS["$key"]="${local_status[$key]}"
   done
-}
-
-# Ensure this script is sourced, not executed
-if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    echo "This script should be sourced, not executed directly"
-    exit 1
-fi
-
-readonly GLOBAL_LOG_DIR="/var/log/pimp_my_ubuntu"
-readonly LOG_FILE="${GLOBAL_LOG_DIR}/install.log"
-
-# Get the real user's home directory (works with sudo)
-if [[ -n "${SUDO_USER:-}" ]]; then
-    GLOBAL_REAL_USER="${SUDO_USER}"
-    GLOBAL_REAL_HOME=$(getent passwd "${SUDO_USER}" | cut -d: -f6)
-else
-    GLOBAL_REAL_USER="${USER}"
-    GLOBAL_REAL_HOME="${HOME}"
-fi
-
-readonly GLOBAL_DOWNLOAD_DIR="$GLOBAL_REAL_HOME/Documents/pimp_my_ubuntu"
-
-
-# Gloabl functions --------------------------------
-
-# Function to run commands as the real user
-global_run_as_user() {
-    sudo -u "${GLOBAL_REAL_USER}" "$@"
-}
-
-
-# Function to ensure a directory exists and has correct ownership
-global_ensure_dir() {
-    local dir=$1
-    mkdir -p "${dir}"
-    chown "${GLOBAL_REAL_USER}:${GLOBAL_REAL_USER}" "${dir}"
-}
-
-# Print last lines of the log file
-global_debug_echo() {
-    if [[ "${DEBUG}" == "true" ]]; then
-        tail -n 1 "${LOG_FILE}"
-    fi
-}
-
-
-# Log a message with timestamp
-# Usage: log_message "INFO" "Starting installation"
-global_log_message() {
-    global_ensure_dir "${GLOBAL_LOG_DIR}"
-    local level=$1
-    local message=$2
-    local timestamp
-    timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-    echo -e "[${timestamp}] [${level}] ${message}" >> "${LOG_FILE}"
-    global_debug_echo
-}
-
-# Initialize logging system for the application
-# This function:
-# 1. Ensures the log directory exists with proper permissions
-# 2. Removes any existing log file to start fresh
-# 3. Creates a new empty log file
-# 4. Saves the original stdout (file descriptor 1) to fd 3
-# 5. Saves the original stderr (file descriptor 2) to fd 4
-# 6. Redirects stdout and stderr to both the terminal and the log file using tee
-# Usage: global_setup_logging
-global_setup_logging() {
-    global_ensure_dir "${GLOBAL_LOG_DIR}"
-    rm -f "${LOG_FILE}"
-    touch "${LOG_FILE}"
-    exec 3>&1 4>&2
-    exec 1> >(tee -a "${LOG_FILE}") 2>&1
-}
-
-
-# Check for root privileges
-global_check_root() {
-    if [[ $EUID -ne 0 ]]; then
-        echo "This script must be run as root" >&2
-        echo "Please run: sudo $0" >&2
-        exit 1
-    fi
 }
 
 

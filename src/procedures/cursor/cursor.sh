@@ -10,7 +10,7 @@
 #
 # COMMON INSTRUCTIONS:
 # 1. Dont use echo. Use global_log_message instead.
-# 2. Send all output to log file. command >>"${LOG_FILE}" 2>&1
+# 2. Send all output to log file. command >>"${GLOBAL_LOG_FILE}" 2>&1
 # =============================================================================
 
 # Debug flag - set to true to enable debug messages
@@ -100,11 +100,11 @@ _step_init() {
     
     # Remove any existing AppImage launcher conflicts
     if systemctl --user -q is-active appimaged.service 2>/dev/null; then
-        global_run_as_user systemctl --user stop appimaged.service >>"${LOG_FILE}" 2>&1 || true
+        global_run_as_user systemctl --user stop appimaged.service >>"${GLOBAL_LOG_FILE}" 2>&1 || true
     fi
-    apt-get -y purge appimagelauncher >>"${LOG_FILE}" 2>&1 || true
-    rm -f "${_USER_CONFIG_DIR}/systemd/user/default.target.wants/appimagelauncherd.service" >>"${LOG_FILE}" 2>&1 || true
-    rm -f "${_USER_LOCAL_DIR}/share/applications/appimage"* >>"${LOG_FILE}" 2>&1 || true
+    apt-get -y purge appimagelauncher >>"${GLOBAL_LOG_FILE}" 2>&1 || true
+    rm -f "${_USER_CONFIG_DIR}/systemd/user/default.target.wants/appimagelauncherd.service" >>"${GLOBAL_LOG_FILE}" 2>&1 || true
+    rm -f "${_USER_LOCAL_DIR}/share/applications/appimage"* >>"${GLOBAL_LOG_FILE}" 2>&1 || true
 }
 
 # Install dependencies
@@ -112,7 +112,7 @@ _step_install_dependencies() {
     global_log_message "INFO" "Installing dependencies for ${_SOFTWARE_COMMAND}"
 
     # Update package lists
-    apt-get update >>"${LOG_FILE}" 2>&1
+    apt-get update >>"${GLOBAL_LOG_FILE}" 2>&1
 
     # First, ensure curl and wget are installed
     global_install_apt_package "curl" "wget"
@@ -122,7 +122,7 @@ _step_install_dependencies() {
     
     # Remove old fuse if installed to prevent conflicts
     if dpkg -l | grep -q "^ii  fuse "; then
-        apt-get remove -y fuse >>"${LOG_FILE}" 2>&1
+        apt-get remove -y fuse >>"${GLOBAL_LOG_FILE}" 2>&1
     fi
 
     # Install FUSE3 packages
@@ -142,21 +142,21 @@ _step_install_software() {
     global_log_message "INFO" "Installing appimaged"
     local appimaged_url
     appimaged_url=$(global_run_as_user wget -q https://github.com/probonopd/go-appimage/releases/expanded_assets/continuous -O - | grep "appimaged-.*-x86_64.AppImage" | head -n 1 | cut -d '"' -f 2)
-    global_run_as_user wget -c "https://github.com/${appimaged_url}" -P "${_APPLICATIONS_DIR}/" >>"${LOG_FILE}" 2>&1
-    global_run_as_user chmod +x "${_APPLICATIONS_DIR}"/appimaged-*.AppImage >>"${LOG_FILE}" 2>&1
+    global_run_as_user wget -c "https://github.com/${appimaged_url}" -P "${_APPLICATIONS_DIR}/" >>"${GLOBAL_LOG_FILE}" 2>&1
+    global_run_as_user chmod +x "${_APPLICATIONS_DIR}"/appimaged-*.AppImage >>"${GLOBAL_LOG_FILE}" 2>&1
     
     # Fix sandbox issues
     global_log_message "INFO" "Configuring system settings"
     if ! grep -q "kernel.apparmor_restrict_unprivileged_unconfined" /etc/sysctl.d/99-cursor.conf 2>/dev/null; then
         echo "kernel.apparmor_restrict_unprivileged_unconfined=0" >> /etc/sysctl.d/99-cursor.conf
         echo "kernel.apparmor_restrict_unprivileged_userns=0" >> /etc/sysctl.d/99-cursor.conf
-        sysctl -p /etc/sysctl.d/99-cursor.conf >>"${LOG_FILE}" 2>&1
+        sysctl -p /etc/sysctl.d/99-cursor.conf >>"${GLOBAL_LOG_FILE}" 2>&1
     fi
     
     # Download Cursor AppImage
     global_log_message "INFO" "Downloading Cursor AppImage"
-    global_run_as_user curl -L "https://download.cursor.sh/linux/appImage/x64" -o "${_CURSOR_APPIMAGE}" >>"${LOG_FILE}" 2>&1
-    global_run_as_user chmod +x "${_CURSOR_APPIMAGE}" >>"${LOG_FILE}" 2>&1
+    global_run_as_user curl -L "https://download.cursor.sh/linux/appImage/x64" -o "${_CURSOR_APPIMAGE}" >>"${GLOBAL_LOG_FILE}" 2>&1
+    global_run_as_user chmod +x "${_CURSOR_APPIMAGE}" >>"${GLOBAL_LOG_FILE}" 2>&1
 
     return 0
 }
@@ -191,7 +191,7 @@ cursor() {
                 # Append the cursor function to the RC file if not already present
                 echo "${cursor_function}" >> "${rc_file}"
                 # Ensure the RC file has the correct ownership
-                chown "${GLOBAL_REAL_USER}:${GLOBAL_REAL_USER}" "${rc_file}" >>"${LOG_FILE}" 2>&1
+                chown "${GLOBAL_REAL_USER}:${GLOBAL_REAL_USER}" "${rc_file}" >>"${GLOBAL_LOG_FILE}" 2>&1
                 
                 # Verify the function was added correctly
                 if grep -q "cursor()" "${rc_file}"; then
@@ -207,7 +207,7 @@ cursor() {
     
     # Start appimaged
     global_log_message "INFO" "Starting appimaged"
-    global_run_as_user XDG_RUNTIME_DIR="/run/user/$(id -u ${GLOBAL_REAL_USER})" "${_APPLICATIONS_DIR}"/appimaged-*.AppImage >>"${LOG_FILE}" 2>&1 &
+    global_run_as_user XDG_RUNTIME_DIR="/run/user/$(id -u ${GLOBAL_REAL_USER})" "${_APPLICATIONS_DIR}"/appimaged-*.AppImage >>"${GLOBAL_LOG_FILE}" 2>&1 &
     
     global_log_message "INFO" "Installation of ${_SOFTWARE_COMMAND} completed"
 }
@@ -219,7 +219,7 @@ _step_cleanup() {
     # Clean apt cache if we installed new packages
     if [[ "${GLOBAL_INSTALLATION_STATUS["${_SOFTWARE_COMMAND}"]}" == "SUCCESS" ]]; then
         global_log_message "DEBUG" "Cleaning apt cache"
-        apt-get clean >>"${LOG_FILE}" 2>&1
+        apt-get clean >>"${GLOBAL_LOG_FILE}" 2>&1
     fi
 }
 

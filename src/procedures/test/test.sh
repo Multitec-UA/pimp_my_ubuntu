@@ -10,7 +10,7 @@
 #
 # COMMON INSTRUCTIONS:
 # 1. Dont use echo. Use global_log_message instead.
-# 2. Send all output to log file. command >>"${LOG_FILE}" 2>&1
+# 2. Send all output to log file. command >>"${GLOBAL_LOG_FILE}" 2>&1
 # =============================================================================
 
 # Debug flag - set to true to enable debug messages
@@ -108,19 +108,19 @@ _step_cleanup() {
     # Remove downloaded theme file if it exists
     if [[ -f "${GLOBAL_DOWNLOAD_DIR}/${_THEME_NAME}.zip" ]]; then
         global_log_message "DEBUG" "Removing downloaded theme file"
-        rm -f "${GLOBAL_DOWNLOAD_DIR}/${_THEME_NAME}.zip" >>"${LOG_FILE}" 2>&1
+        rm -f "${GLOBAL_DOWNLOAD_DIR}/${_THEME_NAME}.zip" >>"${GLOBAL_LOG_FILE}" 2>&1
     fi
     
     # Clean any temporary files that might have been created
     if [[ -d "/tmp/grub-customizer-temp" ]]; then
         global_log_message "DEBUG" "Removing temporary files"
-        rm -rf "/tmp/grub-customizer-temp" >>"${LOG_FILE}" 2>&1
+        rm -rf "/tmp/grub-customizer-temp" >>"${GLOBAL_LOG_FILE}" 2>&1
     fi
     
     # Clean apt cache if we installed new packages
     if [[ "$(GLOBAL_INSTALLATION_STATUS "${_SOFTWARE_COMMAND}")" == "SUCCESS" ]]; then
         global_log_message "DEBUG" "Cleaning apt cache"
-        apt-get clean >>"${LOG_FILE}" 2>&1
+        apt-get clean >>"${GLOBAL_LOG_FILE}" 2>&1
     fi
 }
 
@@ -138,7 +138,7 @@ _install_grub_theme() {
     
     # Extract theme to GRUB themes directory
     global_log_message "INFO" "Extracting theme to GRUB themes directory"
-    sudo unzip -o "${GLOBAL_DOWNLOAD_DIR}/${_THEME_NAME}.zip" -d /boot/grub/themes/ >>"${LOG_FILE}" 2>&1
+    sudo unzip -o "${GLOBAL_DOWNLOAD_DIR}/${_THEME_NAME}.zip" -d /boot/grub/themes/ >>"${GLOBAL_LOG_FILE}" 2>&1
     
     # Edit GRUB configuration
     global_log_message "INFO" "Configuring GRUB theme"
@@ -150,7 +150,7 @@ _install_grub_theme() {
     
     # Update GRUB
     global_log_message "INFO" "Updating GRUB configuration"
-    sudo update-grub >>"${LOG_FILE}" 2>&1
+    sudo update-grub >>"${GLOBAL_LOG_FILE}" 2>&1
     
     global_log_message "INFO" "GRUB theme installation completed. Changes will take effect after next reboot."
 }

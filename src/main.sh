@@ -19,11 +19,14 @@ readonly _SOFTWARE_DESCRIPTION="Main menu for Pimp My Ubuntu"
 readonly _SOFTWARE_VERSION="1.0.0"
 readonly _DEPENDENCIES=("curl" "wget" "dialog" "jq")
 
+# Software-specific constants
+readonly MAIN_PROCEDURES_PATH="/src/procedures"
+
 # Strict mode
 set -euo pipefail
 
 main() {
-    _source_lib "/src/lib/main_utils.sh"
+    #_source_lib "/src/lib/main_utils.sh"
     _source_lib "/src/lib/global_utils.sh"
     _source_lib "/src/lib/dialog.sh"
 
@@ -35,9 +38,9 @@ main() {
   
     
     global_log_message "INFO" "Initializing procedures information"
-    main_init_procedures_info
+    _init_procedures_info
     exit 0
-    procedures=($(global_get_procedure_names))
+    procedures=($(main_get_procedure_names))
 
     # Display welcome message
     dialog --title "Pimp My Ubuntu" --backtitle "Installation Script" \
@@ -106,10 +109,35 @@ _step_init() {
     global_install_apt_package "${_DEPENDENCIES[@]}"
 }
 
-# Install basic dependencies
-_install_basic_dependencies() {
-    apt-get update
-    apt-get install -y curl git dialog jq
+# Initialize procedures information
+# Fetches procedures from repository and initializes their status
+_init_procedures_info() {
+    global_log_message "INFO" "Setting up procedures information"
+        
+    # Get procedures list from GitHub API
+    local procedures_json
+    procedures_json=$(curl -s -H "Accept: application/vnd.github.v3+json" "${_REPOSITORY_URL}/${MAIN_PROCEDURES_PATH}")
+    
+    # Create status tracking array if needed
+    if ! declare -p GLOBAL_INSTALLATION_STATUS >/dev/null 2>&1; then
+        declare -A GLOBAL_INSTALLATION_STATUS
+    fi
+    
+    # Make status array available to child scripts
+    export GLOBAL_INSTALLATION_STATUS
+    
+    # Parse procedure names from JSON response
+    local names
+    names=$(echo "${procedures_json}" | jq -r '.[].name')
+    
+    # Initialize each procedure's status as pending
+    while IFS= read -r name; do
+        GLOBAL_INSTALLATION_STATUS["${name}"]="PENDING"
+        global_log_message "INFO" "Added procedure '${name}' with status 'PENDING'"
+    done <<< "${names}"
+    
+    global_log_message "INFO" "All procedures initialized with PENDING status"
+    echo "${procedures_json}"
 }
 
 

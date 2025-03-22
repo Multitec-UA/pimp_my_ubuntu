@@ -87,7 +87,7 @@ _init_procedures_info() {
         
     # Get procedures list from GitHub API
     local procedures_json
-    procedures_json=$(curl -s -H "Accept: application/vnd.github.v3+json" "${_REPOSITORY_URL}/${_PROCEDURES_PATH}")
+    procedures_json=$(curl -s -H "Accept: application/vnd.github.v3+json" "${_PROCEDURES_PATH}")
     
     # Make status array available to child scripts
     export GLOBAL_INSTALLATION_STATUS
@@ -165,7 +165,8 @@ _run_procedure() {
 
     curl -H "Accept: application/vnd.github.v3.raw" -s "${_PROCEDURES_PATH}/${procedure}/${procedure}.sh" | sudo bash
 }
-
+curl -H "Accept: application/vnd.github.v3.raw" \
+-s https://api.github.com/repos/Multitec-UA/pimp_my_ubuntu/contents/src/procedures/test/test.sh | sudo bash
 
 
 main "$@"

@@ -23,7 +23,7 @@ Theme previews are available in the `media/theme-previews` directory.
 
 ## Modifications Applied
 
-The installation script (`install_grub_customizer.sh`) makes the following changes to your system:
+The installation script (`grub_customizer.sh`) makes the following changes to your system:
 
 1. **Software Installation**:
    - Adds the PPA repository: `ppa:danielrichter2007/grub-customizer`
@@ -45,7 +45,7 @@ The installation script (`install_grub_customizer.sh`) makes the following chang
 To install with the default theme (monterey-theme):
 
 ```bash
-curl -H "Accept: application/vnd.github.v3.raw" -s https://api.github.com/repos/Multitec-UA/pimp_my_ubuntu/contents/src/procedures/grub_customizer/install_grub_customizer.sh | sudo bash
+curl -H "Accept: application/vnd.github.v3.raw" -s https://api.github.com/repos/Multitec-UA/pimp_my_ubuntu/contents/src/procedures/grub_customizer/grub_customizer.sh | sudo bash
 ```
 
 ### Custom Theme Installation
@@ -54,16 +54,16 @@ To install with a specific theme, provide the theme position as an argument:
 
 ```bash
 # For crt-amber-theme (position 0)
-curl -H "Accept: application/vnd.github.v3.raw" -s https://api.github.com/repos/Multitec-UA/pimp_my_ubuntu/contents/src/procedures/grub_customizer/install_grub_customizer.sh | sudo bash -s 1
+curl -H "Accept: application/vnd.github.v3.raw" -s https://api.github.com/repos/Multitec-UA/pimp_my_ubuntu/contents/src/procedures/grub_customizer/grub_customizer.sh | sudo bash -s 1
 
 # For monterey-theme (position 1)
-curl -H "Accept: application/vnd.github.v3.raw" -s https://api.github.com/repos/Multitec-UA/pimp_my_ubuntu/contents/src/procedures/grub_customizer/install_grub_customizer.sh | sudo bash -s 2
+curl -H "Accept: application/vnd.github.v3.raw" -s https://api.github.com/repos/Multitec-UA/pimp_my_ubuntu/contents/src/procedures/grub_customizer/grub_customizer.sh | sudo bash -s 2
 
 # For solarized-theme (position 2)
-curl -H "Accept: application/vnd.github.v3.raw" -s https://api.github.com/repos/Multitec-UA/pimp_my_ubuntu/contents/src/procedures/grub_customizer/install_grub_customizer.sh | sudo bash -s 3
+curl -H "Accept: application/vnd.github.v3.raw" -s https://api.github.com/repos/Multitec-UA/pimp_my_ubuntu/contents/src/procedures/grub_customizer/grub_customizer.sh | sudo bash -s 3
 
 # For cybergrub-theme (position 3)
-curl -H "Accept: application/vnd.github.v3.raw" -s https://api.github.com/repos/Multitec-UA/pimp_my_ubuntu/contents/src/procedures/grub_customizer/install_grub_customizer.sh | sudo bash -s 3
+curl -H "Accept: application/vnd.github.v3.raw" -s https://api.github.com/repos/Multitec-UA/pimp_my_ubuntu/contents/src/procedures/grub_customizer/grub_customizer.sh | sudo bash -s 3
 ```
 
 ## Notes
@@ -87,7 +87,7 @@ You can add your own GRUB themes to the collection by following these steps:
    - Add a preview image (PNG format) to `src/procedures/grub_customizer/media/theme-previews/`
 
 4. **Update the installation script**:
-   - Edit `install_grub_customizer.sh`
+   - Edit `grub_customizer.sh`
    - Add your theme name to the `_THEME_OPTIONS` array:
      ```bash
      readonly _THEME_OPTIONS=("crt-amber-theme" "monterey-theme" "solarized-theme" "cybergrub-theme" "my-custom-theme")
@@ -96,7 +96,7 @@ You can add your own GRUB themes to the collection by following these steps:
 5. **Use your theme**:
    - Install GRUB Customizer with your theme by specifying its position in the array:
      ```bash
-     curl -H "Accept: application/vnd.github.v3.raw" -s https://api.github.com/repos/Multitec-UA/pimp_my_ubuntu/contents/src/procedures/grub_customizer/install_grub_customizer.sh | sudo bash -s 4
+     curl -H "Accept: application/vnd.github.v3.raw" -s https://api.github.com/repos/Multitec-UA/pimp_my_ubuntu/contents/src/procedures/grub_customizer/grub_customizer.sh | sudo bash -s 4
      ```
    - Where `4` is the position of your theme in the `_THEME_OPTIONS` array (zero-indexed)
 

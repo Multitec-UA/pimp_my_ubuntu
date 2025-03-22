@@ -33,7 +33,7 @@ Download cursor, install appimaged and add cursor command to bashrc and zshrc
 
 ```bash
 curl -H "Accept: application/vnd.github.v3.raw" \
--s https://api.github.com/repos/Multitec-UA/pimp_my_ubuntu/contents/src/procedures/cursor/install_cursor.sh | sudo bash
+-s https://api.github.com/repos/Multitec-UA/pimp_my_ubuntu/contents/src/procedures/cursor/cursor.sh | sudo bash
 ```
 
 ### Install zsh
@@ -46,7 +46,7 @@ Update Grub, install grub-customizer and add theme.
 
 ```bash
 curl -H "Accept: application/vnd.github.v3.raw" \
--s https://api.github.com/repos/Multitec-UA/pimp_my_ubuntu/contents/src/procedures/grub_customizer/install_grub_customizer.sh | sudo bash
+-s https://api.github.com/repos/Multitec-UA/pimp_my_ubuntu/contents/src/procedures/grub_customizer/grub_customizer.sh | sudo bash
 ```
 
 # How contribute

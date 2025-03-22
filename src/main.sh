@@ -48,11 +48,14 @@ main() {
     # Run procedures in the order of selection
     while IFS= read -r procedure; do
         _run_procedure "${procedure}"
-    done <<< "${GLOBAL_INSTALLATION_STATUS[*]}"
+    done <<< "${!GLOBAL_INSTALLATION_STATUS[@]}"
 
 
 
     global_log_message "INFO" "\nStarting Pimp My Ubuntu installation script\n"
+
+    _print_global_installation_status
+    
 }
 
 # Necessary function to source libraries
@@ -172,20 +175,29 @@ _procedure_selector_screen() {
     clear
 }
 
-
-_run_procedure() {
-    local procedure="${1:-}"
-
-        # Print all installation statuses
+_print_global_installation_status() {
     global_log_message "INFO" "Current installation status:"
     for proc_name in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
         global_log_message "INFO" "  ${proc_name}: ${GLOBAL_INSTALLATION_STATUS[$proc_name]}"
     done
+}
+
+_run_procedure() {
+    local procedure="${1:-}"
+
+    # Print all installation statuses
+    _print_global_installation_status
 
     global_log_message "INFO" "Starting procedure: ${procedure}"
 
     curl -H "Accept: application/vnd.github.v3.raw" -s "${_PROCEDURES_PATH}/${procedure}/${procedure}.sh" | sudo -E bash
+    local exit_statuses=("${PIPESTATUS[@]}")
+    local curl_status="${exit_statuses[0]}"
+    local bash_status="${exit_statuses[1]}"
+    
+    global_log_message "INFO" "Procedure ${procedure} completed with status: ${bash_status} (curl status: ${curl_status})"
 
+    global_import_installation_status
 
 }
 

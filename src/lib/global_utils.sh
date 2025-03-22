@@ -15,13 +15,20 @@
 # Usage: global_export_installation_status
 global_export_installation_status() {
   local serialized=""
+  local temp_status_file="/tmp/pmu_installation_status.tmp"
+  
   for key in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
     # Create a string like "key1:value1;key2:value2"
     serialized+="${key}:${GLOBAL_INSTALLATION_STATUS[$key]};"
   done
-  # Export as a normal environment variable
-  export PMU_INSTALLATION_STATUS="$serialized"
-  global_log_message "INFO" "Exported installation status: ${serialized}"
+  
+  # Write to temporary file instead of environment variable
+  echo "$serialized" > "$temp_status_file"
+  
+  # Ensure the file has appropriate permissions
+  chmod 644 "$temp_status_file"
+  
+  global_log_message "INFO" "Exported installation status to file: ${temp_status_file}"
 }
 
 # Function to import and deserialize the installation status array
@@ -29,10 +36,13 @@ global_export_installation_status() {
 global_import_installation_status() {
   # Create a local associative array
   declare -A local_status
+  local temp_status_file="/tmp/pmu_installation_status.tmp"
   
-  if [[ -n "${PMU_INSTALLATION_STATUS:-}" ]]; then
+  if [[ -f "$temp_status_file" ]]; then
+    local serialized=$(cat "$temp_status_file")
+    
     local IFS=";"
-    for pair in $PMU_INSTALLATION_STATUS; do
+    for pair in $serialized; do
       if [[ -n "$pair" ]]; then
         key="${pair%%:*}"
         value="${pair#*:}"
@@ -41,7 +51,7 @@ global_import_installation_status() {
       fi
     done
   else
-    global_log_message "WARNING" "No installation status found in environment"
+    global_log_message "WARNING" "No installation status file found at ${temp_status_file}"
   fi
   
   # Make the array available globally

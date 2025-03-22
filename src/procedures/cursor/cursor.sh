@@ -11,7 +11,6 @@
 # COMMON INSTRUCTIONS:
 # 1. Dont use echo. Use global_log_message instead.
 # 2. Send all output to log file. command >>"${LOG_FILE}" 2>&1
-# 3. Reboot your system if needed
 # =============================================================================
 
 # Debug flag - set to true to enable debug messages
@@ -46,7 +45,7 @@ main() {
     
     global_check_root
 
-    _step_init_procedure
+    _step_init
 
     if [ "$(global_get_status "${_SOFTWARE_COMMAND}")" == "SKIPPED" ]; then
         global_log_message "INFO" "${_SOFTWARE_COMMAND} is already installed"
@@ -85,7 +84,7 @@ _source_lib() {
 }
 
 # Prepare for installation
-_step_init_procedure() {
+_step_init() {
     global_log_message "INFO" "Starting installation of ${_SOFTWARE_COMMAND}"
     
     if global_check_if_installed "${_SOFTWARE_COMMAND}"; then

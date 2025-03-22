@@ -9,28 +9,35 @@
 # License: MIT
 # =============================================================================
 
+# Debug flag - set to true to enable debug messages
+readonly DEBUG=${DEBUG:-true}
+
+# Software-common constants
+readonly _REPOSITORY_URL="https://api.github.com/repos/Multitec-UA/pimp_my_ubuntu/contents"
+readonly _SOFTWARE_COMMAND="main-menu"
+readonly _SOFTWARE_DESCRIPTION="Main menu for Pimp My Ubuntu"
+readonly _SOFTWARE_VERSION="1.0.0"
+readonly _DEPENDENCIES=("curl" "wget" "dialog" "jq")
+
 # Strict mode
 set -euo pipefail
 
-
 main() {
-    _source_lib "/src/lib/global.sh"
     _source_lib "/src/lib/main_utils.sh"
+    _source_lib "/src/lib/global_utils.sh"
     _source_lib "/src/lib/dialog.sh"
 
     # Check if the script is running with root privileges
-    main_check_root
+    global_check_root
 
-    # Initialize logging
-    main_setup_logging
-
-    # Install basic dependencies
-    main_log_message "INFO" "Installing basic dependencies"
-    #install_basic_dependencies
+    # Initialize main menu
+    _step_init
+  
     
-    main_log_message "INFO" "Setting up procedures information"
-    main_set_procedures_info
-    procedures=($(main_get_procedure_names))
+    global_log_message "INFO" "Initializing procedures information"
+    main_init_procedures_info
+    exit 0
+    procedures=($(global_get_procedure_names))
 
     # Display welcome message
     dialog --title "Pimp My Ubuntu" --backtitle "Installation Script" \
@@ -40,7 +47,7 @@ main() {
     if [[ ${#procedures[@]} -eq 0 ]]; then
         dialog --title "Error" --backtitle "Pimp My Ubuntu" \
                --msgbox "No installation procedures found!" 8 40
-        main_log_message "ERROR" "No installation procedures found"
+        global_log_message "ERROR" "No installation procedures found"
         exit 1
     fi
 
@@ -58,7 +65,7 @@ main() {
         if [[ $menu_status -ne 0 ]]; then
             dialog --title "Cancelled" --backtitle "Pimp My Ubuntu" \
                    --msgbox "Installation cancelled by user." 8 40
-            main_log_message "INFO" "User cancelled the installation."
+            global_log_message "INFO" "User cancelled the installation."
             exit 0
         fi
         
@@ -66,31 +73,38 @@ main() {
         if [[ ${#selected[@]} -eq 0 ]]; then
             dialog --title "No Selection" --backtitle "Pimp My Ubuntu" \
                    --msgbox "Please select at least one software to continue." 8 50
-            main_log_message "INFO" "No software selected. Prompting again."
+            global_log_message "INFO" "No software selected. Prompting again."
         else
             # User made a valid selection, exit the loop
             exit_flag=true
-            main_log_message "INFO" "User selected: ${selected[*]}"
+            global_log_message "INFO" "User selected: ${selected[*]}"
         fi
     done
 
-    main_log_message "INFO" "\nStarting Pimp My Ubuntu installation script\n"
+    global_log_message "INFO" "\nStarting Pimp My Ubuntu installation script\n"
 }
 
 # Necessary function to source libraries
 _source_lib() {
-    readonly REPOSITORY_URL="https://api.github.com/repos/Multitec-UA/pimp_my_ubuntu/contents"
     local header="Accept: application/vnd.github.v3.raw"
     local file="${1:-}"
     
     if [[ -n "${file}" ]]; then
-        source <(curl -H "${header}" -s "${REPOSITORY_URL}/${file}")
+        source <(curl -H "${header}" -s "${_REPOSITORY_URL}/${file}")
     else
-        echo "Error: No file specified" >&2
+        echo "Error: No library file specified to source" >&2
         exit 1
     fi
 }
 
+
+# Prepare for installation
+_step_init() {
+    global_setup_logging
+    global_log_message "INFO" "Starting Main Menu"
+    global_log_message "INFO" "Installing basic dependencies"
+    global_install_apt_package "${_DEPENDENCIES[@]}"
+}
 
 # Install basic dependencies
 _install_basic_dependencies() {

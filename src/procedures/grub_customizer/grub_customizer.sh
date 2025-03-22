@@ -11,7 +11,6 @@
 # COMMON INSTRUCTIONS:
 # 1. Dont use echo. Use global_log_message instead.
 # 2. Send all output to log file. command >>"${LOG_FILE}" 2>&1
-# 3. Reboot your system
 # =============================================================================
 
 # Debug flag - set to true to enable debug messages
@@ -22,10 +21,11 @@ readonly _REPOSITORY_URL="https://api.github.com/repos/Multitec-UA/pimp_my_ubunt
 readonly _SOFTWARE_COMMAND="grub-customizer"
 readonly _SOFTWARE_DESCRIPTION="Grub Customizer is a tool for managing GRUB bootloader settings and install a theme"
 readonly _SOFTWARE_VERSION="1.0.0"
+readonly _DEPENDENCIES=("curl" "wget" "coreutils")
 
 # Software-specific constants
 # More themes in https://www.gnome-look.org/ Add .zip with theme.txt file inside to media folder
-readonly _THEME_OPTIONS=("monterey-theme" "crt-amber-theme" "solarized-theme" "cybergrub-theme") # Available theme options
+readonly _THEME_OPTIONS=("crt-amber-theme" "monterey-theme" "solarized-theme" "cybergrub-theme") # Available theme options
 readonly _THEME_POSITION=${1:-0} #Default theme position, can be overridden by command line argument
 readonly _THEME_NAME="${_THEME_OPTIONS[_THEME_POSITION]}"
 readonly _MEDIA_PATH="/src/procedures/grub_customizer/media"
@@ -46,7 +46,7 @@ main() {
     
     global_check_root
 
-    _step_init_procedure
+    _step_init
 
 
     if [ "$(global_get_status "${_SOFTWARE_COMMAND}")" == "SKIPPED" ]; then
@@ -88,7 +88,7 @@ _source_lib() {
 
 
 # Prepare for installation
-_step_init_procedure() {
+_step_init() {
     global_log_message "INFO" "Starting installation of ${_SOFTWARE_COMMAND}"
     
     if global_check_if_installed "${_SOFTWARE_COMMAND}"; then
@@ -100,8 +100,7 @@ _step_init_procedure() {
 # Main installation function
 _step_install_dependencies() {
     global_log_message "INFO" "Installing dependencies for ${_SOFTWARE_COMMAND}"
-
-    global_install_apt_package "curl" "wget" "coreutils"
+    global_install_apt_package "${_DEPENDENCIES[@]}"
     
 }
 

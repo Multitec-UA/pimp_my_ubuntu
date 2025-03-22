@@ -11,7 +11,6 @@
 # COMMON INSTRUCTIONS:
 # 1. Dont use echo. Use global_log_message instead.
 # 2. Send all output to log file. command >>"${LOG_FILE}" 2>&1
-# 3. Reboot your system if needed
 # =============================================================================
 
 # Debug flag - set to true to enable debug messages
@@ -22,6 +21,7 @@ readonly _REPOSITORY_URL="https://api.github.com/repos/Multitec-UA/pimp_my_ubunt
 readonly _SOFTWARE_COMMAND="SOFTWARE_COMMAND_HERE"
 readonly _SOFTWARE_DESCRIPTION="SOFTWARE_DESCRIPTION_HERE"
 readonly _SOFTWARE_VERSION="1.0.0"
+readonly _DEPENDENCIES=("dependency1" "dependency2" "dependency3")
 
 # Software-specific constants
 # Add any software-specific constants here
@@ -43,7 +43,7 @@ main() {
     
     global_check_root
 
-    _step_init_procedure
+    _step_init
 
     if [ "$(global_get_status "${_SOFTWARE_COMMAND}")" == "SKIPPED" ]; then
         global_log_message "INFO" "${_SOFTWARE_COMMAND} is already installed"
@@ -84,7 +84,7 @@ _source_lib() {
 
 
 # Prepare for installation
-_step_init_procedure() {
+_step_init() {
     global_log_message "INFO" "Starting installation of ${_SOFTWARE_COMMAND}"
     
     if global_check_if_installed "${_SOFTWARE_COMMAND}"; then
@@ -97,8 +97,8 @@ _step_init_procedure() {
 _step_install_dependencies() {
     global_log_message "INFO" "Installing dependencies for ${_SOFTWARE_COMMAND}"
 
-    # Replace with actual dependencies
-    global_install_apt_package "dependency1" "dependency2" "dependency3"
+    # Install dependencies from the _DEPENDENCIES array
+    global_install_apt_package "${_DEPENDENCIES[@]}"
     
     # Example for adding a PPA if needed
     # global_add_apt_repository "ppa:example/ppa"

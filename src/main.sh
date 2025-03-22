@@ -22,6 +22,9 @@ readonly _DEPENDENCIES=("curl" "wget" "dialog" "jq")
 # Software-specific constants
 readonly MAIN_PROCEDURES_PATH="/src/procedures"
 
+# Declare the global installation status array
+declare -A GLOBAL_INSTALLATION_STATUS
+
 # Strict mode
 set -euo pipefail
 
@@ -39,50 +42,14 @@ main() {
     
     global_log_message "INFO" "Initializing procedures information"
     _init_procedures_info
-    exit 0
-    procedures=($(main_get_procedure_names))
 
-    # Display welcome message
-    dialog --title "Pimp My Ubuntu" --backtitle "Installation Script" \
-           --msgbox "Welcome to Pimp My Ubuntu!\n\nThis script will help you set up your Ubuntu system with your preferred software and configurations." 10 60
-    
-    # TODO: show_procedure_selector_menu
-    if [[ ${#procedures[@]} -eq 0 ]]; then
-        dialog --title "Error" --backtitle "Pimp My Ubuntu" \
-               --msgbox "No installation procedures found!" 8 40
-        global_log_message "ERROR" "No installation procedures found"
-        exit 1
-    fi
+    _welcome_screen
 
-    # Get user selection menu
-    # Loop to let user select software or exit
-    local selected=()
-    local exit_flag=false
-    
-    while [[ "$exit_flag" == "false" ]]; do
-        # Call dialog_show_menu and capture its output and exit status
-        selected=($(dialog_show_menu "${procedures[@]}"))
-        local menu_status=$?
-        
-        # Check if user pressed Cancel/Esc
-        if [[ $menu_status -ne 0 ]]; then
-            dialog --title "Cancelled" --backtitle "Pimp My Ubuntu" \
-                   --msgbox "Installation cancelled by user." 8 40
-            global_log_message "INFO" "User cancelled the installation."
-            exit 0
-        fi
-        
-        # Check if user made a selection
-        if [[ ${#selected[@]} -eq 0 ]]; then
-            dialog --title "No Selection" --backtitle "Pimp My Ubuntu" \
-                   --msgbox "Please select at least one software to continue." 8 50
-            global_log_message "INFO" "No software selected. Prompting again."
-        else
-            # User made a valid selection, exit the loop
-            exit_flag=true
-            global_log_message "INFO" "User selected: ${selected[*]}"
-        fi
-    done
+    _PROCEDURES_SELECTED=()
+    _procedure_selector_screen
+    echo "Selected procedures: ${_PROCEDURES_SELECTED[*]}"
+
+
 
     global_log_message "INFO" "\nStarting Pimp My Ubuntu installation script\n"
 }
@@ -118,28 +85,74 @@ _init_procedures_info() {
     local procedures_json
     procedures_json=$(curl -s -H "Accept: application/vnd.github.v3+json" "${_REPOSITORY_URL}/${MAIN_PROCEDURES_PATH}")
     
-    # Create status tracking array if needed
-    if ! declare -p GLOBAL_INSTALLATION_STATUS >/dev/null 2>&1; then
-        declare -A GLOBAL_INSTALLATION_STATUS
-    fi
-    
     # Make status array available to child scripts
     export GLOBAL_INSTALLATION_STATUS
     
-    # Parse procedure names from JSON response
+    # Parse procedure names from JSON response and filter out template.sh
     local names
-    names=$(echo "${procedures_json}" | jq -r '.[].name')
+    names=$(echo "${procedures_json}" | jq -r '.[].name | select(. != "template.sh")')
     
     # Initialize each procedure's status as pending
     while IFS= read -r name; do
-        GLOBAL_INSTALLATION_STATUS["${name}"]="PENDING"
-        global_log_message "INFO" "Added procedure '${name}' with status 'PENDING'"
+        GLOBAL_INSTALLATION_STATUS["${name}"]="INIT"
+        global_log_message "INFO" "Added procedure '${name}' with status 'INIT'"
     done <<< "${names}"
     
-    global_log_message "INFO" "All procedures initialized with PENDING status"
-    echo "${procedures_json}"
+    global_log_message "INFO" "All procedures initialized with INIT status"
 }
 
+_welcome_screen() {
+        # Display welcome message
+    dialog --title "Pimp My Ubuntu" --backtitle "Installation Script" \
+           --msgbox "Welcome to Pimp My Ubuntu!\n\nThis script will help you set up your Ubuntu system with your preferred software and configurations." 10 60
+    
+    # Check if there are any procedures to install
+    if [[ ${#GLOBAL_INSTALLATION_STATUS[@]} -eq 0 ]]; then
+        dialog --title "Error" --backtitle "Pimp My Ubuntu" \
+               --msgbox "No installation procedures found!" 8 40
+        global_log_message "ERROR" "No installation procedures found"
+        exit 1
+    fi
+}
+
+_procedure_selector_screen() {
+    # Get user selection menu
+    # Loop to let user select software or exit
+    local exit_flag=false
+    
+    while [[ "$exit_flag" == "false" ]]; do
+        # Build menu items from GLOBAL_INSTALLATION_STATUS
+        local menu_items=()
+        for software in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
+            local status="${GLOBAL_INSTALLATION_STATUS[$software]}"
+            menu_items+=("$software")
+        done
+        
+        # Call dialog_show_menu and capture its output and exit status
+        _PROCEDURES_SELECTED=($(dialog_show_menu "${menu_items[@]}"))
+        local menu_status=$?
+        
+        # Check if user pressed Cancel/Esc
+        if [[ $menu_status -ne 0 ]]; then
+            dialog --title "Cancelled" --backtitle "Pimp My Ubuntu" \
+                   --msgbox "Installation cancelled by user." 8 40
+            global_log_message "INFO" "User cancelled the installation."
+            exit 0
+        fi
+        
+        # Check if user made a selection
+        if [[ ${#_PROCEDURES_SELECTED[@]} -eq 0 ]]; then
+            dialog --title "No Selection" --backtitle "Pimp My Ubuntu" \
+                   --msgbox "Please select at least one software to continue." 8 50
+            global_log_message "INFO" "No software selected. Prompting again."
+        else
+            # User made a valid selection, exit the loop
+            exit_flag=true
+            global_log_message "INFO" "User selected: ${_PROCEDURES_SELECTED[*]}"
+        fi
+    done
+
+}
 
 
 main "$@"

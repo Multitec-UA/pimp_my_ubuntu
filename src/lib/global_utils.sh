@@ -12,7 +12,7 @@
 # Global Variables --------------------------------
 
 declare -A GLOBAL_INSTALLATION_STATUS
-echo "THIS IS A COMMENT"
+export GLOBAL_INSTALLATION_STATUS
 
 # Function to serialize and export the installation status array
 # Usage: global_export_installation_status

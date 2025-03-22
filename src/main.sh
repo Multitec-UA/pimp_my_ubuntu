@@ -33,8 +33,13 @@ main() {
     # Check if the script is running with root privileges
     global_check_root
 
+    GLOBAL_INSTALLATION_STATUS["test"]="INIT"
+    echo "GLOBAL_INSTALLATION_STATUS: ${GLOBAL_INSTALLATION_STATUS[@]}"
+
     # Initialize main menu
     _step_init
+
+
   
     
     global_log_message "INFO" "Initializing procedures information"

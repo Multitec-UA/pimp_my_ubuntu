@@ -20,7 +20,7 @@ readonly _SOFTWARE_VERSION="1.0.0"
 readonly _DEPENDENCIES=("curl" "wget" "dialog" "jq")
 
 # Software-specific constants
-readonly MAIN_PROCEDURES_PATH="/src/procedures"
+readonly _PROCEDURES_PATH="${_REPOSITORY_URL}/src/procedures"
 
 # Declare the global installation status array
 declare -A GLOBAL_INSTALLATION_STATUS
@@ -48,6 +48,10 @@ main() {
     _PROCEDURES_SELECTED=()
     _procedure_selector_screen
     echo "Selected procedures: ${_PROCEDURES_SELECTED[*]}"
+
+    while IFS= read -r procedure; do
+        _run_procedure "${procedure}"
+    done <<< "${_PROCEDURES_SELECTED[@]}"
 
 
 
@@ -83,7 +87,7 @@ _init_procedures_info() {
         
     # Get procedures list from GitHub API
     local procedures_json
-    procedures_json=$(curl -s -H "Accept: application/vnd.github.v3+json" "${_REPOSITORY_URL}/${MAIN_PROCEDURES_PATH}")
+    procedures_json=$(curl -s -H "Accept: application/vnd.github.v3+json" "${_REPOSITORY_URL}/${_PROCEDURES_PATH}")
     
     # Make status array available to child scripts
     export GLOBAL_INSTALLATION_STATUS
@@ -153,6 +157,15 @@ _procedure_selector_screen() {
     done
 
 }
+
+
+_run_procedure() {
+    local procedure="${1:-}"
+    global_log_message "INFO" "Starting procedure: ${procedure}"
+
+    curl -H "Accept: application/vnd.github.v3.raw" -s "${_PROCEDURES_PATH}/${procedure}/${procedure}.sh" | sudo bash
+}
+
 
 
 main "$@"

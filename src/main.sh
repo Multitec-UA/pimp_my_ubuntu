@@ -179,7 +179,7 @@ _print_global_installation_status() {
     for proc_name in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
         global_log_message "INFO" "  ${proc_name}: ${GLOBAL_INSTALLATION_STATUS[$proc_name]}"
     done
-    global_log_message "INFO" "for more details, check the log file ${GLOBAL_LOG_FILE}"
+    global_log_message "INFO" "for more details, check the log file ${GLOBAL_LOG_FILE}\n"
 }
 
 _run_procedure() {

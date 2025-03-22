@@ -110,7 +110,7 @@ global_export_installation_status() {
   # Ensure the file has appropriate permissions
   chmod 644 "$temp_status_file"
   
-  global_log_message "INFO" "Exported installation status to file: ${temp_status_file}"
+  global_log_message "DEBUG" "Exported installation status to file: ${temp_status_file}"
 }
 
 # Function to import and deserialize the installation status array
@@ -129,7 +129,7 @@ global_import_installation_status() {
         key="${pair%%:*}"
         value="${pair#*:}"
         local_status["$key"]="$value"
-        global_log_message "INFO" "Imported status: ${key}=${value}"
+        global_log_message "DEBUG" "Imported status: ${key}=${value}"
       fi
     done
   else

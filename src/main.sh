@@ -23,7 +23,10 @@ readonly _SOFTWARE_VERSION="1.0.1"
 readonly _DEPENDENCIES=("curl" "wget" "dialog" "jq")
 
 # Software-specific constants
-readonly _PROCEDURES_PATH="${_REPOSITORY_URL}/src/procedures"
+readonly _PROCEDURES_PATH="https://api.github.com/repos/Multitec-UA/pimp_my_ubuntu/contents/src/procedures"
+
+# Declare GLOBAL_INSTALLATION_STATUS if not already declared
+declare -A GLOBAL_INSTALLATION_STATUS
 
 
 # Strict mode
@@ -81,7 +84,6 @@ _step_init() {
     global_log_message "INFO" "Starting Main Menu"
     global_log_message "INFO" "Installing basic dependencies"
     global_install_apt_package "${_DEPENDENCIES[@]}"
-    global_import_installation_status
 }
 
 # Initialize procedures information
@@ -91,7 +93,7 @@ _init_procedures_info() {
         
     # Get procedures list from GitHub API
     local procedures_json
-    procedures_json=$(curl -s -H "Accept: application/vnd.github.v3+json" "${_PROCEDURES_PATH}")
+    procedures_json=$(curl -fsSL "${_PROCEDURES_PATH}")
     
     # Parse procedure names from JSON response and filter out template
     local names
@@ -99,8 +101,8 @@ _init_procedures_info() {
     
     # Initialize each procedure's status as pending
     while IFS= read -r proc_name; do
-        GLOBAL_INSTALLATION_STATUS["${proc_name}"]="INIT"
         global_log_message "INFO" "Added procedure '${proc_name}' with status 'INIT'"
+        GLOBAL_INSTALLATION_STATUS["${proc_name}"]="INIT"
     done <<< "${names}"
     
     global_export_installation_status
@@ -182,7 +184,7 @@ _print_global_installation_status() {
     echo -e "\n"
     global_log_message "INFO" "Current installation status:"
     for proc_name in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
-        global_log_message "INFO" "  ${proc_name}: ${GLOBAL_INSTALLATION_STATUS[$proc_name]}"
+        global_log_message "INFO" "${proc_name}: ${GLOBAL_INSTALLATION_STATUS[$proc_name]}"
     done
     global_log_message "INFO" "For more details, check the log file ${GLOBAL_LOG_FILE}"
     echo -e "\n"
@@ -196,7 +198,7 @@ _run_procedure() {
 
     global_log_message "INFO" "Starting procedure: ${procedure}"
 
-    curl -H "Accept: application/vnd.github.v3.raw" -s "${_PROCEDURES_PATH}/${procedure}/${procedure}.sh" | sudo -E bash
+    curl -fsSL "${_PROCEDURES_PATH}/${procedure}/${procedure}.sh" | sudo -E bash
     local exit_statuses=("${PIPESTATUS[@]}")
     local curl_status="${exit_statuses[0]}"
     local bash_status="${exit_statuses[1]}"

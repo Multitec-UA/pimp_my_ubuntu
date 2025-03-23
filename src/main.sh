@@ -19,7 +19,7 @@ readonly DEBUG=${DEBUG:-true}
 readonly _REPOSITORY_URL="https://api.github.com/repos/Multitec-UA/pimp_my_ubuntu/contents"
 readonly _SOFTWARE_COMMAND="main-menu"
 readonly _SOFTWARE_DESCRIPTION="Main menu for Pimp My Ubuntu"
-readonly _SOFTWARE_VERSION="1.0.0"
+readonly _SOFTWARE_VERSION="1.0.1"
 readonly _DEPENDENCIES=("curl" "wget" "dialog" "jq")
 
 # Software-specific constants

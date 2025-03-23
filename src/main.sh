@@ -37,6 +37,11 @@ main() {
     # Check if the script is running with root privileges
     global_check_root
 
+    ## DEBUG
+    echo GLOBAL_REAL_USER: ${GLOBAL_REAL_USER}
+    echo GLOBAL_REAL_HOME: ${GLOBAL_REAL_HOME}
+    exit 0
+
     _step_init
   
     _init_procedures_info

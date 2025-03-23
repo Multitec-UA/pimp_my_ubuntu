@@ -105,12 +105,6 @@ _step_install_software() {
     # Install ZSH
     global_install_apt_package "${_SOFTWARE_COMMAND}"
     
-    # Make ZSH the default shell for the current user
-    # Note: This needs to be done for the user, not as root
-    REAL_USER=$(logname || echo "${SUDO_USER:-$USER}")
-    global_log_message "INFO" "Setting ZSH as default shell for user ${REAL_USER}"
-    chsh -s "$(which zsh)" "${REAL_USER}" >>"${GLOBAL_LOG_FILE}" 2>&1
-    
     # Install Oh-My-Zsh
     _install_ohmyzsh
     
@@ -120,31 +114,23 @@ _step_install_software() {
 
 # Install Oh-My-Zsh
 _install_ohmyzsh() {
-    REAL_USER=$(logname || echo "${SUDO_USER:-$USER}")
+    global_log_message "INFO" "Setting ZSH as default shell for user ${GLOBAL_REAL_USER}"
+    # Make ZSH the default shell for the current user
+    chsh -s "$(which zsh)" "${GLOBAL_REAL_USER}" >>"${GLOBAL_LOG_FILE}" 2>&1
     
     global_log_message "INFO" "Installing Oh-My-Zsh"
-    # Create a temporary script to install Oh-My-Zsh non-interactively
-    cat > /tmp/install_ohmyzsh.sh << 'EOF'
-#!/bin/bash
-export RUNZSH=no
-sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-EOF
-    chmod +x /tmp/install_ohmyzsh.sh
     
-    # Run the script as the real user
-    if [ "${REAL_USER}" != "root" ]; then
-        su - "${REAL_USER}" -c "/tmp/install_ohmyzsh.sh" >>"${GLOBAL_LOG_FILE}" 2>&1
+    # Install Oh-My-Zsh using direct curl pipe to bash (non-interactively)
+    if [ "${GLOBAL_REAL_USER}" != "root" ]; then
+        su - "${GLOBAL_REAL_USER}" -c 'RUNZSH=no sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"' >>"${GLOBAL_LOG_FILE}" 2>&1
     else
-        /tmp/install_ohmyzsh.sh >>"${GLOBAL_LOG_FILE}" 2>&1
+        RUNZSH=no sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" >>"${GLOBAL_LOG_FILE}" 2>&1
     fi
 }
 
 # Post-installation configuration
 _step_post_install() {
     global_log_message "INFO" "Post installation of ${_SOFTWARE_COMMAND}"
-    
-    REAL_USER=$(logname || echo "${SUDO_USER:-$USER}")
-    USER_HOME=$(eval echo ~${REAL_USER})
     
     # Install ZSH plugins
     _install_zsh_plugins
@@ -167,11 +153,6 @@ _step_post_install() {
 _step_cleanup() {
     global_log_message "INFO" "Cleaning up after installation of ${_SOFTWARE_COMMAND}"
     
-    # Remove temporary files
-    if [[ -f "/tmp/install_ohmyzsh.sh" ]]; then
-        rm -f "/tmp/install_ohmyzsh.sh" >>"${GLOBAL_LOG_FILE}" 2>&1
-    fi
-    
     # Clean apt cache
     if [[ "${GLOBAL_INSTALLATION_STATUS["${_SOFTWARE_COMMAND}"]}" == "SUCCESS" ]]; then
         global_log_message "DEBUG" "Cleaning apt cache"
@@ -183,129 +164,98 @@ _step_cleanup() {
 _install_zsh_plugins() {
     global_log_message "INFO" "Installing ZSH plugins"
     
-    REAL_USER=$(logname || echo "${SUDO_USER:-$USER}")
-    USER_HOME=$(eval echo ~${REAL_USER})
-    ZSH_CUSTOM="${USER_HOME}/.oh-my-zsh/custom"
+    ZSH_CUSTOM="${GLOBAL_REAL_HOME}/.oh-my-zsh/custom"
     
-    # Create command to install plugins
-    cat > /tmp/install_zsh_plugins.sh << EOF
-#!/bin/bash
-# Install zsh-autosuggestions
-if [ ! -d "${ZSH_CUSTOM}/plugins/zsh-autosuggestions" ]; then
-    git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM}/plugins/zsh-autosuggestions
-fi
-
-# Install zsh-syntax-highlighting
-if [ ! -d "${ZSH_CUSTOM}/plugins/zsh-syntax-highlighting" ]; then
-    git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM}/plugins/zsh-syntax-highlighting
-fi
-EOF
-    chmod +x /tmp/install_zsh_plugins.sh
-    
-    # Run the script as the real user
-    if [ "${REAL_USER}" != "root" ]; then
-        su - "${REAL_USER}" -c "/tmp/install_zsh_plugins.sh" >>"${GLOBAL_LOG_FILE}" 2>&1
+    # Install zsh-autosuggestions plugin
+    global_log_message "INFO" "Installing zsh-autosuggestions plugin"
+    if [ "${GLOBAL_REAL_USER}" != "root" ]; then
+        su - "${GLOBAL_REAL_USER}" -c "if [ ! -d \"${ZSH_CUSTOM}/plugins/zsh-autosuggestions\" ]; then git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM}/plugins/zsh-autosuggestions; fi" >>"${GLOBAL_LOG_FILE}" 2>&1
     else
-        /tmp/install_zsh_plugins.sh >>"${GLOBAL_LOG_FILE}" 2>&1
+        bash -c "if [ ! -d \"${ZSH_CUSTOM}/plugins/zsh-autosuggestions\" ]; then git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM}/plugins/zsh-autosuggestions; fi" >>"${GLOBAL_LOG_FILE}" 2>&1
     fi
     
-    rm -f /tmp/install_zsh_plugins.sh >>"${GLOBAL_LOG_FILE}" 2>&1
+    # Install zsh-syntax-highlighting plugin
+    global_log_message "INFO" "Installing zsh-syntax-highlighting plugin"
+    if [ "${GLOBAL_REAL_USER}" != "root" ]; then
+        su - "${GLOBAL_REAL_USER}" -c "if [ ! -d \"${ZSH_CUSTOM}/plugins/zsh-syntax-highlighting\" ]; then git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM}/plugins/zsh-syntax-highlighting; fi" >>"${GLOBAL_LOG_FILE}" 2>&1
+    else
+        bash -c "if [ ! -d \"${ZSH_CUSTOM}/plugins/zsh-syntax-highlighting\" ]; then git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM}/plugins/zsh-syntax-highlighting; fi" >>"${GLOBAL_LOG_FILE}" 2>&1
+    fi
 }
 
 # Install Meslo Nerd Fonts
 _install_nerd_fonts() {
     global_log_message "INFO" "Installing Meslo Nerd Fonts"
     
-    REAL_USER=$(logname || echo "${SUDO_USER:-$USER}")
-    USER_HOME=$(eval echo ~${REAL_USER})
-    FONT_DIR="${USER_HOME}/.local/share/fonts"
+    FONT_DIR="${GLOBAL_REAL_HOME}/.local/share/fonts"
     
-    # Create command to install fonts
-    cat > /tmp/install_fonts.sh << EOF
-#!/bin/bash
-mkdir -p "${FONT_DIR}"
-cd "${FONT_DIR}"
-curl -fLo "MesloLGS NF Regular.ttf" "${_MESLO_FONT_BASE_URL}/MesloLGS%20NF%20Regular.ttf"
-curl -fLo "MesloLGS NF Bold.ttf" "${_MESLO_FONT_BASE_URL}/MesloLGS%20NF%20Bold.ttf"
-curl -fLo "MesloLGS NF Italic.ttf" "${_MESLO_FONT_BASE_URL}/MesloLGS%20NF%20Italic.ttf" 
-curl -fLo "MesloLGS NF Bold Italic.ttf" "${_MESLO_FONT_BASE_URL}/MesloLGS%20NF%20Bold%20Italic.ttf"
-fc-cache -f -v
-EOF
-    chmod +x /tmp/install_fonts.sh
-    
-    # Run the script as the real user
-    if [ "${REAL_USER}" != "root" ]; then
-        su - "${REAL_USER}" -c "/tmp/install_fonts.sh" >>"${GLOBAL_LOG_FILE}" 2>&1
+    # Install fonts directly
+    FONTS_COMMAND="mkdir -p \"${FONT_DIR}\" && \
+        cd \"${FONT_DIR}\" && \
+        curl -fLo \"MesloLGS NF Regular.ttf\" \"${_MESLO_FONT_BASE_URL}/MesloLGS%20NF%20Regular.ttf\" && \
+        curl -fLo \"MesloLGS NF Bold.ttf\" \"${_MESLO_FONT_BASE_URL}/MesloLGS%20NF%20Bold.ttf\" && \
+        curl -fLo \"MesloLGS NF Italic.ttf\" \"${_MESLO_FONT_BASE_URL}/MesloLGS%20NF%20Italic.ttf\" && \
+        curl -fLo \"MesloLGS NF Bold Italic.ttf\" \"${_MESLO_FONT_BASE_URL}/MesloLGS%20NF%20Bold%20Italic.ttf\" && \
+        fc-cache -f -v"
+
+    if [ "${GLOBAL_REAL_USER}" != "root" ]; then
+        su - "${GLOBAL_REAL_USER}" -c "${FONTS_COMMAND}" >>"${GLOBAL_LOG_FILE}" 2>&1
     else
-        /tmp/install_fonts.sh >>"${GLOBAL_LOG_FILE}" 2>&1
+        bash -c "${FONTS_COMMAND}" >>"${GLOBAL_LOG_FILE}" 2>&1
     fi
-    
-    rm -f /tmp/install_fonts.sh >>"${GLOBAL_LOG_FILE}" 2>&1
 }
 
 # Install Powerlevel10k theme
 _install_powerlevel10k() {
     global_log_message "INFO" "Installing Powerlevel10k theme"
     
-    REAL_USER=$(logname || echo "${SUDO_USER:-$USER}")
-    USER_HOME=$(eval echo ~${REAL_USER})
-    ZSH_CUSTOM="${USER_HOME}/.oh-my-zsh/custom"
+    ZSH_CUSTOM="${GLOBAL_REAL_HOME}/.oh-my-zsh/custom"
     
-    # Create command to install theme
-    cat > /tmp/install_powerlevel10k.sh << EOF
-#!/bin/bash
-if [ ! -d "${ZSH_CUSTOM}/themes/powerlevel10k" ]; then
-    git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM}/themes/powerlevel10k
-fi
-EOF
-    chmod +x /tmp/install_powerlevel10k.sh
-    
-    # Run the script as the real user
-    if [ "${REAL_USER}" != "root" ]; then
-        su - "${REAL_USER}" -c "/tmp/install_powerlevel10k.sh" >>"${GLOBAL_LOG_FILE}" 2>&1
+    # Install Powerlevel10k theme directly
+    if [ "${GLOBAL_REAL_USER}" != "root" ]; then
+        su - "${GLOBAL_REAL_USER}" -c "if [ ! -d \"${ZSH_CUSTOM}/themes/powerlevel10k\" ]; then git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM}/themes/powerlevel10k; fi" >>"${GLOBAL_LOG_FILE}" 2>&1
     else
-        /tmp/install_powerlevel10k.sh >>"${GLOBAL_LOG_FILE}" 2>&1
+        bash -c "if [ ! -d \"${ZSH_CUSTOM}/themes/powerlevel10k\" ]; then git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM}/themes/powerlevel10k; fi" >>"${GLOBAL_LOG_FILE}" 2>&1
     fi
-    
-    rm -f /tmp/install_powerlevel10k.sh >>"${GLOBAL_LOG_FILE}" 2>&1
 }
 
 # Configure .zshrc with plugins and theme
 _configure_zshrc() {
     global_log_message "INFO" "Configuring .zshrc"
     
-    REAL_USER=$(logname || echo "${SUDO_USER:-$USER}")
-    USER_HOME=$(eval echo ~${REAL_USER})
-    ZSHRC="${USER_HOME}/.zshrc"
-    
-    # Create command to modify .zshrc
-    cat > /tmp/configure_zshrc.sh << 'EOF'
-#!/bin/bash
-# Set the ZSH theme to powerlevel10k
-sed -i '/ZSH_THEME=/c\ZSH_THEME="powerlevel10k/powerlevel10k"' ~/.zshrc
+    # Configure .zshrc directly
+    ZSHRC_COMMAND='
+        # Set the ZSH theme to powerlevel10k
+        sed -i "/ZSH_THEME=/c\ZSH_THEME=\"powerlevel10k/powerlevel10k\"" ~/.zshrc
 
-# Set plugins
-sed -i '/^plugins=(git)$/c\plugins=(git z zsh-syntax-highlighting zsh-autosuggestions docker sudo web-search terraform)' ~/.zshrc
+        # Set plugins
+        sed -i "/^plugins=(git)$/c\plugins=(git z zsh-syntax-highlighting zsh-autosuggestions docker sudo web-search gcloud terraform)" ~/.zshrc
 
-# Add bat alias if batcat is installed
-if command -v batcat &> /dev/null; then
-    if ! grep -q "alias bat='batcat'" ~/.zshrc; then
-        echo '# bat alias' >> ~/.zshrc
-        echo 'export PATH="$HOME/.local/bin/bat:$PATH"' >> ~/.zshrc
-        echo "alias bat='batcat'" >> ~/.zshrc
-    fi
-fi
-EOF
-    chmod +x /tmp/configure_zshrc.sh
+        # Add bat alias if batcat is installed
+        if command -v batcat &> /dev/null; then
+            if ! grep -q "alias bat='\''batcat'\''" ~/.zshrc; then
+                echo "# bat alias" >> ~/.zshrc
+                echo "export PATH=\"\$HOME/.local/bin/bat:\$PATH\"" >> ~/.zshrc
+                echo "alias bat='\''batcat'\''" >> ~/.zshrc
+            fi
+        fi'
     
-    # Run the script as the real user
-    if [ "${REAL_USER}" != "root" ]; then
-        su - "${REAL_USER}" -c "/tmp/configure_zshrc.sh" >>"${GLOBAL_LOG_FILE}" 2>&1
+    if [ "${GLOBAL_REAL_USER}" != "root" ]; then
+        su - "${GLOBAL_REAL_USER}" -c "${ZSHRC_COMMAND}" >>"${GLOBAL_LOG_FILE}" 2>&1
     else
-        /tmp/configure_zshrc.sh >>"${GLOBAL_LOG_FILE}" 2>&1
+        bash -c "${ZSHRC_COMMAND}" >>"${GLOBAL_LOG_FILE}" 2>&1
     fi
+
+    # Remplace .p10k.zsh by .p10k.zsh.local if it exists
+    if [[ -f "${GLOBAL_REAL_HOME}/.p10k.zsh" ]]; then
+        cp "${GLOBAL_REAL_HOME}/.p10k.zsh" "${GLOBAL_REAL_HOME}/.p10k.zsh.local"
+    fi
+
+    # Replace .p10k.zsh content by remote file
+    curl -fsSL https://raw.github.com/Multitec-UA/pimp_my_ubuntu/main/src/procedures/zsh/media/.p10k.zsh > "${GLOBAL_REAL_HOME}/.p10k.zsh"
     
-    rm -f /tmp/configure_zshrc.sh >>"${GLOBAL_LOG_FILE}" 2>&1
+    # Set proper ownership for the downloaded file
+    chown "${GLOBAL_REAL_USER}:${GLOBAL_REAL_USER}" "${GLOBAL_REAL_HOME}/.p10k.zsh"
 }
 
 # Execute main function

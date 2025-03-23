@@ -65,13 +65,17 @@ main() {
 
 # Necessary function to source libraries
 _source_lib() {
-    local header="Accept: application/vnd.github.v3.raw"
     local file="${1:-}"
     
     if [[ -n "${file}" ]]; then
-        source <(curl -H "${header}" -s "${_REPOSITORY_URL}/${file}")
+        # Add error handling for curl command
+        if ! source <(curl -fsSL "${_REPOSITORY_URL}/${file}"); then
+            global_log_message "ERROR" "Failed to source library: ${file}"
+            exit 1
+        fi
+        global_log_message "DEBUG" "Successfully sourced library: ${file}"
     else
-        echo "Error: No library file specified to source" >&2
+        global_log_message "ERROR" "No library file specified to source"
         exit 1
     fi
 }

@@ -68,11 +68,11 @@ _source_lib() {
     
     if [[ -n "${file}" ]]; then
         # Add error handling for curl command
-        if ! source <(curl -fsSL "${_REPOSITORY_URL}${file}"); then
+        if ! source <(curl -fsSL "${_REPOSITORY_URL}/${file}"); then
             global_log_message "ERROR" "Failed to source library: ${file}"
             exit 1
         fi
-        global_log_message "INFO" "Successfully sourced library: ${file}"
+        global_log_message "DEBUG" "Successfully sourced library: ${file}"
     else
         global_log_message "ERROR" "No library file specified to source"
         exit 1

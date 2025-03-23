@@ -159,19 +159,18 @@ _procedure_selector_screen() {
     for proc in "${all_procedures[@]}"; do
         if [[ ! " ${procedures_selected[@]} " =~ " ${proc} " ]]; then
             unset "GLOBAL_INSTALLATION_STATUS[$proc]"
-            global_log_message "INFO" "Removed $proc from installation status"
+            global_log_message "DEBUG" "Removed $proc from installation status"
         fi
     done
 
     # Set all remaining procedures to PENDING status
     for proc in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
         GLOBAL_INSTALLATION_STATUS["$proc"]="PENDING"
-        global_log_message "INFO" "Set $proc status to PENDING"
+        global_log_message "DEBUG" "Set $proc status to PENDING"
     done
 
     # Make status array available to child scripts
     global_export_installation_status
-    clear
 }
 
 _print_global_installation_status() {

@@ -88,9 +88,9 @@ _init_procedures_info() {
     local procedures_json
     procedures_json=$(curl -s -H "Accept: application/vnd.github.v3+json" "${_PROCEDURES_PATH}")
     
-    # Parse procedure names from JSON response and filter out template.sh
+    # Parse procedure names from JSON response and filter out template
     local names
-    names=$(echo "${procedures_json}" | jq -r '.[].name | select(. != "template.sh")')
+    names=$(echo "${procedures_json}" | jq -r '.[].name | select(. != "template")')
     
     # Initialize each procedure's status as pending
     while IFS= read -r proc_name; do

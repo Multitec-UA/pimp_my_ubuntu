@@ -35,9 +35,12 @@ curl -H "Accept: application/vnd.github.v3.raw" \
 -s https://api.github.com/repos/Multitec-UA/pimp_my_ubuntu/contents/src/procedures/cursor/cursor.sh | sudo bash
 ```
 
-### Install zsh
+### Install ZSH
+Install ZSH, Oh-My-Zsh, plugins (autosuggestions, syntax-highlighting), Powerlevel10k theme and Meslo Nerd Fonts.
+
 ```bash
-#WIP
+curl -H "Accept: application/vnd.github.v3.raw" \
+-s https://api.github.com/repos/Multitec-UA/pimp_my_ubuntu/contents/src/procedures/zsh/zsh.sh | sudo bash
 ```
 
 ### Install Grub Customizer
@@ -45,7 +48,7 @@ Update Grub, install grub-customizer and add theme.
 
 ```bash
 curl -H "Accept: application/vnd.github.v3.raw" \
--s https://api.github.com/repos/Multitec-UA/pimp_my_ubuntu/contents/src/procedures/grub_customizer/grub_customizer.sh | sudo bash
+-s https://api.github.com/repos/Multitec-UA/pimp_my_ubuntu/contents/src/procedures/grub-customizer/grub-customizer.sh | sudo bash
 ```
 
 # How contribute

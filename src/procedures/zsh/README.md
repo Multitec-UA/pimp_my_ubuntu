@@ -17,8 +17,7 @@ This procedure installs and configures ZSH with Oh-My-Zsh, plugins, and the Powe
 Run this command to install ZSH with all configurations:
 
 ```bash
-curl -H "Accept: application/vnd.github.v3.raw" \
--s https://api.github.com/repos/Multitec-UA/pimp_my_ubuntu/contents/src/procedures/zsh/zsh.sh | sudo bash
+curl -fsSL https://raw.github.com/Multitec-UA/pimp_my_ubuntu/main/src/procedures/zsh/zsh.sh | sudo bash
 ```
 
 ## What It Does

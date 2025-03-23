@@ -17,7 +17,7 @@
 readonly DEBUG=${DEBUG:-true}
 
 # Software-common constants
-readonly _REPOSITORY_URL="https://api.github.com/repos/Multitec-UA/pimp_my_ubuntu/contents"
+readonly _REPOSITORY_URL="https://raw.github.com/Multitec-UA/pimp_my_ubuntu/main"
 readonly _SOFTWARE_COMMAND="zsh"
 readonly _SOFTWARE_DESCRIPTION="ZSH with Oh-My-Zsh, plugins, and Powerlevel10k theme"
 readonly _SOFTWARE_VERSION="1.0.0"

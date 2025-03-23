@@ -37,8 +37,9 @@ The installation script (`cursor.sh`) makes the following changes to your system
 To install Cursor IDE:
 
 ```bash
-curl -H "Accept: application/vnd.github.v3.raw" -s https://api.github.com/repos/Multitec-UA/pimp_my_ubuntu/contents/src/procedures/cursor/cursor.sh | sudo bash
+curl -fsSL https://raw.github.com/Multitec-UA/pimp_my_ubuntu/main/src/procedures/cursor/cursor.sh | sudo bash
 ```
+
 
 ### Using Cursor
 

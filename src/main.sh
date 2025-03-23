@@ -81,6 +81,7 @@ _step_init() {
     global_log_message "INFO" "Starting Main Menu"
     global_log_message "INFO" "Installing basic dependencies"
     global_install_apt_package "${_DEPENDENCIES[@]}"
+    global_import_installation_status
 }
 
 # Initialize procedures information

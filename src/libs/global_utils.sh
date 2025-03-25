@@ -279,7 +279,7 @@ global_download_media() {
         local output_file="${GLOBAL_DOWNLOAD_DIR}/$(basename "${file_path}")"
 
         # Use raw URL for GitHub content instead of API
-        curl -fsSL "${_REPOSITORY_URL}/${file_path}" -o "${output_file}"  >>"${GLOBAL_LOG_FILE}" 2>&1
+        curl -fsSL "${_REPOSITORY_RAW_URL}/${file_path}" -o "${output_file}"  >>"${GLOBAL_LOG_FILE}" 2>&1
         local curl_status=$?
         
         # Ensure the downloaded file is owned by the real user
@@ -287,7 +287,7 @@ global_download_media() {
         
         return $curl_status
     else
-    
+
         global_log_message "ERROR" "No media file specified to download"
         return 1
     fi

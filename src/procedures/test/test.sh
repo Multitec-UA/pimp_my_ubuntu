@@ -17,7 +17,7 @@
 readonly DEBUG=${DEBUG:-false}
 
 # Software-common constants
-readonly _REPOSITORY_URL="https://raw.github.com/Multitec-UA/pimp_my_ubuntu/main"
+readonly _REPOSITORY_RAW_URL="https://raw.github.com/Multitec-UA/pimp_my_ubuntu/main"
 readonly _SOFTWARE_COMMAND="test"
 readonly _SOFTWARE_DESCRIPTION="Test procedure"
 readonly _SOFTWARE_VERSION="1.0.0"
@@ -59,7 +59,7 @@ _source_lib() {
     local file="${1:-}"
     
     if [[ -n "${file}" ]]; then
-        source <(curl -H "${header}" -s "${_REPOSITORY_URL}/${file}")
+        source <(curl -H "${header}" -s "${_REPOSITORY_RAW_URL}/${file}")
     else
         echo "Error: No library file specified to source" >&2
         exit 1

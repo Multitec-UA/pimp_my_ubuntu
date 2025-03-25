@@ -56,23 +56,28 @@ global_debug_echo() {
 }
 
 
-# Log a message with timestamp
-# Usage: log_message "INFO" "Starting installation"
+# Log a message with timestamp and level
+# Usage: global_log_message "INFO" "Starting installation"
 global_log_message() {
-    global_ensure_dir "${GLOBAL_LOG_DIR}"
-    local level=$1
-    local message=$2
+    local level="${1:-INFO}"
+    local message="${2:-}"
     local timestamp
-    timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-    echo -e "[${timestamp}] [${level}] ${message}" >> "${GLOBAL_LOG_FILE}"
+    
+    # Ensure log directory exists
+    global_ensure_dir "${GLOBAL_LOG_DIR}"
+    
+    # Get current timestamp once
+    timestamp="$(date '+%Y-%m-%d %H:%M:%S')"
+    
+    # Format log entry
+    local log_entry="[${timestamp}] [${level}] ${message}"
+    
+    # Write to log file
+    echo -e "${log_entry}" >> "${GLOBAL_LOG_FILE}"
 
-    # Print to terminal
-    if [[ "${DEBUG}" == "true" ]]; then
-        echo -e "[${timestamp}] [${level}] ${message}"
-    else
-        if [[ "${level}" != "DEBUG" ]]; then
-            echo -e "[${level}] ${message}"
-        fi
+    # Print to terminal based on debug level
+    if [[ "${DEBUG}" == "true" ]] || [[ "${level}" != "DEBUG" ]]; then
+        echo -e "${log_entry}"
     fi
 }
 

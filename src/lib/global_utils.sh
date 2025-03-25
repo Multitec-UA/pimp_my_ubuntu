@@ -65,7 +65,7 @@ global_log_message() {
     local timestamp
     timestamp=$(date '+%Y-%m-%d %H:%M:%S')
     echo -e "[${timestamp}] [${level}] ${message}" >> "${GLOBAL_LOG_FILE}"
-    global_debug_echo
+    #global_debug_echo
 }
 
 # Initialize logging system for the application

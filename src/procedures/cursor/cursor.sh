@@ -17,7 +17,8 @@
 readonly DEBUG=${DEBUG:-false}
 
 # Software-common constants
-readonly _REPOSITORY_URL="https://raw.github.com/Multitec-UA/pimp_my_ubuntu/main"
+readonly _REPOSITORY_RAW_URL="https://raw.github.com/Multitec-UA/pimp_my_ubuntu/main"
+readonly _LIBS_REMOTE_URL="${_REPOSITORY_RAW_URL}/src/libs/"
 readonly _SOFTWARE_COMMAND="cursor"
 readonly _SOFTWARE_DESCRIPTION="A modern and powerful IDE built on web technologies"
 readonly _SOFTWARE_VERSION="latest"
@@ -41,7 +42,7 @@ set -euo pipefail
 main() {
 
     # Source global variables and functions
-    _source_lib "/src/lib/global_utils.sh"
+    _source_lib "global_utils.sh"
     
     global_check_root
 
@@ -75,8 +76,8 @@ _source_lib() {
     local file="${1:-}"
     
     if [[ -n "${file}" ]]; then
-        # Add error handling for curl command
-        if ! source <(curl -fsSL "${_REPOSITORY_URL}/${file}"); then
+        # Redirect curl errors to console
+        if ! source <(curl -fsSL "${_LIBS_REMOTE_URL}${file}" 2>&1); then
             global_log_message "ERROR" "Failed to source library: ${file}"
             exit 1
         fi

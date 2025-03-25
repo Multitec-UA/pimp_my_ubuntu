@@ -17,11 +17,12 @@
 readonly DEBUG=${DEBUG:-false}
 
 # Software-common constants
-readonly _REPOSITORY_URL="https://raw.github.com/Multitec-UA/pimp_my_ubuntu/main"
 readonly _SOFTWARE_COMMAND="SOFTWARE_COMMAND_HERE"
 readonly _SOFTWARE_DESCRIPTION="SOFTWARE_DESCRIPTION_HERE"
 readonly _SOFTWARE_VERSION="1.0.0"
 readonly _DEPENDENCIES=("dependency1" "dependency2" "dependency3")
+readonly _REPOSITORY_RAW_URL="https://raw.github.com/Multitec-UA/pimp_my_ubuntu/main"
+readonly _LIBS_REMOTE_URL="${_REPOSITORY_RAW_URL}/src/libs/"
 
 # Software-specific constants
 # Add any software-specific constants here
@@ -77,8 +78,8 @@ _source_lib() {
     local file="${1:-}"
     
     if [[ -n "${file}" ]]; then
-        # Add error handling for curl command
-        if ! source <(curl -fsSL "${_REPOSITORY_URL}/${file}"); then
+        # Redirect curl errors to console
+        if ! source <(curl -fsSL "${_LIBS_REMOTE_URL}${file}" 2>&1); then
             global_log_message "ERROR" "Failed to source library: ${file}"
             exit 1
         fi
@@ -88,6 +89,7 @@ _source_lib() {
         exit 1
     fi
 }
+
 
 
 # Prepare for installation

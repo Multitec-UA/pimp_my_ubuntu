@@ -17,11 +17,12 @@
 readonly DEBUG=${DEBUG:-false}
 
 # Software-common constants
-readonly _REPOSITORY_URL="https://raw.github.com/Multitec-UA/pimp_my_ubuntu/main"
 readonly _SOFTWARE_COMMAND="grub-customizer"
 readonly _SOFTWARE_DESCRIPTION="Grub Customizer is a tool for managing GRUB bootloader settings and install a theme"
 readonly _SOFTWARE_VERSION="1.0.0"
 readonly _DEPENDENCIES=("curl" "wget" "coreutils")
+readonly _REPOSITORY_RAW_URL="https://raw.github.com/Multitec-UA/pimp_my_ubuntu/main"
+readonly _LIBS_REMOTE_URL="${_REPOSITORY_RAW_URL}/src/libs/"
 
 # Software-specific constants
 # More themes in https://www.gnome-look.org/ Add .zip with theme.txt file inside to media folder
@@ -77,8 +78,8 @@ _source_lib() {
     local file="${1:-}"
     
     if [[ -n "${file}" ]]; then
-        # Add error handling for curl command
-        if ! source <(curl -fsSL "${_REPOSITORY_URL}/${file}"); then
+        # Redirect curl errors to console
+        if ! source <(curl -fsSL "${_LIBS_REMOTE_URL}${file}" 2>&1); then
             global_log_message "ERROR" "Failed to source library: ${file}"
             exit 1
         fi

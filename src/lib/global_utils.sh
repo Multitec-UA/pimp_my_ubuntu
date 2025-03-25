@@ -154,53 +154,53 @@ global_check_if_installed() {
     local log_prefix="[CHECK] ${software}"
     
     # Log the check attempt
-    global_log_message "INFO" "${log_prefix}: Checking if installed"
+    global_log_message "DEBUG" "${log_prefix}: Checking if installed"
     
     # Method 1: Check if it's an APT package
     if dpkg -l "${software}" &> /dev/null; then
-        global_log_message "INFO" "${log_prefix}: Found as APT package"
+        global_log_message "DEBUG" "${log_prefix}: Found as APT package"
         return 0
     fi
     
     # Method 2: Try running the command with --version or -v (common patterns)
     if "${software}" --version &> /dev/null || "${software}" -v &> /dev/null; then
-        global_log_message "INFO" "${log_prefix}: Responds to --version or -v flag"
+        global_log_message "DEBUG" "${log_prefix}: Responds to --version or -v flag"
         return 0
     fi
     
     # Method 3: Check if executable exists in PATH
     if command -v "${software}" &> /dev/null; then
-        global_log_message "INFO" "${log_prefix}: Found in PATH"
+        global_log_message "DEBUG" "${log_prefix}: Found in PATH"
         return 0
     fi
     
     # Method 4: Check if it's a snap package
     if snap list 2>/dev/null | grep -q "^${software} "; then
-        global_log_message "INFO" "${log_prefix}: Found as Snap package"
+        global_log_message "DEBUG" "${log_prefix}: Found as Snap package"
         return 0
     fi
     
     # Method 5: Check if it's a flatpak
     if command -v flatpak &> /dev/null && flatpak list --app 2>/dev/null | grep -q "${software}"; then
-        global_log_message "INFO" "${log_prefix}: Found as Flatpak"
+        global_log_message "DEBUG" "${log_prefix}: Found as Flatpak"
         return 0
     fi
     
     # Method 6: Check systemd services
     if systemctl list-unit-files --type=service 2>/dev/null | grep -q "${software}.service"; then
-        global_log_message "INFO" "${log_prefix}: Found as systemd service"
+        global_log_message "DEBUG" "${log_prefix}: Found as systemd service"
         return 0
     fi
     
     # Method 7: Check desktop entries
     if [ -f "/usr/share/applications/${software}.desktop" ] || \
        [ -f "$GLOBAL_REAL_HOME/.local/share/applications/${software}.desktop" ]; then
-        global_log_message "INFO" "${log_prefix}: Found desktop entry"
+        global_log_message "DEBUG" "${log_prefix}: Found desktop entry"
         return 0
     fi
     
     # If we made it here, the software was not found
-    global_log_message "INFO" "${log_prefix}: Not found"
+    global_log_message "DEBUG" "${log_prefix}: Not found"
     return 1
 }
 

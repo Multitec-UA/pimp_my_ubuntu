@@ -35,7 +35,7 @@ else
     GLOBAL_REAL_HOME="${HOME}"
 fi
 
-readonly GLOBAL_DOWNLOAD_DIR="$GLOBAL_REAL_HOME/Documents/pimp_my_ubuntu"
+GLOBAL_DOWNLOAD_DIR="$GLOBAL_REAL_HOME/Documents/pimp_my_ubuntu"
 
 # Strict mode
 set -euo pipefail
@@ -52,6 +52,7 @@ main() {
   
     _init_procedures_info
 
+    exit 0
     _welcome_screen
 
     _procedure_selector_screen
@@ -121,12 +122,12 @@ _init_procedures_info() {
     
     # Initialize each procedure's status as pending
     while IFS= read -r proc_name; do
-        global_log_message "INFO" "Added procedure '${proc_name}' with status 'INIT'"
+        global_log_message "DEBUG" "Added procedure '${proc_name}' with status 'INIT'"
         GLOBAL_INSTALLATION_STATUS["${proc_name}"]="INIT"
     done <<< "${names}"
     
     global_export_installation_status
-    global_log_message "INFO" "All procedures initialized with INIT status"
+    global_log_message "DEBUG" "All procedures initialized with INIT status"
 }
 
 _welcome_screen() {

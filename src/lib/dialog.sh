@@ -9,6 +9,55 @@
 # License: MIT
 # =============================================================================
 
+# Show welcome screen
+# Returns: 0 if procedures exist, 1 if no procedures found
+dialog_show_welcome() {
+    dialog --title "Pimp My Ubuntu" --backtitle "Installation Script" \
+           --msgbox "Welcome to Pimp My Ubuntu!\n\nThis script will help you set up your Ubuntu system with your preferred software and configurations." 10 60
+
+    # Check if there are any procedures to install
+    if [[ ${#GLOBAL_INSTALLATION_STATUS[@]} -eq 0 ]]; then
+        dialog --title "Error" --backtitle "Pimp My Ubuntu" \
+               --msgbox "No installation procedures found!" 8 40
+        return 1
+    fi
+    return 0
+}
+
+# Show procedure selection screen and update GLOBAL_INSTALLATION_STATUS
+# Returns: 0 on success, 1 if user cancels
+dialog_show_procedure_selector() {
+    local procedures=("$@")
+    local choices=()
+    local cmd=(dialog --title "Pimp My Ubuntu" --backtitle "Software Selection" \
+              --separate-output --checklist "Select software to install:" 22 76 16)
+    
+    for proc in "${procedures[@]}"; do
+        cmd+=("$proc" "Select to install" off)
+    done
+    
+    # Run dialog and capture output
+    choices=$("${cmd[@]}" 2>&1 >/dev/tty)
+    local status=$?
+    
+    # Check if user cancelled
+    if [[ $status -ne 0 ]]; then
+        dialog --title "Cancelled" --backtitle "Pimp My Ubuntu" \
+               --msgbox "Installation cancelled by user." 8 40
+        return 1
+    fi
+    
+    # Check if no selection was made
+    if [[ -z "$choices" ]]; then
+        dialog --title "No Selection" --backtitle "Pimp My Ubuntu" \
+               --msgbox "Please select at least one software to continue." 8 50
+        return 1
+    fi
+    
+    # Return selected choices
+    echo "${choices}"
+    return 0
+}
 
 # Display menu and get user selection
 dialog_show_menu() {
@@ -44,8 +93,6 @@ dialog_show_progress() {
         "$percent" \
         "$message"
 }
-
-
 
 # Get user confirmation
 # Usage: if get_confirmation "Do you want to proceed?"; then echo "Proceeding..."; fi

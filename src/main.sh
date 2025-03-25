@@ -110,72 +110,41 @@ _init_procedures_info() {
 }
 
 _welcome_screen() {
-        # Display welcome message
-    dialog --title "Pimp My Ubuntu" --backtitle "Installation Script" \
-           --msgbox "Welcome to Pimp My Ubuntu!\n\nThis script will help you set up your Ubuntu system with your preferred software and configurations." 10 60
-    
-    # Check if there are any procedures to install
-    if [[ ${#GLOBAL_INSTALLATION_STATUS[@]} -eq 0 ]]; then
-        dialog --title "Error" --backtitle "Pimp My Ubuntu" \
-               --msgbox "No installation procedures found!" 8 40
+    if ! dialog_show_welcome; then
         global_log_message "ERROR" "No installation procedures found"
         exit 1
     fi
 }
 
 _procedure_selector_screen() {
-    # Get user selection menu
-    # Loop to let user select software or exit
-    local exit_flag=false
-    local procedures_selected=()
+    local procedures=()
     
-    while [[ "$exit_flag" == "false" ]]; do
-        # Build menu items from GLOBAL_INSTALLATION_STATUS
-        local menu_items=()
-        for proc_name in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
-            local status="${GLOBAL_INSTALLATION_STATUS[$proc_name]}"
-            menu_items+=("$proc_name")
-        done
-        
-        # Call dialog_show_menu and capture its output and exit status
-        procedures_selected=($(dialog_show_menu "${menu_items[@]}"))
-        local menu_status=$?
-        
-        # Check if user pressed Cancel/Esc
-        if [[ $menu_status -ne 0 ]]; then
-            dialog --title "Cancelled" --backtitle "Pimp My Ubuntu" \
-                   --msgbox "Installation cancelled by user." 8 40
-            global_log_message "INFO" "User cancelled the installation."
-            exit 0
-        fi
-        
-        # Check if user made a selection
-        if [[ ${#procedures_selected[@]} -eq 0 ]]; then
-            dialog --title "No Selection" --backtitle "Pimp My Ubuntu" \
-                   --msgbox "Please select at least one software to continue." 8 50
-            global_log_message "INFO" "No software selected. Prompting again."
-        else
-            # User made a valid selection, exit the loop
-            exit_flag=true
-            global_log_message "INFO" "User selected: ${procedures_selected[*]}"
-        fi
+    # Get list of available procedures
+    for proc_name in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
+        procedures+=("$proc_name")
     done
-
-    # Remove procedures not selected from GLOBAL_INSTALLATION_STATUS
+    
+    # Show selector and get choices
+    local selected
+    selected=$(dialog_show_procedure_selector "${procedures[@]}")
+    
+    if [[ $? -ne 0 ]]; then
+        global_log_message "INFO" "User cancelled the installation."
+        exit 0
+    fi
+    
+    # Update GLOBAL_INSTALLATION_STATUS based on selection
     local all_procedures=("${!GLOBAL_INSTALLATION_STATUS[@]}")
     for proc in "${all_procedures[@]}"; do
-        if [[ ! " ${procedures_selected[@]} " =~ " ${proc} " ]]; then
+        if [[ ! " ${selected} " =~ " ${proc} " ]]; then
             unset "GLOBAL_INSTALLATION_STATUS[$proc]"
             global_log_message "DEBUG" "Removed $proc from installation status"
+        else
+            GLOBAL_INSTALLATION_STATUS["$proc"]="PENDING"
+            global_log_message "DEBUG" "Set $proc status to PENDING"
         fi
     done
-
-    # Set all remaining procedures to PENDING status
-    for proc in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
-        GLOBAL_INSTALLATION_STATUS["$proc"]="PENDING"
-        global_log_message "DEBUG" "Set $proc status to PENDING"
-    done
-
+    
     # Make status array available to child scripts
     global_export_installation_status
 }

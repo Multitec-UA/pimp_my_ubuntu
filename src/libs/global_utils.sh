@@ -274,7 +274,7 @@ global_download_media() {
     chown "${GLOBAL_REAL_USER}:${GLOBAL_REAL_USER}" "${GLOBAL_DOWNLOAD_DIR}"
     
     if [[ -n "${file_path}" ]]; then
-        global_log_message "INFO" "Downloading media file: ${file_path}"
+        global_log_message "INFO" "Downloading media file: ${file_path} to ${GLOBAL_DOWNLOAD_DIR}"
         local output_file="${GLOBAL_DOWNLOAD_DIR}/$(basename "${file_path}")"
 
         # Use raw URL for GitHub content instead of API

@@ -80,9 +80,6 @@ global_log_message() {
     local message="${2:-}"
     local timestamp
     
-    # Ensure log directory exists
-    global_ensure_dir "${GLOBAL_LOG_DIR}"
-    
     # Get current timestamp once
     timestamp="$(date '+%Y-%m-%d %H:%M:%S')"
     

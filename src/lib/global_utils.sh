@@ -55,10 +55,6 @@ global_setup_logging() {
     global_ensure_dir "${GLOBAL_LOG_DIR}"
     rm -f "${GLOBAL_LOG_FILE}"
     touch "${GLOBAL_LOG_FILE}"
-    # Save original stdout and stderr
-    #exec 3>&1 4>&2
-    ## We only redirect stdout/stderr to terminal, not to the log file
-    #exec 1> >(tee /dev/tty) 2>&1
 }
 
 # Log a message with timestamp and level
@@ -80,7 +76,7 @@ global_log_message() {
     # Format log entry
     local log_entry="[${timestamp}] [${level}] ${message}"
     
-    # Write to log file (only once)
+    # Write to log file
     echo -e "${log_entry}" >> "${GLOBAL_LOG_FILE}"
 
     # Print to terminal based on debug level

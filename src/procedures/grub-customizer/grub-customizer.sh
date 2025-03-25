@@ -14,7 +14,7 @@
 # =============================================================================
 
 # Debug flag - set to true to enable debug messages
-readonly DEBUG=${DEBUG:-true}
+readonly DEBUG=${DEBUG:-false}
 
 # Software-common constants
 readonly _REPOSITORY_URL="https://raw.github.com/Multitec-UA/pimp_my_ubuntu/main"

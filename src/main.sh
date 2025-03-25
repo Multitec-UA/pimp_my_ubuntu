@@ -13,7 +13,7 @@
 declare -A GLOBAL_INSTALLATION_STATUS
 
 # Debug flag - set to true to enable debug messages
-readonly DEBUG=${DEBUG:-true}
+readonly DEBUG=${DEBUG:-false}
 
 # Software-common constants
 readonly _REPOSITORY_URL="https://raw.github.com/Multitec-UA/pimp_my_ubuntu/main"
@@ -25,8 +25,6 @@ readonly _DEPENDENCIES=("curl" "wget" "dialog" "jq")
 # Software-specific constants
 readonly _PROCEDURES_PATH="https://api.github.com/repos/Multitec-UA/pimp_my_ubuntu/contents/src/procedures"
 
-# Declare GLOBAL_INSTALLATION_STATUS if not already declared
-declare -A GLOBAL_INSTALLATION_STATUS
 
 # Get the real user's home directory (works with sudo)
 if [[ -n "${SUDO_USER:-}" ]]; then
@@ -90,6 +88,19 @@ _source_lib() {
 
 # Prepare for installation
 _step_init() {
+    # Log all environment variables for debugging
+    global_log_message "DEBUG" "_REPOSITORY_URL: ${_REPOSITORY_URL}"
+    global_log_message "DEBUG" "_SOFTWARE_COMMAND: ${_SOFTWARE_COMMAND}"
+    global_log_message "DEBUG" "_SOFTWARE_DESCRIPTION: ${_SOFTWARE_DESCRIPTION}"
+    global_log_message "DEBUG" "_SOFTWARE_VERSION: ${_SOFTWARE_VERSION}"
+    global_log_message "DEBUG" "_DEPENDENCIES: ${_DEPENDENCIES[*]}"
+    global_log_message "DEBUG" "DEBUG_MODE: ${DEBUG}"
+    global_log_message "DEBUG" "GLOBAL_LOG_DIR: ${GLOBAL_LOG_DIR}"
+    global_log_message "DEBUG" "GLOBAL_LOG_FILE: ${GLOBAL_LOG_FILE}"
+    global_log_message "DEBUG" "GLOBAL_REAL_USER: ${GLOBAL_REAL_USER}"
+    global_log_message "DEBUG" "GLOBAL_REAL_HOME: ${GLOBAL_REAL_HOME}"
+    global_log_message "DEBUG" "GLOBAL_DOWNLOAD_DIR: ${GLOBAL_DOWNLOAD_DIR}"
+    global_log_message "DEBUG" "GLOBAL_LOGGING_INITIALIZED: ${GLOBAL_LOGGING_INITIALIZED}"
     global_log_message "INFO" "Starting Main Menu"
     global_log_message "INFO" "Installing basic dependencies"
     global_install_apt_package "${_DEPENDENCIES[@]}"

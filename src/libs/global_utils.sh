@@ -28,7 +28,7 @@ else
     GLOBAL_REAL_HOME="${HOME}"
 fi
 
-readonly GLOBAL_DOWNLOAD_DIR="$GLOBAL_REAL_HOME/Documents/pimp_my_ubuntu"
+GLOBAL_DOWNLOAD_DIR="$GLOBAL_REAL_HOME/Documents/pimp_my_ubuntu"
 
 # Flag to track if logging has been initialized
 GLOBAL_LOGGING_INITIALIZED=false

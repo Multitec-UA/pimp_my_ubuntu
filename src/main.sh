@@ -51,6 +51,7 @@ main() {
     global_check_root
 
     _step_init    
+    global_log_message "DEBUG" "GLOBAL_DOWNLOAD_DIR: ${GLOBAL_DOWNLOAD_DIR}"
   
     _init_procedures_info
 

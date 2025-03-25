@@ -32,6 +32,8 @@ echo "GLOBAL_REAL_HOME: ${GLOBAL_REAL_HOME}" >> "${GLOBAL_LOG_FILE}"
 
 readonly GLOBAL_DOWNLOAD_DIR="$GLOBAL_REAL_HOME/Documents/pimp_my_ubuntu"
 
+# Flag to track if logging has been initialized
+GLOBAL_LOGGING_INITIALIZED=false
 
 # Gloabl functions --------------------------------
 
@@ -56,9 +58,24 @@ global_debug_echo() {
 }
 
 
+# Initialize logging system for the application
+global_setup_logging() {
+    global_ensure_dir "${GLOBAL_LOG_DIR}"
+    rm -f "${GLOBAL_LOG_FILE}"
+    touch "${GLOBAL_LOG_FILE}"
+    exec 3>&1 4>&2
+    exec 1> >(tee -a "${GLOBAL_LOG_FILE}") 2>&1
+}
+
 # Log a message with timestamp and level
 # Usage: global_log_message "INFO" "Starting installation"
 global_log_message() {
+    # Initialize logging if this is the first call
+    if [[ "${GLOBAL_LOGGING_INITIALIZED}" == "false" ]]; then
+        global_setup_logging
+        GLOBAL_LOGGING_INITIALIZED=true
+    fi
+
     local level="${1:-INFO}"
     local message="${2:-}"
     local timestamp
@@ -79,23 +96,6 @@ global_log_message() {
     if [[ "${DEBUG}" == "true" ]] || [[ "${level}" != "DEBUG" ]]; then
         echo -e "${log_entry}"
     fi
-}
-
-# Initialize logging system for the application
-# This function:
-# 1. Ensures the log directory exists with proper permissions
-# 2. Removes any existing log file to start fresh
-# 3. Creates a new empty log file
-# 4. Saves the original stdout (file descriptor 1) to fd 3
-# 5. Saves the original stderr (file descriptor 2) to fd 4
-# 6. Redirects stdout and stderr to both the terminal and the log file using tee
-# Usage: global_setup_logging
-global_setup_logging() {
-    global_ensure_dir "${GLOBAL_LOG_DIR}"
-    rm -f "${GLOBAL_LOG_FILE}"
-    touch "${GLOBAL_LOG_FILE}"
-    exec 3>&1 4>&2
-    exec 1> >(tee -a "${GLOBAL_LOG_FILE}") 2>&1
 }
 
 

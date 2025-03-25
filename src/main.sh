@@ -28,6 +28,16 @@ readonly _PROCEDURES_PATH="https://api.github.com/repos/Multitec-UA/pimp_my_ubun
 # Declare GLOBAL_INSTALLATION_STATUS if not already declared
 declare -A GLOBAL_INSTALLATION_STATUS
 
+# Get the real user's home directory (works with sudo)
+if [[ -n "${SUDO_USER:-}" ]]; then
+    GLOBAL_REAL_USER="${SUDO_USER}"
+    GLOBAL_REAL_HOME=$(getent passwd "${SUDO_USER}" | cut -d: -f6)
+else
+    GLOBAL_REAL_USER="${USER}"
+    GLOBAL_REAL_HOME="${HOME}"
+fi
+
+readonly GLOBAL_DOWNLOAD_DIR="$GLOBAL_REAL_HOME/Documents/pimp_my_ubuntu"
 
 # Strict mode
 set -euo pipefail

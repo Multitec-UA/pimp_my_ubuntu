@@ -56,9 +56,9 @@ global_setup_logging() {
     rm -f "${GLOBAL_LOG_FILE}"
     touch "${GLOBAL_LOG_FILE}"
     # Save original stdout and stderr
-    exec 3>&1 4>&2
-    # We only redirect stdout/stderr to terminal, not to the log file
-    exec 1> >(tee /dev/tty) 2>&1
+    #exec 3>&1 4>&2
+    ## We only redirect stdout/stderr to terminal, not to the log file
+    #exec 1> >(tee /dev/tty) 2>&1
 }
 
 # Log a message with timestamp and level

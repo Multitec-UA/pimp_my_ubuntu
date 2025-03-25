@@ -43,7 +43,7 @@ set -euo pipefail
 main() {
 
     # Source global variables and functions
-    _source_lib "/src/lib/global_utils.sh"
+    _source_lib "global_utils.sh"
     
     global_check_root
 

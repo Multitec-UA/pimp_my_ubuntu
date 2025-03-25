@@ -272,7 +272,8 @@ global_download_media() {
     
     # Ensure the directory is owned by the real user
     chown "${GLOBAL_REAL_USER}:${GLOBAL_REAL_USER}" "${GLOBAL_DOWNLOAD_DIR}"
-    global_log_message "DEBUG-GLOBAL_DOWNLOAD_DIR" "GLOBAL_DOWNLOAD_DIR: ${GLOBAL_DOWNLOAD_DIR}"
+
+    global_log_message "DEBUG" "GLOBAL_DOWNLOAD_DIR-GLOBAL_UTILS: ${GLOBAL_DOWNLOAD_DIR}"
     if [[ -n "${file_path}" ]]; then
         global_log_message "INFO" "Downloading media file: ${file_path} to ${GLOBAL_DOWNLOAD_DIR}"
         local output_file="${GLOBAL_DOWNLOAD_DIR}/$(basename "${file_path}")"

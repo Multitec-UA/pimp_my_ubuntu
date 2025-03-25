@@ -48,7 +48,7 @@ main() {
     global_check_root
 
     _step_init
-    global_log_message "DEBUG-GRUB-CUSTOMIZER" "GLOBAL_DOWNLOAD_DIR: ${GLOBAL_DOWNLOAD_DIR}"
+    global_log_message "DEBUG" "GLOBAL_DOWNLOAD_DIR-GRUB-CUSTOMIZER: ${GLOBAL_DOWNLOAD_DIR}"
     global_log_message "DEBUG" "pwd: $(pwd)"
     global_log_message "DEBUG" "ls: $(ls -al)"
 

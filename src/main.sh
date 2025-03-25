@@ -51,7 +51,6 @@ main() {
     global_check_root
 
     _step_init    
-    global_log_message "DEBUG" "GLOBAL_DOWNLOAD_DIR: ${GLOBAL_DOWNLOAD_DIR}"
   
     _init_procedures_info
 
@@ -194,7 +193,7 @@ _run_procedure() {
     global_log_message "INFO" "Starting procedure: ${procedure}"
     
 
-    curl -fsSL "${_PROCEDURES_REMOTE_URL}${procedure}/${procedure}.sh" | sudo -E bash  >>"${GLOBAL_LOG_FILE}" 2>&1
+    curl -fsSL "${_PROCEDURES_REMOTE_URL}${procedure}/${procedure}.sh" | bash  >>"${GLOBAL_LOG_FILE}" 2>&1
     
     local exit_statuses=("${PIPESTATUS[@]}")
     local curl_status="${exit_statuses[0]}"

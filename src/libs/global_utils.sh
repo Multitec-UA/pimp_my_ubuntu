@@ -287,6 +287,7 @@ global_download_media() {
         
         return $curl_status
     else
+    
         global_log_message "ERROR" "No media file specified to download"
         return 1
     fi

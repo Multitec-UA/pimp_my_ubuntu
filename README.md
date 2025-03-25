@@ -26,18 +26,18 @@ Execute his command to use de Pimp My Ubuntu main menu.
 curl -fsSL https://raw.github.com/Multitec-UA/pimp_my_ubuntu/main/src/main.sh | sudo bash
 ```
 
-### Install Cursor
-Download cursor, install appimaged and add cursor command to bashrc and zshrc
-
-```bash
-curl -fsSL https://raw.github.com/Multitec-UA/pimp_my_ubuntu/main/src/procedures/cursor/cursor.sh | sudo bash
-```
-
 ### Install ZSH
 Install ZSH, Oh-My-Zsh, plugins (autosuggestions, syntax-highlighting), Powerlevel10k theme and Meslo Nerd Fonts.
 
 ```bash
 curl -fsSL https://raw.github.com/Multitec-UA/pimp_my_ubuntu/main/src/procedures/zsh/zsh.sh | sudo bash
+```
+
+### Install Cursor
+Download cursor, install appimaged and add cursor command to bashrc and zshrc
+
+```bash
+curl -fsSL https://raw.github.com/Multitec-UA/pimp_my_ubuntu/main/src/procedures/cursor/cursor.sh | sudo bash
 ```
 
 ### Install Grub Customizer

@@ -16,14 +16,16 @@ declare -A GLOBAL_INSTALLATION_STATUS
 readonly DEBUG=${DEBUG:-false}
 
 # Software-common constants
-readonly _REPOSITORY_URL="https://raw.github.com/Multitec-UA/pimp_my_ubuntu/main"
 readonly _SOFTWARE_COMMAND="main-menu"
 readonly _SOFTWARE_DESCRIPTION="Main menu for Pimp My Ubuntu"
 readonly _SOFTWARE_VERSION="1.0.1"
 readonly _DEPENDENCIES=("curl" "wget" "dialog" "jq")
 
 # Software-specific constants
-readonly _PROCEDURES_PATH="https://api.github.com/repos/Multitec-UA/pimp_my_ubuntu/contents/src/procedures"
+readonly _PROCEDURES_CONTENT_URL="https://api.github.com/repos/Multitec-UA/pimp_my_ubuntu/contents/src/procedures"
+readonly _REPOSITORY_RAW_URL="https://raw.github.com/Multitec-UA/pimp_my_ubuntu/main"
+readonly _PROCEDURES_REMOTE_URL="${_REPOSITORY_RAW_URL}/src/procedures/"
+readonly _LIBS_REMOTE_URL="${_REPOSITORY_RAW_URL}/src/libs/"
 
 
 # Get the real user's home directory (works with sudo)
@@ -42,16 +44,13 @@ set -euo pipefail
 
 main() {
     #_source_lib "/src/lib/main_utils.sh"
-    _source_lib "/src/lib/global_utils.sh"
-    _source_lib "/src/lib/dialog.sh"
+    _source_lib "global_utils.sh"
+    _source_lib "dialog.sh"
 
     # Check if the script is running with root privileges
     global_check_root
 
-    _step_init
-
-    pwd >>"${GLOBAL_LOG_FILE}" 2>&1
-    ls -la >>"${GLOBAL_LOG_FILE}" 2>&1
+    _step_init    
   
     _init_procedures_info
 
@@ -76,8 +75,8 @@ _source_lib() {
     local file="${1:-}"
     
     if [[ -n "${file}" ]]; then
-        # Add error handling for curl command
-        if ! source <(curl -fsSL "${_REPOSITORY_URL}/${file}"); then
+        # Redirect curl errors to console
+        if ! source <(curl -fsSL "${_LIBS_REMOTE_URL}${file}" 2>&1); then
             global_log_message "ERROR" "Failed to source library: ${file}"
             exit 1
         fi
@@ -92,7 +91,10 @@ _source_lib() {
 # Prepare for installation
 _step_init() {
     # Log all environment variables for debugging
-    global_log_message "DEBUG" "_REPOSITORY_URL: ${_REPOSITORY_URL}"
+    global_log_message "DEBUG" "_PROCEDURES_CONTENT_URL: ${_PROCEDURES_CONTENT_URL}"
+    global_log_message "DEBUG" "_REPOSITORY_RAW_URL: ${_REPOSITORY_RAW_URL}"
+    global_log_message "DEBUG" "_PROCEDURES_REMOTE_URL: ${_PROCEDURES_REMOTE_URL}"
+    global_log_message "DEBUG" "_LIBS_REMOTE_URL: ${_LIBS_REMOTE_URL}"
     global_log_message "DEBUG" "_SOFTWARE_COMMAND: ${_SOFTWARE_COMMAND}"
     global_log_message "DEBUG" "_SOFTWARE_DESCRIPTION: ${_SOFTWARE_DESCRIPTION}"
     global_log_message "DEBUG" "_SOFTWARE_VERSION: ${_SOFTWARE_VERSION}"
@@ -116,7 +118,7 @@ _init_procedures_info() {
         
     # Get procedures list from GitHub API
     local procedures_json
-    procedures_json=$(curl -fsSL "${_PROCEDURES_PATH}")
+    procedures_json=$(curl -fsSL "${_PROCEDURES_CONTENT_URL}")
     
     # Parse procedure names from JSON response and filter out template
     local names
@@ -189,8 +191,10 @@ _run_procedure() {
     _print_global_installation_status
 
     global_log_message "INFO" "Starting procedure: ${procedure}"
+    
 
-    curl -fsSL "${_PROCEDURES_PATH}/${procedure}/${procedure}.sh" | sudo -E bash  >>"${GLOBAL_LOG_FILE}" 2>&1
+    curl -fsSL "${_PROCEDURES_REMOTE_URL}/${procedure}${procedure}.sh" | sudo -E bash  >>"${GLOBAL_LOG_FILE}" 2>&1
+    
     local exit_statuses=("${PIPESTATUS[@]}")
     local curl_status="${exit_statuses[0]}"
     local bash_status="${exit_statuses[1]}"

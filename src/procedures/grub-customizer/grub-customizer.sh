@@ -48,8 +48,10 @@ main() {
     global_check_root
 
     _step_init
-    global_log_message "DEBUG-GRUB-CUSTOMIZER" " : ${GLOBAL_DOWNLOAD_DIR}"
-    
+    global_log_message "DEBUG-GRUB-CUSTOMIZER" "GLOBAL_DOWNLOAD_DIR: ${GLOBAL_DOWNLOAD_DIR}"
+    global_log_message "DEBUG" "pwd: $(pwd)"
+    global_log_message "DEBUG" "ls: $(ls -al)"
+
 
     if [ "${GLOBAL_INSTALLATION_STATUS["${_SOFTWARE_COMMAND}"]}" == "SKIPPED" ]; then
         global_log_message "INFO" "${_SOFTWARE_COMMAND} is already installed"

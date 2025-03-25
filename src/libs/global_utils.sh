@@ -58,8 +58,8 @@ global_setup_logging() {
 # Log a message with timestamp and level
 # Usage: global_log_message "INFO" "Starting installation"
 global_log_message() {
-    # Initialize logging if this is the first call
-    if [[ "${GLOBAL_LOGGING_INITIALIZED}" == "false" ]]; then
+    # Initialize logging if this is the first call form main menu
+    if [[ "${GLOBAL_LOGGING_INITIALIZED}" == "false" ]] && [[ "${_SOFTWARE_COMMAND}" == "main-menu" ]]; then
         global_setup_logging
         GLOBAL_LOGGING_INITIALIZED=true
     fi

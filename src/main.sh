@@ -49,10 +49,12 @@ main() {
     global_check_root
 
     _step_init
+
+    pwd >>"${GLOBAL_LOG_FILE}" 2>&1
+    ls -la >>"${GLOBAL_LOG_FILE}" 2>&1
   
     _init_procedures_info
 
-    exit 0
     _welcome_screen
 
     _procedure_selector_screen
@@ -188,7 +190,7 @@ _run_procedure() {
 
     global_log_message "INFO" "Starting procedure: ${procedure}"
 
-    curl -fsSL "${_PROCEDURES_PATH}/${procedure}/${procedure}.sh" | sudo -E bash
+    curl -fsSL "${_PROCEDURES_PATH}/${procedure}/${procedure}.sh" | sudo -E bash  >>"${GLOBAL_LOG_FILE}" 2>&1
     local exit_statuses=("${PIPESTATUS[@]}")
     local curl_status="${exit_statuses[0]}"
     local bash_status="${exit_statuses[1]}"

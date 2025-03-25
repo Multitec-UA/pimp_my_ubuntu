@@ -27,8 +27,6 @@ else
     GLOBAL_REAL_USER="${USER}"
     GLOBAL_REAL_HOME="${HOME}"
 fi
-echo "GLOBAL_REAL_USER: ${GLOBAL_REAL_USER}" >> "${GLOBAL_LOG_FILE}"
-echo "GLOBAL_REAL_HOME: ${GLOBAL_REAL_HOME}" >> "${GLOBAL_LOG_FILE}"
 
 readonly GLOBAL_DOWNLOAD_DIR="$GLOBAL_REAL_HOME/Documents/pimp_my_ubuntu"
 
@@ -280,11 +278,11 @@ global_download_media() {
         local output_file="${GLOBAL_DOWNLOAD_DIR}/$(basename "${file_path}")"
 
         # Use raw URL for GitHub content instead of API
-        curl -H "${header}" -s "${_REPOSITORY_URL}/${file_path}" -o "${output_file}"
+        curl -fsSL "${_REPOSITORY_URL}/${file_path} -o "${output_file}"  >>"${GLOBAL_LOG_FILE}" 2>&1
         local curl_status=$?
         
         # Ensure the downloaded file is owned by the real user
-        chown "${GLOBAL_REAL_USER}:${GLOBAL_REAL_USER}" "${output_file}"
+        chown "${GLOBAL_REAL_USER}:${GLOBAL_REAL_USER}" "${output_file}"  >>"${GLOBAL_LOG_FILE}" 2>&1
         
         return $curl_status
     else

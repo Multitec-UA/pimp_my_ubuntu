@@ -28,7 +28,7 @@ readonly _LIBS_REMOTE_URL="${_REPOSITORY_RAW_URL}/src/libs/"
 # More themes in https://www.gnome-look.org/ Add .zip with theme.txt file inside to media folder
 readonly _THEME_OPTIONS=("crt-amber-theme" "monterey-theme" "solarized-theme" "cybergrub-theme") # Available theme options
 readonly _THEME_POSITION=${1:-0} #Default theme position, can be overridden by command line argument
-readonly _THEME_NAME="${_THEME_OPTIONS[$_THEME_POSITION]}"
+readonly _THEME_NAME="${_THEME_OPTIONS[_THEME_POSITION]}"
 readonly _MEDIA_PATH="/src/procedures/grub_customizer/media"
 
 # Declare GLOBAL_INSTALLATION_STATUS if not already declared

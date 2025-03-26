@@ -28,7 +28,7 @@ readonly _DEPENDENCIES=("curl" "wget" "coreutils")
 readonly _THEME_OPTIONS=("crt-amber-theme" "monterey-theme" "solarized-theme" "cybergrub-theme") # Available theme options
 readonly _THEME_POSITION=${1:-0} #Default theme position, can be overridden by command line argument
 readonly _THEME_NAME="${_THEME_OPTIONS[_THEME_POSITION]}"
-readonly _MEDIA_PATH="/src/procedures/grub_customizer/media"
+readonly _MEDIA_PATH="/src/procedures/grub-customizer/media"
 
 # Declare GLOBAL_INSTALLATION_STATUS if not already declared
 if ! declare -p GLOBAL_INSTALLATION_STATUS >/dev/null 2>&1; then

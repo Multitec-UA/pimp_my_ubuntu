@@ -23,7 +23,7 @@ Theme previews are available in the `media/theme-previews` directory.
 
 ## Modifications Applied
 
-The installation script (`grub_customizer.sh`) makes the following changes to your system:
+The installation script (`grub-customizer.sh`) makes the following changes to your system:
 
 1. **Software Installation**:
    - Adds the PPA repository: `ppa:danielrichter2007/grub-customizer`
@@ -83,11 +83,11 @@ You can add your own GRUB themes to the collection by following these steps:
    - Name the ZIP file descriptively (e.g., `my-custom-theme.zip`)
 
 3. **Add the theme to the project**:
-   - Place the ZIP file in the `src/procedures/grub_customizer/media/` directory
-   - Add a preview image (PNG format) to `src/procedures/grub_customizer/media/theme-previews/`
+   - Place the ZIP file in the `src/procedures/grub-customizer/media/` directory
+   - Add a preview image (PNG format) to `src/procedures/grub-customizer/media/theme-previews/`
 
 4. **Update the installation script**:
-   - Edit `grub_customizer.sh`
+   - Edit `grub-customizer.sh`
    - Add your theme name to the `_THEME_OPTIONS` array:
      ```bash
      readonly _THEME_OPTIONS=("crt-amber-theme" "monterey-theme" "solarized-theme" "cybergrub-theme" "my-custom-theme")

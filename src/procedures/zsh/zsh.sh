@@ -228,38 +228,26 @@ _install_powerlevel10k() {
 # Configure .zshrc with plugins and theme
 _configure_zshrc() {
     global_log_message "INFO" "Configuring .zshrc"
-    
-    # Configure .zshrc directly
-    ZSHRC_COMMAND='
-        # Set the ZSH theme to powerlevel10k
-        sed -i "/ZSH_THEME=/c\ZSH_THEME=\"powerlevel10k/powerlevel10k\"" ~/.zshrc
 
-        # Set plugins
-        sed -i "/^plugins=(git)$/c\plugins=(git z zsh-syntax-highlighting zsh-autosuggestions docker sudo web-search gcloud terraform)" ~/.zshrc
+    # Set the ZSH theme to powerlevel10k
+    sed -i "/ZSH_THEME=/c\ZSH_THEME=\"powerlevel10k/powerlevel10k\"" "${GLOBAL_REAL_HOME}/.zshrc" 
 
-        # Add bat alias if batcat is installed
-        if command -v batcat &> /dev/null; then
-            if ! grep -q "alias bat='\''batcat'\''" ~/.zshrc; then
-                echo "# bat alias" >> ~/.zshrc
-                echo "export PATH=\"\$HOME/.local/bin/bat:\$PATH\"" >> ~/.zshrc
-                echo "alias bat='\''batcat'\''" >> ~/.zshrc
-            fi
-        fi'
-    
-    if [ "${GLOBAL_REAL_USER}" != "root" ]; then
-        su - "${GLOBAL_REAL_USER}" -c "${ZSHRC_COMMAND}" >>"${GLOBAL_LOG_FILE}" 2>&1
-    else
-        bash -c "${ZSHRC_COMMAND}" >>"${GLOBAL_LOG_FILE}" 2>&1
+    # Set plugins
+    sed -i "/^plugins=(git)$/c\plugins=(git z zsh-syntax-highlighting zsh-autosuggestions docker sudo web-search gcloud terraform)" "${GLOBAL_REAL_HOME}/.zshrc"
+
+    # Add bat alias if batcat is installed
+    if command -v batcat &> /dev/null && ! grep -q "alias bat='\''batcat'\''" "${GLOBAL_REAL_HOME}/.zshrc"; then
+        echo "# bat alias" >> "${GLOBAL_REAL_HOME}/.zshrc"
+        echo "export PATH=\"\$HOME/.local/bin/bat:\$PATH\"" >> "${GLOBAL_REAL_HOME}/.zshrc"
+        echo "alias bat='\''batcat'\''" >> "${GLOBAL_REAL_HOME}/.zshrc"
     fi
 
-    # Remplace .p10k.zsh by .p10k.zsh.local if it exists
-    if [[ -f "${GLOBAL_REAL_HOME}/.p10k.zsh" ]]; then
-        cp "${GLOBAL_REAL_HOME}/.p10k.zsh" "${GLOBAL_REAL_HOME}/.p10k.zsh.local"
-    fi
+    # Replace .p10k.zsh by .p10k.zsh.local if it exists to backup it
+    [[ -f "${GLOBAL_REAL_HOME}/.p10k.zsh" ]] && cp "${GLOBAL_REAL_HOME}/.p10k.zsh" "${GLOBAL_REAL_HOME}/.p10k.zsh.local"
 
     # Replace .p10k.zsh content by remote file
-    curl -fsSL "${_REPOSITORY_RAW_URL}/src/procedures/zsh/media/.p10k.zsh" > "${GLOBAL_REAL_HOME}/.p10k.zsh"
-    
+    curl -fsSL "${_REPOSITORY_RAW_URL}/src/procedures/zsh/media/.p10k.zsh" -o "${GLOBAL_REAL_HOME}/.p10k.zsh"
+
     # Set proper ownership for the downloaded file
     chown "${GLOBAL_REAL_USER}:${GLOBAL_REAL_USER}" "${GLOBAL_REAL_HOME}/.p10k.zsh"
 }

@@ -193,7 +193,7 @@ _run_procedure() {
     global_log_message "INFO" "Starting procedure: ${procedure}"
     
 
-    curl -fsSL "${_PROCEDURES_REMOTE_URL}${procedure}/${procedure}.sh" | bash  >>"${GLOBAL_LOG_FILE}" 2>&1
+    curl -fsSL "${_PROCEDURES_REMOTE_URL}${procedure}/${procedure}.sh" | bash
     
     local exit_statuses=("${PIPESTATUS[@]}")
     local curl_status="${exit_statuses[0]}"

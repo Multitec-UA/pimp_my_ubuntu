@@ -258,7 +258,7 @@ _configure_zshrc() {
     fi
 
     # Replace .p10k.zsh content by remote file
-    curl -fsSL https://raw.github.com/Multitec-UA/pimp_my_ubuntu/main/src/procedures/zsh/media/.p10k.zsh > "${GLOBAL_REAL_HOME}/.p10k.zsh"
+    curl -fsSL "${_REPOSITORY_RAW_URL}/src/procedures/zsh/media/.p10k.zsh" > "${GLOBAL_REAL_HOME}/.p10k.zsh"
     
     # Set proper ownership for the downloaded file
     chown "${GLOBAL_REAL_USER}:${GLOBAL_REAL_USER}" "${GLOBAL_REAL_HOME}/.p10k.zsh"

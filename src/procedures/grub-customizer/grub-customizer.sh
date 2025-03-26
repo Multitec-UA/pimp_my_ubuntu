@@ -48,9 +48,6 @@ main() {
     global_check_root
 
     _step_init
-    global_log_message "DEBUG" "GLOBAL_DOWNLOAD_DIR-GRUB-CUSTOMIZER: ${GLOBAL_DOWNLOAD_DIR}"
-    global_log_message "DEBUG" "pwd: $(pwd)"
-    global_log_message "DEBUG" "ls: $(ls -al)"
 
 
     if [ "${GLOBAL_INSTALLATION_STATUS["${_SOFTWARE_COMMAND}"]}" == "SKIPPED" ]; then
@@ -125,7 +122,7 @@ _step_install_software() {
 
 # Post-installation configuration
 _step_post_install() {
-    global_log_message "INFO" "Post installation of ${_SOFTWARE_COMMAND}"
+    global_log_message "DEBUG" "Post installation of ${_SOFTWARE_COMMAND}"
     
     global_log_message "INFO" "Installing grub theme"
     _install_grub_theme
@@ -133,7 +130,7 @@ _step_post_install() {
 
 # Cleanup after installation
 _step_cleanup() {
-    global_log_message "INFO" "Cleaning up after installation of ${_SOFTWARE_COMMAND}"
+    global_log_message "DEBUG" "Cleaning up after installation of ${_SOFTWARE_COMMAND}"
     
     # Remove downloaded theme file if it exists
     if [[ -f "${GLOBAL_DOWNLOAD_DIR}/${_THEME_NAME}.zip" ]]; then
@@ -159,15 +156,15 @@ _install_grub_theme() {
     
     
     # Download and extract theme
-    global_log_message "INFO" "Downloading and extracting GRUB theme"
+    global_log_message "DEBUG" "Downloading and extracting GRUB theme"
     global_download_media "${_MEDIA_PATH}/${_THEME_NAME}.zip"
     
     # Create themes directory if it doesn't exist
-    global_log_message "INFO" "Creating GRUB themes directory"
+    global_log_message "DEBUG" "Creating GRUB themes directory"
     sudo mkdir -p /boot/grub/themes
     
     # Extract theme to GRUB themes directory
-    global_log_message "INFO" "Extracting theme to GRUB themes directory"
+    global_log_message "DEBUG" "Extracting theme to GRUB themes directory"
     sudo unzip -o "${GLOBAL_DOWNLOAD_DIR}/${_THEME_NAME}.zip" -d /boot/grub/themes/ >>"${GLOBAL_LOG_FILE}" 2>&1
     
     # Edit GRUB configuration

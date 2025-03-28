@@ -33,14 +33,7 @@ GLOBAL_DOWNLOAD_DIR="$GLOBAL_REAL_HOME/Documents/pimp_my_ubuntu"
 # Flag to track if logging has been initialized
 GLOBAL_LOGGING_INITIALIZED=false
 
-# Gloabl functions --------------------------------
-
-global_declare_installation_status() {
-    if ! declare -p GLOBAL_INSTALLATION_STATUS >/dev/null 2>&1; then
-        declare -A GLOBAL_INSTALLATION_STATUS
-        echo "GLOBAL_INSTALLATION_STATUS declared"
-    fi
-}
+# Gloabl functions ------------------------------------------------------------
 
 # Function to run commands as the real user
 global_run_as_user() {
@@ -97,6 +90,14 @@ global_check_root() {
         echo "This script must be run as root" >&2
         echo "Please run: sudo $0" >&2
         exit 1
+    fi
+}
+
+global_declare_installation_status() {
+    if ! declare -p GLOBAL_INSTALLATION_STATUS >/dev/null 2>&1; then
+        declare -A GLOBAL_INSTALLATION_STATUS
+        # DEBUG
+        echo "echo: DEGUB GLOBAL_INSTALLATION_STATUS declared"
     fi
 }
 
@@ -157,6 +158,8 @@ global_get_installation_status() {
     global_import_installation_status
     # Use parameter expansion with default to avoid unbound variable error
     echo "${GLOBAL_INSTALLATION_STATUS[$command]:-}"
+    # DEBUG
+    echo "echo: DEGUB GLOBAL_INSTALLATION_STATUS get: ${command}=${GLOBAL_INSTALLATION_STATUS[$command]:-}"
 }
 
 global_set_installation_status() {
@@ -165,6 +168,8 @@ global_set_installation_status() {
     global_declare_installation_status
     GLOBAL_INSTALLATION_STATUS["$command"]="$status"
     global_export_installation_status
+    # DEBUG
+    echo "echo: DEGUB GLOBAL_INSTALLATION_STATUS set: ${command}=${status}"
 }
 
 # Function to remove a command from the installation status array

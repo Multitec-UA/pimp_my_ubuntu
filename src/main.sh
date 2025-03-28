@@ -127,6 +127,12 @@ _init_procedures_info() {
     done <<< "${names}"
     
     global_log_message "DEBUG" "All procedures initialized with INIT status"
+
+    ## DEBUG
+    global_set_installation_status "debug" "SUCCESS"
+    global_log_message "DEBUG" "GET: $(global_get_installation_status "debug")"
+    global_log_message "DEBUG" "GLOBAL_INSTALLATION_STATUS: ${GLOBAL_INSTALLATION_STATUS[@]}"   
+    global_log_message "DEBUG" "GLOBAL_INSTALLATION_STATUS_KEYS: ${!GLOBAL_INSTALLATION_STATUS[@]}"
 }
 
 _welcome_screen() {

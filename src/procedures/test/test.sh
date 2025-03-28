@@ -42,7 +42,9 @@ main() {
     global_check_root
     echo "GLOBAL_INSTALLATION_STATUS: ${GLOBAL_INSTALLATION_STATUS[@]}"
     global_set_installation_status "${_SOFTWARE_COMMAND}" "SUCCESS"
+    global_set_installation_status "debug" "FAILED"
     echo "GLOBAL_INSTALLATION_STATUS: ${GLOBAL_INSTALLATION_STATUS[@]}"
+    echo "GLOBAL_INSTALLATION_STATUS_KEYS: ${!GLOBAL_INSTALLATION_STATUS[@]}"
 
     echo "STATUS: $(global_get_installation_status ${_SOFTWARE_COMMAND})"
     echo "GLOBAL_INSTALLATION_STATUS: ${GLOBAL_INSTALLATION_STATUS[@]}"

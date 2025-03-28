@@ -99,6 +99,8 @@ global_declare_installation_status() {
         declare -gA GLOBAL_INSTALLATION_STATUS
         # DEBUG
         global_log_message "DEBUG" "GLOBAL_INSTALLATION_STATUS declared as global associative array"
+        echo "echo: version 1"
+
     fi
 }
 
@@ -162,7 +164,6 @@ global_import_installation_status() {
     done
     
     # DEBUG
-    echo "echo: version 1"
     global_log_message "DEBUG" "GLOBAL_INSTALLATION_STATUS after import: ${GLOBAL_INSTALLATION_STATUS[@]}"
     global_log_message "DEBUG" "GLOBAL_INSTALLATION_STATUS_KEYS after import: ${!GLOBAL_INSTALLATION_STATUS[@]}"
 }

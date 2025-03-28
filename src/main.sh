@@ -37,8 +37,6 @@ fi
 
 GLOBAL_DOWNLOAD_DIR="$GLOBAL_REAL_HOME/Documents/pimp_my_ubuntu"
 
-# Strict mode
-set -euo pipefail
 
 main() {
     #_source_lib "/src/lib/main_utils.sh"

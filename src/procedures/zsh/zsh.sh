@@ -31,8 +31,6 @@ readonly _ZSH_SYNTAX_HIGHLIGHTING_URL="https://github.com/zsh-users/zsh-syntax-h
 readonly _POWERLEVEL10K_URL="https://github.com/romkatv/powerlevel10k.git"
 readonly _MESLO_FONT_BASE_URL="https://github.com/romkatv/powerlevel10k-media/raw/master"
 
-# Strict mode
-set -euo pipefail
 
 # Main procedure function
 main() {

@@ -31,8 +31,6 @@ readonly _USER_LOCAL_DIR="${GLOBAL_REAL_HOME}/.local"
 readonly _SHELL_RC_FILES=("${GLOBAL_REAL_HOME}/.bashrc" "${GLOBAL_REAL_HOME}/.zshrc")
 
 
-# Strict mode
-set -euo pipefail
 
 # Main procedure function
 main() {

@@ -29,8 +29,6 @@ readonly _LIBS_REMOTE_URL="${_REPOSITORY_RAW_URL}/src/libs/"
 readonly _EXAMPLE_CONFIG_VALUE="example_value"
 
 
-# Strict mode
-set -euo pipefail
 
 # Main procedure function
 main() {

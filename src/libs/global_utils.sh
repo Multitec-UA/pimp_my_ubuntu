@@ -155,7 +155,8 @@ global_get_installation_status() {
     local command=$1
     
     global_import_installation_status
-    echo "${GLOBAL_INSTALLATION_STATUS[$command]}"
+    # Use parameter expansion with default to avoid unbound variable error
+    echo "${GLOBAL_INSTALLATION_STATUS[$command]:-}"
 }
 
 global_set_installation_status() {

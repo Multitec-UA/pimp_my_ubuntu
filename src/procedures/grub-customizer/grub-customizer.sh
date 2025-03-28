@@ -31,8 +31,6 @@ readonly _THEME_POSITION=${1:-0} #Default theme position, can be overridden by c
 readonly _THEME_NAME="${_THEME_OPTIONS[_THEME_POSITION]}"
 readonly _MEDIA_PATH="/src/procedures/grub-customizer/media"
 
-# Strict mode
-set -euo pipefail
 
 # Main procedure function
 main() {

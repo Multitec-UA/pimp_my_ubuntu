@@ -42,7 +42,6 @@ main() {
     _source_lib "global_utils.sh"
     
     global_check_root
-    echo "GLOBAL_INSTALLATION_STATUS: ${GLOBAL_INSTALLATION_STATUS[@]}"
     global_set_installation_status "${_SOFTWARE_COMMAND}" "SUCCESS"
     echo "GLOBAL_INSTALLATION_STATUS: ${GLOBAL_INSTALLATION_STATUS[@]}"
 
@@ -74,7 +73,7 @@ _step_init() {
     global_log_message "INFO" "Starting installation of ${_SOFTWARE_COMMAND}"
     
     if global_check_if_installed "${_SOFTWARE_COMMAND}"; then
-        GLOBAL_INSTALLATION_STATUS "${_SOFTWARE_COMMAND}" "SKIPPED"
+        global_set_installation_status "${_SOFTWARE_COMMAND}" "SKIPPED"
         return 0
     fi
 }
@@ -120,7 +119,7 @@ _step_cleanup() {
     fi
     
     # Clean apt cache if we installed new packages
-    if [[ "$(GLOBAL_INSTALLATION_STATUS "${_SOFTWARE_COMMAND}")" == "SUCCESS" ]]; then
+    if [[ "$(global_get_installation_status "${_SOFTWARE_COMMAND}")" == "SUCCESS" ]]; then
         global_log_message "DEBUG" "Cleaning apt cache"
         apt-get clean >>"${GLOBAL_LOG_FILE}" 2>&1
     fi

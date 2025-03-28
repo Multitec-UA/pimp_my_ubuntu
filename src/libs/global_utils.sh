@@ -145,23 +145,23 @@ global_import_installation_status() {
 }
 
 global_get_installation_status() {
+    local command=$1
     # Declare GLOBAL_INSTALLATION_STATUS if not already declared
     if ! declare -p GLOBAL_INSTALLATION_STATUS >/dev/null 2>&1; then
         declare -A GLOBAL_INSTALLATION_STATUS
     fi
-    local command=$1
     global_import_installation_status
     echo "${GLOBAL_INSTALLATION_STATUS[$command]}"
 }
 
 global_set_installation_status() {
+    local command=$1
+    local status=$2
     # Declare GLOBAL_INSTALLATION_STATUS if not already declared
     if ! declare -p GLOBAL_INSTALLATION_STATUS >/dev/null 2>&1; then
         declare -A GLOBAL_INSTALLATION_STATUS
+        global_import_installation_status
     fi
-    local command=$1
-    local status=$2
-    global_import_installation_status
     GLOBAL_INSTALLATION_STATUS["$command"]="$status"
     global_export_installation_status
 }

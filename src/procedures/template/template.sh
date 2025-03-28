@@ -71,12 +71,12 @@ _source_lib() {
     if [[ -n "${file}" ]]; then
         # Redirect curl errors to console
         if ! source <(curl -fsSL "${_LIBS_REMOTE_URL}${file}" 2>&1); then
-            global_log_message "ERROR" "Failed to source library: ${file}"
+            echo "ERROR" "Failed to source library: ${file}"
             exit 1
         fi
         global_log_message "DEBUG" "Successfully sourced library: ${file}"
     else
-        global_log_message "ERROR" "No library file specified to source"
+        echo "ERROR" "No library file specified to source"
         exit 1
     fi
 }

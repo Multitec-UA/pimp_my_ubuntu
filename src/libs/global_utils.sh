@@ -167,6 +167,14 @@ global_set_installation_status() {
     global_export_installation_status
 }
 
+# Function to remove a command from the installation status array
+# Usage: global_remove_installation_status "command_name"
+global_unset_installation_status() {
+    local command=$1
+    unset GLOBAL_INSTALLATION_STATUS["$command"]
+    global_export_installation_status
+}
+
 # Check if software is already installed using multiple methods
 # Usage: global_check_if_installed "software_name"
 # Returns: 0 if installed, 1 if not installed

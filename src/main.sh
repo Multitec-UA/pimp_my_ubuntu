@@ -64,8 +64,6 @@ main() {
     _print_global_installation_status
     
     global_log_message "INFO" "Finished Pimp My Ubuntu installation script\n"
-
-    
 }
 
 # Necessary function to source libraries
@@ -125,7 +123,7 @@ _init_procedures_info() {
     # Initialize each procedure's status as pending
     while IFS= read -r proc_name; do
         global_log_message "DEBUG" "Added procedure '${proc_name}' with status 'INIT'"
-        GLOBAL_INSTALLATION_STATUS["${proc_name}"]="INIT"
+        global_set_installation_status "${proc_name}" "INIT"
     done <<< "${names}"
     
     global_log_message "DEBUG" "All procedures initialized with INIT status"
@@ -155,27 +153,26 @@ _procedure_selector_screen() {
         exit 0
     fi
     
-    # Update GLOBAL_INSTALLATION_STATUS based on selection
+    # Update installation status based on selection
     local all_procedures=("${!GLOBAL_INSTALLATION_STATUS[@]}")
     for proc in "${all_procedures[@]}"; do
         if [[ ! " ${selected} " =~ " ${proc} " ]]; then
-            unset "GLOBAL_INSTALLATION_STATUS[$proc]"
+            # Remove procedures that aren't selected
+            global_unset_installation_status "${proc}"
             global_log_message "DEBUG" "Removed $proc from installation status"
         else
-            GLOBAL_INSTALLATION_STATUS["$proc"]="PENDING"
+            # Set selected procedures to PENDING status
+            global_set_installation_status "${proc}" "PENDING"
             global_log_message "DEBUG" "Set $proc status to PENDING"
         fi
     done
-    
-    # Make status array available to child scripts
-    
 }
 
 _print_global_installation_status() {
     echo -e "\n"
     global_log_message "INFO" "Current installation status:"
     for proc_name in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
-        global_log_message "INFO" "${proc_name}: ${GLOBAL_INSTALLATION_STATUS[$proc_name]}"
+        global_log_message "INFO" "${proc_name}: $(global_get_installation_status ${proc_name})"
     done
     global_log_message "INFO" "For more details, check the log file ${GLOBAL_LOG_FILE}"
     echo -e "\n"

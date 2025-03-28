@@ -18,6 +18,7 @@ readonly DEBUG=${DEBUG:-false}
 
 # Software-common constants
 readonly _REPOSITORY_RAW_URL="https://raw.github.com/Multitec-UA/pimp_my_ubuntu/main"
+readonly _LIBS_REMOTE_URL="${_REPOSITORY_RAW_URL}/src/libs/"
 readonly _SOFTWARE_COMMAND="test"
 readonly _SOFTWARE_DESCRIPTION="Test procedure"
 readonly _SOFTWARE_VERSION="1.0.0"
@@ -30,10 +31,6 @@ readonly _THEME_POSITION=${1:-0} #Default theme position, can be overridden by c
 readonly _THEME_NAME="${_THEME_OPTIONS[_THEME_POSITION]}"
 readonly _MEDIA_PATH="/src/procedures/grub-customizer/media"
 
-# Declare GLOBAL_INSTALLATION_STATUS if not already declared
-if ! declare -p GLOBAL_INSTALLATION_STATUS >/dev/null 2>&1; then
-    declare -A GLOBAL_INSTALLATION_STATUS
-fi
 
 # Strict mode
 set -euo pipefail
@@ -42,26 +39,29 @@ set -euo pipefail
 main() {
 
     # Source global variables and functions
-    _source_lib "/src/lib/global_utils.sh"
+    _source_lib "global_utils.sh"
     
     global_check_root
 
-    global_import_installation_status
+    global_set_installation_status "${_SOFTWARE_COMMAND}" "SUCCESS"
 
-    GLOBAL_INSTALLATION_STATUS["${_SOFTWARE_COMMAND}"]="SUCCESS"
-    global_export_installation_status
+    echo "global_get_installation_status: ${_SOFTWARE_COMMAND}"
     exit 0
 }
 
 # Necessary function to source libraries
 _source_lib() {
-    local header="Accept: application/vnd.github.v3.raw"
     local file="${1:-}"
     
     if [[ -n "${file}" ]]; then
-        source <(curl -H "${header}" -s "${_REPOSITORY_RAW_URL}/${file}")
+        # Redirect curl errors to console
+        if ! source <(curl -fsSL "${_LIBS_REMOTE_URL}${file}" 2>&1); then
+            global_log_message "ERROR" "Failed to source library: ${file}"
+            exit 1
+        fi
+        global_log_message "DEBUG" "Successfully sourced library: ${file}"
     else
-        echo "Error: No library file specified to source" >&2
+        global_log_message "ERROR" "No library file specified to source"
         exit 1
     fi
 }

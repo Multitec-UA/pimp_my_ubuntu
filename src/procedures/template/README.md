@@ -54,7 +54,6 @@ The template provides access to these global utility functions:
 - `global_install_apt_package`: Install packages via APT
 - `global_add_apt_repository`: Add a PPA repository
 - `global_log_message`: Write messages to the log file
-- `global_import_installation_status`/`global_export_installation_status`: Track installation status
 
 ## Example
 

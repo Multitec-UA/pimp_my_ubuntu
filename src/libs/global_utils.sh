@@ -93,56 +93,78 @@ global_check_root() {
     fi
 }
 
+
 # Function to serialize and export the installation status array
 # Usage: global_export_installation_status
 global_export_installation_status() {
-  local serialized=""
-  local temp_status_file="/tmp/pmu_installation_status.tmp"
-  
-  for key in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
-    # Create a string like "key1:value1;key2:value2"
-    serialized+="${key}:${GLOBAL_INSTALLATION_STATUS[$key]};"
-  done
-  
-  # Write to temporary file instead of environment variable
-  echo "$serialized" > "$temp_status_file"
-  
-  # Ensure the file has appropriate permissions
-  chmod 644 "$temp_status_file"
-  
-  global_log_message "DEBUG" "Exported installation status to file: ${temp_status_file}"
+    local serialized=""
+    local temp_status_file="/tmp/pmu_installation_status.tmp"
+    
+    for key in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
+        # Create a string like "key1:value1;key2:value2"
+        serialized+="${key}:${GLOBAL_INSTALLATION_STATUS[$key]};"
+    done
+    
+    # Write to temporary file instead of environment variable
+    echo "$serialized" > "$temp_status_file"
+    
+    # Ensure the file has appropriate permissions
+    chmod 644 "$temp_status_file"
+    
+    global_log_message "DEBUG" "Exported installation status to file: ${temp_status_file}"
 }
 
 # Function to import and deserialize the installation status array
 # Usage: global_import_installation_status
 global_import_installation_status() {
-  # Create a local associative array
-  declare -A local_status
-  local temp_status_file="/tmp/pmu_installation_status.tmp"
-  
-  if [[ -f "$temp_status_file" ]]; then
-    local serialized=$(cat "$temp_status_file")
+    # Create a local associative array
+    declare -A local_status
+    local temp_status_file="/tmp/pmu_installation_status.tmp"
     
-    local IFS=";"
-    for pair in $serialized; do
-      if [[ -n "$pair" ]]; then
-        key="${pair%%:*}"
-        value="${pair#*:}"
-        local_status["$key"]="$value"
-        global_log_message "DEBUG" "Imported status: ${key}=${value}"
-      fi
+    if [[ -f "$temp_status_file" ]]; then
+        local serialized=$(cat "$temp_status_file")
+        
+        local IFS=";"
+        for pair in $serialized; do
+        if [[ -n "$pair" ]]; then
+            key="${pair%%:*}"
+            value="${pair#*:}"
+            local_status["$key"]="$value"
+            global_log_message "DEBUG" "Imported status: ${key}=${value}"
+        fi
+        done
+    else
+        global_log_message "WARNING" "No installation status file found at ${temp_status_file}"
+    fi
+    
+    # Make the array available globally
+    GLOBAL_INSTALLATION_STATUS=()
+    for key in "${!local_status[@]}"; do
+        GLOBAL_INSTALLATION_STATUS["$key"]="${local_status[$key]}"
     done
-  else
-    global_log_message "WARNING" "No installation status file found at ${temp_status_file}"
-  fi
-  
-  # Make the array available globally
-  GLOBAL_INSTALLATION_STATUS=()
-  for key in "${!local_status[@]}"; do
-    GLOBAL_INSTALLATION_STATUS["$key"]="${local_status[$key]}"
-  done
 }
 
+global_get_installation_status() {
+    # Declare GLOBAL_INSTALLATION_STATUS if not already declared
+    if ! declare -p GLOBAL_INSTALLATION_STATUS >/dev/null 2>&1; then
+        declare -A GLOBAL_INSTALLATION_STATUS
+    fi
+    local command=$1
+    global_import_installation_status
+    echo "${GLOBAL_INSTALLATION_STATUS[$command]}"
+}
+
+global_set_installation_status() {
+    # Declare GLOBAL_INSTALLATION_STATUS if not already declared
+    if ! declare -p GLOBAL_INSTALLATION_STATUS >/dev/null 2>&1; then
+        declare -A GLOBAL_INSTALLATION_STATUS
+    fi
+    local command=$1
+    local status=$2
+    global_import_installation_status
+    GLOBAL_INSTALLATION_STATUS["$command"]="$status"
+    global_export_installation_status
+}
 
 # Check if software is already installed using multiple methods
 # Usage: global_check_if_installed "software_name"

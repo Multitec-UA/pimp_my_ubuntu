@@ -28,13 +28,6 @@ readonly _LIBS_REMOTE_URL="${_REPOSITORY_RAW_URL}/src/libs/"
 # Add any software-specific constants here
 readonly _EXAMPLE_CONFIG_VALUE="example_value"
 
-# Declare GLOBAL_INSTALLATION_STATUS if not already declared
-if ! declare -p GLOBAL_INSTALLATION_STATUS >/dev/null 2>&1; then
-    declare -A GLOBAL_INSTALLATION_STATUS
-fi
-
-# Note: GLOBAL_INSTALLATION_STATUS is now managed via global_import_installation_status/global_export_installation_status
-# and should not be declared directly in procedure scripts
 
 # Strict mode
 set -euo pipefail
@@ -49,7 +42,7 @@ main() {
 
     _step_init
 
-    if [ "${GLOBAL_INSTALLATION_STATUS["${_SOFTWARE_COMMAND}"]}" == "SKIPPED" ]; then
+    if [[ "$(global_get_installation_status "${_SOFTWARE_COMMAND}")" == "SKIPPED" ]]; then
         global_log_message "INFO" "${_SOFTWARE_COMMAND} is already installed"
         _step_post_install
         _step_cleanup
@@ -61,12 +54,12 @@ main() {
     if _step_install_software; then
         _step_post_install
         global_log_message "INFO" "${_SOFTWARE_COMMAND} installation completed successfully"
-        GLOBAL_INSTALLATION_STATUS["${_SOFTWARE_COMMAND}"]="SUCCESS"
+        global_set_installation_status "${_SOFTWARE_COMMAND}" "SUCCESS"
         _step_cleanup
         return 0
     else
         global_log_message "ERROR" "Failed to install ${_SOFTWARE_COMMAND}"
-        GLOBAL_INSTALLATION_STATUS["${_SOFTWARE_COMMAND}"]="FAILED"
+        global_set_installation_status "${_SOFTWARE_COMMAND}" "FAILED"
         _step_cleanup
         return 1
     fi
@@ -94,13 +87,10 @@ _source_lib() {
 
 # Prepare for installation
 _step_init() {
-    # Import installation status from environment
-    global_import_installation_status
-    
     global_log_message "INFO" "Starting installation of ${_SOFTWARE_COMMAND}"
     
     if global_check_if_installed "${_SOFTWARE_COMMAND}"; then
-        GLOBAL_INSTALLATION_STATUS["${_SOFTWARE_COMMAND}"]="SKIPPED"
+        global_set_installation_status "${_SOFTWARE_COMMAND}" "SKIPPED"
         return 0
     fi
 }
@@ -164,7 +154,7 @@ _step_cleanup() {
     fi
     
     # Clean apt cache if we installed new packages
-    if [[ "${GLOBAL_INSTALLATION_STATUS["${_SOFTWARE_COMMAND}"]}" == "SUCCESS" ]]; then
+    if [[ "$(global_get_installation_status "${_SOFTWARE_COMMAND}")" == "SUCCESS" ]]; then
         global_log_message "DEBUG" "Cleaning apt cache"
         apt-get clean >>"${GLOBAL_LOG_FILE}" 2>&1
     fi
@@ -188,8 +178,6 @@ _step_cleanup() {
 # Execute main function
 main "$@"
 
-# Export installation status at the end to propagate changes back to parent
-global_export_installation_status
 
 # Exit with success
 exit 0 

@@ -9,8 +9,6 @@
 # License: MIT
 # =============================================================================
 
-# Declare the global installation status array
-declare -A GLOBAL_INSTALLATION_STATUS
 
 # Debug flag - set to true to enable debug messages
 readonly DEBUG=${DEBUG:-false}
@@ -59,6 +57,8 @@ main() {
     _procedure_selector_screen
 
     # Run procedures in the order of selection
+
+    # TODO: fix this loop to run procedures in the order of selection !!!!!!
     for procedure in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
         _run_procedure "${procedure}"
     done
@@ -130,7 +130,6 @@ _init_procedures_info() {
         GLOBAL_INSTALLATION_STATUS["${proc_name}"]="INIT"
     done <<< "${names}"
     
-    global_export_installation_status
     global_log_message "DEBUG" "All procedures initialized with INIT status"
 }
 
@@ -171,7 +170,7 @@ _procedure_selector_screen() {
     done
     
     # Make status array available to child scripts
-    global_export_installation_status
+    
 }
 
 _print_global_installation_status() {
@@ -200,8 +199,6 @@ _run_procedure() {
     local bash_status="${exit_statuses[1]}"
     
     global_log_message "INFO" "Procedure ${procedure} completed with status: ${bash_status} (curl status: ${curl_status})"
-
-    global_import_installation_status
 
 }
 

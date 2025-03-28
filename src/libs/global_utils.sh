@@ -95,9 +95,12 @@ global_check_root() {
 
 global_declare_installation_status() {
     if ! declare -p GLOBAL_INSTALLATION_STATUS >/dev/null 2>&1; then
+        # Declare a new associative array
         declare -A GLOBAL_INSTALLATION_STATUS
+        # Export it so it's available to subshells
+        export GLOBAL_INSTALLATION_STATUS
         # DEBUG
-        echo "echo: DEGUB GLOBAL_INSTALLATION_STATUS declared"
+        global_log_message "DEBUG" "GLOBAL_INSTALLATION_STATUS declared as associative array"
     fi
 }
 
@@ -108,9 +111,15 @@ global_export_installation_status() {
     local serialized=""
     local temp_status_file="/tmp/pmu_installation_status.tmp"
     
+    # Debug existing array content
+    global_log_message "DEBUG" "Exporting keys: ${!GLOBAL_INSTALLATION_STATUS[@]}"
+    global_log_message "DEBUG" "Exporting values: ${GLOBAL_INSTALLATION_STATUS[@]}"
+    
     for key in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
+        local value="${GLOBAL_INSTALLATION_STATUS[$key]}"
         # Create a string like "key1:value1;key2:value2"
-        serialized+="${key}:${GLOBAL_INSTALLATION_STATUS[$key]};"
+        serialized+="${key}:${value};"
+        global_log_message "DEBUG" "Serializing: ${key}:${value}"
     done
     
     # Write to temporary file instead of environment variable
@@ -119,6 +128,8 @@ global_export_installation_status() {
     # Ensure the file has appropriate permissions
     chmod 644 "$temp_status_file"
     
+    # Verify serialized content
+    global_log_message "DEBUG" "Serialized content: $(cat $temp_status_file)"
     global_log_message "DEBUG" "Exported installation status to file: ${temp_status_file}"
 }
 
@@ -146,10 +157,15 @@ global_import_installation_status() {
     fi
     
     # Make the array available globally
-    GLOBAL_INSTALLATION_STATUS=()
+    # Ensure we declare it as an associative array (-A)
+    declare -A GLOBAL_INSTALLATION_STATUS
     for key in "${!local_status[@]}"; do
         GLOBAL_INSTALLATION_STATUS["$key"]="${local_status[$key]}"
     done
+    
+    # DEBUG
+    global_log_message "DEBUG" "GLOBAL_INSTALLATION_STATUS after import: ${GLOBAL_INSTALLATION_STATUS[@]}"
+    global_log_message "DEBUG" "GLOBAL_INSTALLATION_STATUS_KEYS after import: ${!GLOBAL_INSTALLATION_STATUS[@]}"
 }
 
 global_get_installation_status() {

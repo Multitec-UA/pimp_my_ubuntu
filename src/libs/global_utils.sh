@@ -96,11 +96,9 @@ global_check_root() {
 global_declare_installation_status() {
     if ! declare -p GLOBAL_INSTALLATION_STATUS >/dev/null 2>&1; then
         # Declare a new associative array
-        declare -A GLOBAL_INSTALLATION_STATUS
-        # Export it so it's available to subshells
-        export GLOBAL_INSTALLATION_STATUS
+        declare -gA GLOBAL_INSTALLATION_STATUS
         # DEBUG
-        global_log_message "DEBUG" "GLOBAL_INSTALLATION_STATUS declared as associative array"
+        global_log_message "DEBUG" "GLOBAL_INSTALLATION_STATUS declared as global associative array"
     fi
 }
 
@@ -158,12 +156,13 @@ global_import_installation_status() {
     
     # Make the array available globally
     # Ensure we declare it as an associative array (-A)
-    declare -A GLOBAL_INSTALLATION_STATUS
+    global_declare_installation_status
     for key in "${!local_status[@]}"; do
         GLOBAL_INSTALLATION_STATUS["$key"]="${local_status[$key]}"
     done
     
     # DEBUG
+    echo "echo: version 1"
     global_log_message "DEBUG" "GLOBAL_INSTALLATION_STATUS after import: ${GLOBAL_INSTALLATION_STATUS[@]}"
     global_log_message "DEBUG" "GLOBAL_INSTALLATION_STATUS_KEYS after import: ${!GLOBAL_INSTALLATION_STATUS[@]}"
 }

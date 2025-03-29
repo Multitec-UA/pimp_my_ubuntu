@@ -99,8 +99,6 @@ global_declare_installation_status() {
         declare -gA GLOBAL_INSTALLATION_STATUS
         # DEBUG
         global_log_message "DEBUG" "GLOBAL_INSTALLATION_STATUS declared as global associative array"
-        echo "echo: version 1"
-
     fi
 }
 
@@ -174,8 +172,6 @@ global_get_installation_status() {
     global_import_installation_status
     # Use parameter expansion with default to avoid unbound variable error
     echo "${GLOBAL_INSTALLATION_STATUS[$command]:-}"
-    # DEBUG
-    echo "echo: DEGUB GLOBAL_INSTALLATION_STATUS get: ${command}=${GLOBAL_INSTALLATION_STATUS[$command]:-}"
 }
 
 global_set_installation_status() {
@@ -184,8 +180,6 @@ global_set_installation_status() {
     global_declare_installation_status
     GLOBAL_INSTALLATION_STATUS["$command"]="$status"
     global_export_installation_status
-    # DEBUG
-    echo "echo: DEGUB GLOBAL_INSTALLATION_STATUS set: ${command}=${status}"
 }
 
 # Function to remove a command from the installation status array

@@ -49,11 +49,13 @@ main() {
     _step_init    
 
     ## DEBUG
-    global_set_installation_status "1" "A"
-    global_set_installation_status "2" "B"
+    declare -A GLOBAL_INSTALLATION_STATUS
+    GLOBAL_INSTALLATION_STATUS["1"]="A"
+    GLOBAL_INSTALLATION_STATUS["2"]="B"
     ## SHOW ALL PROCEDURES
-    global_log_message "DEBUG" "MAIN: Procedures keys: ${!GLOBAL_INSTALLATION_STATUS[@]}"
-    global_log_message "DEBUG" "MAIN: Procedures values: ${GLOBAL_INSTALLATION_STATUS[@]}"
+    echo "DEBUG: MAIN: Procedures keys: ${!GLOBAL_INSTALLATION_STATUS[@]}"
+    echo "DEBUG: MAIN: Procedures values: ${GLOBAL_INSTALLATION_STATUS[@]}"
+    _print_global_installation_status
     exit 0
   
     _init_procedures_info
@@ -182,8 +184,10 @@ _procedure_selector_screen() {
 _print_global_installation_status() {
     echo -e "\n"
     global_log_message "INFO" "Current installation status:"
+
+    global_import_installation_status
     for proc_name in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
-        global_log_message "INFO" "${proc_name}: $(global_get_installation_status ${proc_name})"
+        global_log_message "INFO" "[${proc_name}] ${GLOBAL_INSTALLATION_STATUS[${proc_name}]}"
     done
     global_log_message "INFO" "For more details, check the log file ${GLOBAL_LOG_FILE}"
     echo -e "\n"

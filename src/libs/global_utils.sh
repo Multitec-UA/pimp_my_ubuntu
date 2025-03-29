@@ -9,7 +9,7 @@
 # License: MIT
 # =============================================================================
 
-readonly GLOBAL_UTILS_VERSION="1.1.2"
+readonly GLOBAL_UTILS_VERSION="1.1.3"
 
 # Ensure this script is sourced, not executed
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
@@ -160,10 +160,6 @@ global_import_installation_status() {
     for key in "${!local_status[@]}"; do
         GLOBAL_INSTALLATION_STATUS["$key"]="${local_status[$key]}"
     done
-    
-    # DEBUG
-    global_log_message "DEBUG" "GLOBAL_INSTALLATION_STATUS_KEYS after import: ${!GLOBAL_INSTALLATION_STATUS[@]}"
-    global_log_message "DEBUG" "GLOBAL_INSTALLATION_STATUS after import: ${GLOBAL_INSTALLATION_STATUS[@]}"
 }
 
 global_get_installation_status() {

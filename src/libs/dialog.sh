@@ -9,7 +9,7 @@
 # License: MIT
 # =============================================================================
 
-readonly DIALOG_VERSION="1.1.11"
+readonly DIALOG_VERSION="1.1.12"
 
 # Show welcome screen
 # Returns: 0 if procedures exist, 1 if no procedures found
@@ -119,7 +119,7 @@ dialog_get_confirmation() {
 dialog_show_procedure_status() {
     local message=""
     local header="Current Installation Status:\n\n"
-    local separator="+---------------------------+------------------+\n"
+    local separator="+-----------------------+------------------+\n"
     local format="| %-25s | %-16s |\n"
     
     # Check if there are any procedures to display

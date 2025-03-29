@@ -9,7 +9,7 @@
 # License: MIT
 # =============================================================================
 
-readonly DIALOG_VERSION="1.1.10"
+readonly DIALOG_VERSION="1.1.11"
 
 # Show welcome screen
 # Returns: 0 if procedures exist, 1 if no procedures found
@@ -119,10 +119,8 @@ dialog_get_confirmation() {
 dialog_show_procedure_status() {
     local message=""
     local header="Current Installation Status:\n\n"
-    local separator="┌───────────────────────────┬─────────────────┐\n"
-    local middle_separator="├───────────────────────────┼─────────────────┤\n"
-    local bottom_separator="└───────────────────────────┴─────────────────┘\n"
-    local format="│ %-25s │ %-15s │\n"
+    local separator="+---------------------------+------------------+\n"
+    local format="| %-25s | %-16s |\n"
     
     # Check if there are any procedures to display
     if [[ ${#GLOBAL_INSTALLATION_STATUS[@]} -eq 0 ]]; then
@@ -133,29 +131,31 @@ dialog_show_procedure_status() {
         
         # Add table header
         message="${message}$(printf "${format}" "PROCEDURE" "STATUS")"
-        message="${message}${middle_separator}"
+        message="${message}${separator}"
         
         # Build the table with procedure names and their statuses
         for proc_name in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
             status="${GLOBAL_INSTALLATION_STATUS[$proc_name]}"
             
-            # Add color indicators based on status
-            status_display="${status}"
+            # Add indicators based on status
             case "${status}" in
                 "SUCCESS")
-                    status_display="✓ ${status}"
+                    status_display="✓ SUCCESS"
                     ;;
                 "FAILED")
-                    status_display="✗ ${status}"
+                    status_display="✗ FAILED"
                     ;;
                 "PENDING")
-                    status_display="⧖ ${status}"
+                    status_display="⧖ PENDING"
                     ;;
                 "INIT")
-                    status_display="⚙ ${status}"
+                    status_display="⚙ INIT"
                     ;;
                 "SKIPPED")
-                    status_display="⏭ ${status}"
+                    status_display="⏭ SKIPPED"
+                    ;;
+                *)
+                    status_display="${status}"
                     ;;
             esac
             
@@ -163,7 +163,7 @@ dialog_show_procedure_status() {
         done
         
         # Add bottom border
-        message="${message}${bottom_separator}"
+        message="${message}${separator}"
     fi
     
     # Display the dialog with procedure statuses as a table

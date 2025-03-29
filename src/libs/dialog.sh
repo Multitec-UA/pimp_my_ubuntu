@@ -9,7 +9,7 @@
 # License: MIT
 # =============================================================================
 
-readonly DIALOG_VERSION="1.1.12"
+readonly DIALOG_VERSION="1.1.13"
 
 # Show welcome screen
 # Returns: 0 if procedures exist, 1 if no procedures found
@@ -140,19 +140,19 @@ dialog_show_procedure_status() {
             # Add indicators based on status
             case "${status}" in
                 "SUCCESS")
-                    status_display="✓ SUCCESS"
+                    status_display="✅ SUCCESS"
                     ;;
                 "FAILED")
-                    status_display="✗ FAILED"
+                    status_display="❌ FAILED"
                     ;;
                 "PENDING")
-                    status_display="⧖ PENDING"
+                    status_display="⏳ PENDING"
                     ;;
                 "INIT")
-                    status_display="⚙ INIT"
+                    status_display="⚙️ INIT"
                     ;;
                 "SKIPPED")
-                    status_display="⏭ SKIPPED"
+                    status_display="⏭️ SKIPPED"
                     ;;
                 *)
                     status_display="${status}"

@@ -9,7 +9,7 @@
 # License: MIT
 # =============================================================================
 
-readonly GLOBAL_UTILS_VERSION="1.1.0"
+readonly GLOBAL_UTILS_VERSION="1.1.1"
 
 # Ensure this script is sourced, not executed
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
@@ -178,6 +178,10 @@ global_set_installation_status() {
     local command=$1
     local status=$2
     global_declare_installation_status
+    
+    # Import existing values first
+    global_import_installation_status
+    
     GLOBAL_INSTALLATION_STATUS["$command"]="$status"
     global_log_message "DEBUG" "GLOBAL_INSTALLATION_STATUS set: [$command]=$status"
     global_export_installation_status

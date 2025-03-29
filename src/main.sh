@@ -47,8 +47,18 @@ main() {
     global_check_root
 
     _step_init    
+
+    ## DEBUG
+    global_set_installation_status "1" "A"
+    global_set_installation_status "2" "B"
+    ## SHOW ALL PROCEDURES
+    global_log_message "DEBUG" "MAIN: Procedures keys: ${!GLOBAL_INSTALLATION_STATUS[@]}"
+    global_log_message "DEBUG" "MAIN: Procedures values: ${GLOBAL_INSTALLATION_STATUS[@]}"
+    exit 0
   
     _init_procedures_info
+
+
 
     _welcome_screen
 
@@ -127,8 +137,6 @@ _init_procedures_info() {
         global_log_message "DEBUG" "Added procedure '${proc_name}' with status 'INIT'"
     done <<< "${names}"
     
-    global_log_message "DEBUG" "Initialized procedures keys: ${!GLOBAL_INSTALLATION_STATUS[@]}"
-    global_log_message "DEBUG" "Initialized procedures values: ${GLOBAL_INSTALLATION_STATUS[@]}"
     global_log_message "DEBUG" "All procedures initialized with INIT status"
 }
 

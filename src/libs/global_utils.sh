@@ -9,7 +9,7 @@
 # License: MIT
 # =============================================================================
 
-readonly GLOBAL_UTILS_VERSION="1.1.4"
+readonly GLOBAL_UTILS_VERSION="1.1.5"
 
 # Ensure this script is sourced, not executed
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then

@@ -9,7 +9,7 @@
 # License: MIT
 # =============================================================================
 
-readonly DIALOG_VERSION="1.0.3"
+readonly DIALOG_VERSION="1.1.6"
 
 # Show welcome screen
 # Returns: 0 if procedures exist, 1 if no procedures found
@@ -119,19 +119,25 @@ dialog_get_confirmation() {
 dialog_show_procedure_status() {
     local message=""
     local header="Current Installation Status:\n\n"
+    local separator="----------------------------------------\n"
+    local format="%-25s %-15s\n"
     
     # Check if there are any procedures to display
     if [[ ${#GLOBAL_INSTALLATION_STATUS[@]} -eq 0 ]]; then
         message="No installation procedures found."
     else
-        # Build the message with procedure names and their statuses
+        # Add table header
+        message=$(printf "${format}" "PROCEDURE" "STATUS")
+        message="${message}${separator}"
+        
+        # Build the table with procedure names and their statuses
         for proc_name in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
             status="${GLOBAL_INSTALLATION_STATUS[$proc_name]}"
-            message="${message}${proc_name}: ${status}\n"
+            message="${message}$(printf "${format}" "${proc_name}" "${status}")"
         done
     fi
     
-    # Display the dialog with procedure statuses
+    # Display the dialog with procedure statuses as a table
     dialog --title "Installation Status" --backtitle "Pimp My Ubuntu" \
            --msgbox "${header}${message}" 20 60
     

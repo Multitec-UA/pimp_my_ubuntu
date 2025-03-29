@@ -118,12 +118,8 @@ _init_procedures_info() {
     
     # Initialize each procedure's status as INIT
     while IFS= read -r proc_name; do
-        if [[ -n "$proc_name" && ! "$proc_name" =~ ^[0-9]+$ ]]; then
-            global_log_message "DEBUG" "Adding procedure: '${proc_name}' with status 'INIT'"
-            global_set_installation_status "${proc_name}" "INIT"
-        else
-            global_log_message "WARNING" "Skipping invalid procedure name: '${proc_name}'"
-        fi
+        global_log_message "DEBUG" "Added procedure '${proc_name}' with status 'INIT'"
+        global_set_installation_status "${proc_name}" "INIT"
     done <<< "${names}"
     
     # Verify the initialized procedures

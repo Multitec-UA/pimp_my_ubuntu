@@ -16,7 +16,7 @@ readonly DEBUG=${DEBUG:-false}
 # Software-common constants
 readonly _SOFTWARE_COMMAND="main-menu"
 readonly _SOFTWARE_DESCRIPTION="Main menu for Pimp My Ubuntu"
-readonly _SOFTWARE_VERSION="1.1.12"
+readonly _SOFTWARE_VERSION="1.1.13"
 readonly _DEPENDENCIES=("curl" "wget" "dialog" "jq")
 
 # Software-specific constants
@@ -92,8 +92,8 @@ _source_lib() {
 _step_init() {
     # Log all environment variables for debugging
     global_log_message "DEBUG" "GLOBAL_UTILS_VERSION: ${GLOBAL_UTILS_VERSION}"
-    global_log_message "DEBUG" "DIALOG_VERSION: ${DIALOG_VERSION}"
-    global_log_message "DEBUG" "_SOFTWARE_VERSION: ${_SOFTWARE_VERSION}"
+    global_log_message "DEBUG" "DIALOG_UTILS_VERSION: ${DIALOG_VERSION}"
+    global_log_message "DEBUG" "MAIN_VERSION: ${_SOFTWARE_VERSION}"
     global_log_message "DEBUG" "_PROCEDURES_CONTENT_URL: ${_PROCEDURES_CONTENT_URL}"
     global_log_message "DEBUG" "_REPOSITORY_RAW_URL: ${_REPOSITORY_RAW_URL}"
     global_log_message "DEBUG" "_PROCEDURES_REMOTE_URL: ${_PROCEDURES_REMOTE_URL}"

@@ -62,6 +62,7 @@ main() {
     done
 
     _print_global_installation_status
+
     
     global_log_message "INFO" "Finished Pimp My Ubuntu installation script\n"
 }
@@ -88,6 +89,7 @@ _source_lib() {
 _step_init() {
     # Log all environment variables for debugging
     global_log_message "DEBUG" "GLOBAL_UTILS_VERSION: ${GLOBAL_UTILS_VERSION}"
+    global_log_message "DEBUG" "DIALOG_VERSION: ${DIALOG_VERSION}"
     global_log_message "DEBUG" "_PROCEDURES_CONTENT_URL: ${_PROCEDURES_CONTENT_URL}"
     global_log_message "DEBUG" "_REPOSITORY_RAW_URL: ${_REPOSITORY_RAW_URL}"
     global_log_message "DEBUG" "_PROCEDURES_REMOTE_URL: ${_PROCEDURES_REMOTE_URL}"
@@ -186,6 +188,7 @@ _run_procedure() {
 
     # Print all installation statuses
     _print_global_installation_status
+    dialog_show_procedure_status
 
     global_log_message "INFO" "Starting procedure: ${procedure}"
     

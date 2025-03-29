@@ -9,6 +9,8 @@
 # License: MIT
 # =============================================================================
 
+readonly DIALOG_VERSION="1.0.2"
+
 # Show welcome screen
 # Returns: 0 if procedures exist, 1 if no procedures found
 dialog_show_welcome() {
@@ -110,4 +112,45 @@ dialog_get_confirmation() {
         # Non-interactive mode, assume yes
         return 0
     fi
+}
+
+# Display installation status with 10-second timeout
+# Allows user to accept or cancel, continues automatically after timeout
+dialog_show_procedure_status() {
+    local temp_file=$(mktemp)
+    local timeout=10
+    local status_content=""
+    
+    # Generate status content
+    status_content+="Current Installation Status:\n\n"
+    for proc_name in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
+        status_content+="${proc_name}: ${GLOBAL_INSTALLATION_STATUS[${proc_name}]}\n"
+    done
+    
+    status_content+="\n\nContinuing in ${timeout} seconds automatically...\nPress OK to continue now or CANCEL to abort."
+    
+    # Display the dialog with timeout
+    echo -e "${status_content}" > "${temp_file}"
+    
+    # Use dialog with timeout
+    if ! timeout ${timeout} dialog --title "Installation Status" --backtitle "Pimp My Ubuntu" \
+                            --yes-label "Continue" --no-label "Abort" \
+                            --yesno "$(cat ${temp_file})" 20 70 2>/dev/tty; then
+        local result=$?
+        rm "${temp_file}"
+        
+        # Check if it was a timeout (return code 124 from timeout command) or user pressed Cancel
+        if [[ $result -eq 124 ]]; then
+            # Timeout occurred, continue silently
+            return 0
+        else
+            # User pressed Cancel/No
+            dialog --title "Installation Aborted" --backtitle "Pimp My Ubuntu" \
+                   --msgbox "Installation aborted by user." 8 40
+            exit 1
+        fi
+    fi
+    
+    rm "${temp_file}"
+    return 0
 }

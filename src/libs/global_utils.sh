@@ -97,7 +97,6 @@ global_declare_installation_status() {
     if ! declare -p GLOBAL_INSTALLATION_STATUS >/dev/null 2>&1; then
         # Declare a new associative array
         declare -gA GLOBAL_INSTALLATION_STATUS
-        # DEBUG
         global_log_message "DEBUG" "GLOBAL_INSTALLATION_STATUS declared as global associative array"
     fi
 }
@@ -162,8 +161,8 @@ global_import_installation_status() {
     done
     
     # DEBUG
-    global_log_message "DEBUG" "GLOBAL_INSTALLATION_STATUS after import: ${GLOBAL_INSTALLATION_STATUS[@]}"
     global_log_message "DEBUG" "GLOBAL_INSTALLATION_STATUS_KEYS after import: ${!GLOBAL_INSTALLATION_STATUS[@]}"
+    global_log_message "DEBUG" "GLOBAL_INSTALLATION_STATUS after import: ${GLOBAL_INSTALLATION_STATUS[@]}"
 }
 
 global_get_installation_status() {
@@ -179,6 +178,7 @@ global_set_installation_status() {
     local status=$2
     global_declare_installation_status
     GLOBAL_INSTALLATION_STATUS["$command"]="$status"
+    global_log_message "DEBUG" "GLOBAL_INSTALLATION_STATUS set: [$command]=$status"
     global_export_installation_status
 }
 

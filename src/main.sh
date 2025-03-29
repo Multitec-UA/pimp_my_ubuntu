@@ -54,9 +54,13 @@ main() {
 
     _procedure_selector_screen
 
-    # Get all procedures with PENDING status
-    _run_pending_procedures
-    
+    # Run procedures in the order of selection
+
+    # TODO: fix this loop to run procedures in the order of selection !!!!!!
+    for procedure in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
+        _run_procedure "${procedure}"
+    done
+
     _print_global_installation_status
     
     global_log_message "INFO" "Finished Pimp My Ubuntu installation script\n"
@@ -122,9 +126,8 @@ _init_procedures_info() {
         global_set_installation_status "${proc_name}" "INIT"
     done <<< "${names}"
     
-    # Verify the initialized procedures
-    global_import_installation_status
-    global_log_message "DEBUG" "Initialized procedures: ${!GLOBAL_INSTALLATION_STATUS[@]}"
+    global_log_message "DEBUG" "Initialized procedures keys: ${!GLOBAL_INSTALLATION_STATUS[@]}"
+    global_log_message "DEBUG" "Initialized procedures values: ${GLOBAL_INSTALLATION_STATUS[@]}"
     global_log_message "DEBUG" "All procedures initialized with INIT status"
 }
 
@@ -138,15 +141,10 @@ _welcome_screen() {
 _procedure_selector_screen() {
     local procedures=()
     
-    # Import procedures from status file
-    global_import_installation_status
-    
     # Get list of available procedures
-    for proc_key in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
-        procedures+=("$proc_key")
+    for proc_name in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
+        procedures+=("$proc_name")
     done
-    
-    global_log_message "DEBUG" "Available procedures for selection: ${procedures[*]}"
     
     # Show selector and get choices
     local selected
@@ -157,18 +155,17 @@ _procedure_selector_screen() {
         exit 0
     fi
     
-    global_log_message "DEBUG" "User selected procedures: $selected"
-    
     # Update installation status based on selection
-    for proc in "${procedures[@]}"; do
-        if [[ " ${selected} " =~ " ${proc} " ]]; then
+    local all_procedures=("${!GLOBAL_INSTALLATION_STATUS[@]}")
+    for proc in "${all_procedures[@]}"; do
+        if [[ ! " ${selected} " =~ " ${proc} " ]]; then
+            # Remove procedures that aren't selected
+            global_unset_installation_status "${proc}"
+            global_log_message "DEBUG" "Removed $proc from installation status"
+        else
             # Set selected procedures to PENDING status
             global_set_installation_status "${proc}" "PENDING"
             global_log_message "DEBUG" "Set $proc status to PENDING"
-        else
-            # Clear procedures that aren't selected
-            global_unset_installation_status "${proc}"
-            global_log_message "DEBUG" "Removed $proc from installation status"
         fi
     done
 }
@@ -176,21 +173,9 @@ _procedure_selector_screen() {
 _print_global_installation_status() {
     echo -e "\n"
     global_log_message "INFO" "Current installation status:"
-    
-    # Get all procedures from the temp file
-    global_import_installation_status
-    local all_procedures=()
-    
-    # Get the list of all procedures from the status file
-    for proc_key in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
-        all_procedures+=("$proc_key")
+    for proc_name in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
+        global_log_message "INFO" "${proc_name}: $(global_get_installation_status ${proc_name})"
     done
-    
-    for proc_name in "${all_procedures[@]}"; do
-        local status=$(global_get_installation_status "$proc_name")
-        global_log_message "INFO" "${proc_name}: ${status}"
-    done
-    
     global_log_message "INFO" "For more details, check the log file ${GLOBAL_LOG_FILE}"
     echo -e "\n"
 }
@@ -214,31 +199,5 @@ _run_procedure() {
 
 }
 
-# Run all procedures with PENDING status
-_run_pending_procedures() {
-    # Get all procedures from the temp file
-    global_import_installation_status
-    local all_procedures=()
-    
-    # Get the list of all procedures from the status file
-    for proc_key in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
-        all_procedures+=("$proc_key")
-    done
-    
-    global_log_message "DEBUG" "Available procedures: ${all_procedures[*]}"
-    
-    # Run each procedure with PENDING status
-    for proc_name in "${all_procedures[@]}"; do
-        local status=$(global_get_installation_status "$proc_name")
-        global_log_message "DEBUG" "Checking procedure $proc_name with status $status"
-        
-        if [[ "$status" == "PENDING" ]]; then
-            global_log_message "INFO" "Running procedure: $proc_name"
-            _run_procedure "$proc_name"
-        else
-            global_log_message "DEBUG" "Skipping procedure $proc_name (status: $status)"
-        fi
-    done
-}
 
 main "$@"

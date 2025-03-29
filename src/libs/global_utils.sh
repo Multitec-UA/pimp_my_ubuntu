@@ -20,6 +20,9 @@ fi
 readonly GLOBAL_LOG_DIR="/var/log/pimp_my_ubuntu"
 readonly GLOBAL_LOG_FILE="${GLOBAL_LOG_DIR}/install.log"
 
+readonly GLOBAL_TEMP_PATH="/tmp/pimp_my_ubuntu"
+readonly GLOBAL_STATUS_FILE="${GLOBAL_TEMP_PATH}/pmu_installation_status.tmp"
+
 # Get the real user's home directory (works with sudo)
 if [[ -n "${SUDO_USER:-}" ]]; then
     GLOBAL_REAL_USER="${SUDO_USER}"
@@ -33,6 +36,7 @@ GLOBAL_DOWNLOAD_DIR="$GLOBAL_REAL_HOME/Documents/pimp_my_ubuntu"
 
 # Flag to track if logging has been initialized
 GLOBAL_LOGGING_INITIALIZED=false
+GLOBAL_STATUS_FILE_INITIALIZED=false
 
 # Gloabl functions ------------------------------------------------------------
 
@@ -51,19 +55,19 @@ global_ensure_dir() {
 
 # Initialize logging system for the application
 global_setup_logging() {
-    global_ensure_dir "${GLOBAL_LOG_DIR}"
-    rm -f "${GLOBAL_LOG_FILE}"
-    touch "${GLOBAL_LOG_FILE}"
+    if [[ "${GLOBAL_LOGGING_INITIALIZED}" == "false" ]] && [[ "${_SOFTWARE_COMMAND}" == "main-menu" ]]; then
+        global_ensure_dir "${GLOBAL_LOG_DIR}"
+        rm -f "${GLOBAL_LOG_FILE}"
+        touch "${GLOBAL_LOG_FILE}"
+        GLOBAL_LOGGING_INITIALIZED=true
+    fi
 }
 
 # Log a message with timestamp and level
 # Usage: global_log_message "INFO" "Starting installation"
 global_log_message() {
     # Initialize logging if this is the first call form main menu
-    if [[ "${GLOBAL_LOGGING_INITIALIZED}" == "false" ]] && [[ "${_SOFTWARE_COMMAND}" == "main-menu" ]]; then
-        global_setup_logging
-        GLOBAL_LOGGING_INITIALIZED=true
-    fi
+    global_setup_logging
 
     local level="${1:-INFO}"
     local message="${2:-}"
@@ -96,18 +100,33 @@ global_check_root() {
 
 global_declare_installation_status() {
     if ! declare -p GLOBAL_INSTALLATION_STATUS >/dev/null 2>&1; then
-        # Declare a new associative array
         declare -gA GLOBAL_INSTALLATION_STATUS
         global_log_message "DEBUG" "GLOBAL_INSTALLATION_STATUS declared as global associative array"
     fi
 }
 
 
+# Initialize logging system for the application
+global_setup_installation_status() {
+    # Declare a associative array if it not exist yet
+    global_declare_installation_status
+
+    # Initialize the status file if it not initialized yet and is main-menu
+    if [[ "${GLOBAL_STATUS_FILE_INITIALIZED}" == "false" ]] && [[ "${_SOFTWARE_COMMAND}" == "main-menu" ]]; then
+        global_ensure_dir "${GLOBAL_TEMP_PATH}"
+        rm -f "${GLOBAL_STATUS_FILE}"
+        touch "${GLOBAL_STATUS_FILE}"
+        GLOBAL_STATUS_FILE_INITIALIZED=true
+    fi
+}
+
 # Function to serialize and export the installation status array
 # Usage: global_export_installation_status
 global_export_installation_status() {
     local serialized=""
-    local temp_status_file="/tmp/pmu_installation_status.tmp"
+
+    global_setup_installation_status
+    local temp_status_file="$GLOBAL_STATUS_FILE"
     
     # Debug existing array content
     global_log_message "DEBUG" "Exporting keys: ${!GLOBAL_INSTALLATION_STATUS[@]}"
@@ -136,7 +155,10 @@ global_export_installation_status() {
 global_import_installation_status() {
     # Create a local associative array
     declare -A local_status
-    local temp_status_file="/tmp/pmu_installation_status.tmp"
+    
+    # Ensure declare it as an associative array (-A) and ensure file exists
+    global_setup_installation_status
+    local temp_status_file="$GLOBAL_STATUS_FILE"
     
     if [[ -f "$temp_status_file" ]]; then
         local serialized=$(cat "$temp_status_file")
@@ -154,9 +176,7 @@ global_import_installation_status() {
         global_log_message "WARNING" "No installation status file found at ${temp_status_file}"
     fi
     
-    # Make the array available globally
-    # Ensure we declare it as an associative array (-A)
-    global_declare_installation_status
+
     
     # Clear existing array values
     for key in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
@@ -173,15 +193,22 @@ global_import_installation_status() {
     global_log_message "DEBUG" "GLOBAL_INSTALLATION_STATUS after import: ${GLOBAL_INSTALLATION_STATUS[@]}"
 }
 
+# Function to get installation status for a command
+# Ensure exsist variable and file, import existing values and return value
+# Usage: global_get_installation_status "command_name"
 global_get_installation_status() {
     local command=$1
     
+    # Import existing values first
     global_import_installation_status
+    
     # Use parameter expansion with default to avoid unbound variable error
     echo "${GLOBAL_INSTALLATION_STATUS[$command]:-}"
 }
 
 # Function to set installation status for a command
+# Ensure exsist variable and file, import existing values and set value
+# Usage: global_set_installation_status "command_name" "status"
 global_set_installation_status() {
     local command=$1
     local status=$2

@@ -9,7 +9,7 @@
 # License: MIT
 # =============================================================================
 
-readonly DIALOG_VERSION="1.0.2"
+readonly DIALOG_VERSION="1.0.3"
 
 # Show welcome screen
 # Returns: 0 if procedures exist, 1 if no procedures found
@@ -114,43 +114,26 @@ dialog_get_confirmation() {
     fi
 }
 
-# Display installation status with 10-second timeout
-# Allows user to accept or cancel, continues automatically after timeout
+# Display the current status of all installation procedures
+# Shows a dialog with the list of procedures and their current states
 dialog_show_procedure_status() {
-    local temp_file=$(mktemp)
-    local timeout=10
-    local status_content=""
+    local message=""
+    local header="Current Installation Status:\n\n"
     
-    # Generate status content
-    status_content+="Current Installation Status:\n\n"
-    for proc_name in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
-        status_content+="${proc_name}: ${GLOBAL_INSTALLATION_STATUS[${proc_name}]}\n"
-    done
-    
-    status_content+="\n\nContinuing in ${timeout} seconds automatically...\nPress OK to continue now or CANCEL to abort."
-    
-    # Display the dialog with timeout
-    echo -e "${status_content}" > "${temp_file}"
-    
-    # Use dialog with timeout
-    if ! timeout ${timeout} dialog --title "Installation Status" --backtitle "Pimp My Ubuntu" \
-                            --yes-label "Continue" --no-label "Abort" \
-                            --yesno "$(cat ${temp_file})" 20 70 2>/dev/tty; then
-        local result=$?
-        rm "${temp_file}"
-        
-        # Check if it was a timeout (return code 124 from timeout command) or user pressed Cancel
-        if [[ $result -eq 124 ]]; then
-            # Timeout occurred, continue silently
-            return 0
-        else
-            # User pressed Cancel/No
-            dialog --title "Installation Aborted" --backtitle "Pimp My Ubuntu" \
-                   --msgbox "Installation aborted by user." 8 40
-            exit 1
-        fi
+    # Check if there are any procedures to display
+    if [[ ${#GLOBAL_INSTALLATION_STATUS[@]} -eq 0 ]]; then
+        message="No installation procedures found."
+    else
+        # Build the message with procedure names and their statuses
+        for proc_name in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
+            status="${GLOBAL_INSTALLATION_STATUS[$proc_name]}"
+            message="${message}${proc_name}: ${status}\n"
+        done
     fi
     
-    rm "${temp_file}"
+    # Display the dialog with procedure statuses
+    dialog --title "Installation Status" --backtitle "Pimp My Ubuntu" \
+           --msgbox "${header}${message}" 20 60
+    
     return 0
 }

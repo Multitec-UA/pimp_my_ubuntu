@@ -50,6 +50,9 @@ main() {
   
     _init_procedures_info
 
+    dialog_show_procedure_status
+    sleep 10
+
     _welcome_screen
 
     _procedure_selector_screen

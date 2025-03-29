@@ -9,7 +9,7 @@
 # License: MIT
 # =============================================================================
 
-readonly DIALOG_VERSION="1.1.7"
+readonly DIALOG_VERSION="1.1.8"
 
 # Show welcome screen
 # Returns: 0 if procedures exist, 1 if no procedures found

@@ -10,7 +10,7 @@
 
 # Source the global_utils.sh file
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "${SCRIPT_DIR}/../libs/global_utils.sh"
+source "${SCRIPT_DIR}/./global_utils.sh"
 
 # Test results counter
 TESTS_PASSED=0

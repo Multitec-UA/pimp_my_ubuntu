@@ -9,7 +9,7 @@
 # License: MIT
 # =============================================================================
 
-readonly DIALOG_VERSION="1.1.13"
+readonly DIALOG_VERSION="1.1.14"
 
 # Show welcome screen
 # Returns: 0 if procedures exist, 1 if no procedures found
@@ -117,58 +117,61 @@ dialog_get_confirmation() {
 # Display the current status of all installation procedures
 # Shows a dialog with the list of procedures and their current states
 dialog_show_procedure_status() {
-    local message=""
-    local header="Current Installation Status:\n\n"
-    local separator="+-----------------------+------------------+\n"
-    local format="| %-25s | %-16s |\n"
+    local result=""
+    local procedure_count=${#GLOBAL_INSTALLATION_STATUS[@]}
     
     # Check if there are any procedures to display
-    if [[ ${#GLOBAL_INSTALLATION_STATUS[@]} -eq 0 ]]; then
-        message="No installation procedures found."
-    else
-        # Start table with top border
-        message="${separator}"
-        
-        # Add table header
-        message="${message}$(printf "${format}" "PROCEDURE" "STATUS")"
-        message="${message}${separator}"
-        
-        # Build the table with procedure names and their statuses
-        for proc_name in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
-            status="${GLOBAL_INSTALLATION_STATUS[$proc_name]}"
-            
-            # Add indicators based on status
-            case "${status}" in
-                "SUCCESS")
-                    status_display="✅ SUCCESS"
-                    ;;
-                "FAILED")
-                    status_display="❌ FAILED"
-                    ;;
-                "PENDING")
-                    status_display="⏳ PENDING"
-                    ;;
-                "INIT")
-                    status_display="⚙️ INIT"
-                    ;;
-                "SKIPPED")
-                    status_display="⏭️ SKIPPED"
-                    ;;
-                *)
-                    status_display="${status}"
-                    ;;
-            esac
-            
-            message="${message}$(printf "${format}" "${proc_name}" "${status_display}")"
-        done
-        
-        # Add bottom border
-        message="${message}${separator}"
+    if [[ ${procedure_count} -eq 0 ]]; then
+        dialog --title "Installation Status" \
+               --backtitle "Pimp My Ubuntu" \
+               --msgbox "No installation procedures found." 8 40
+        return 0
     fi
     
+    # Create a formatted table with fixed widths
+    result+="INSTALLATION STATUS\n\n"
+    result+="%-20s   %s\n" # Format string for the table
+    result+="----------------------------------------\n"
+    
+    # Add header row
+    result+=$(printf "%-20s   %s\n" "PROCEDURE" "STATUS")
+    result+="----------------------------------------\n"
+    
+    # Add each procedure with its status
+    for proc_name in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
+        status="${GLOBAL_INSTALLATION_STATUS[$proc_name]}"
+        
+        # Add indicators based on status
+        case "${status}" in
+            "SUCCESS")
+                status_display="✅ SUCCESS"
+                ;;
+            "FAILED")
+                status_display="❌ FAILED"
+                ;;
+            "PENDING")
+                status_display="⏳ PENDING"
+                ;;
+            "INIT")
+                status_display="⚙️ INIT"
+                ;;
+            "SKIPPED")
+                status_display="⏭️ SKIPPED"
+                ;;
+            *)
+                status_display="${status}"
+                ;;
+        esac
+        
+        result+=$(printf "%-20s   %s\n" "${proc_name}" "${status_display}")
+    done
+    
     # Display the dialog with procedure statuses as a table
-    dialog --title "Installation Status" --backtitle "Pimp My Ubuntu" \
-           --msgbox "${header}${message}" 25 50
+    # Use --no-collapse to preserve formatting
+    dialog --title "Installation Status" \
+           --backtitle "Pimp My Ubuntu" \
+           --no-collapse \
+           --msgbox "$result" $((procedure_count + 9)) 50
     
     return 0
 }

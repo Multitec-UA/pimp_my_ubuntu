@@ -72,6 +72,7 @@ _source_lib() {
 # Prepare for installation
 _step_init() {
     global_log_message "INFO" "Starting installation of ${_SOFTWARE_COMMAND}"
+    global_log_message "INFO" "_SOFTWARE_VERSION: ${_SOFTWARE_VERSION}"
     
     if global_check_if_installed "${_SOFTWARE_COMMAND}"; then
         global_set_installation_status "${_SOFTWARE_COMMAND}" "SKIPPED"

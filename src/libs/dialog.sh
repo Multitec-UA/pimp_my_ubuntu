@@ -9,7 +9,7 @@
 # License: MIT
 # =============================================================================
 
-readonly DIALOG_VERSION="1.1.8"
+readonly DIALOG_VERSION="1.1.10"
 
 # Show welcome screen
 # Returns: 0 if procedures exist, 1 if no procedures found
@@ -119,27 +119,56 @@ dialog_get_confirmation() {
 dialog_show_procedure_status() {
     local message=""
     local header="Current Installation Status:\n\n"
-    local separator="----------------------------------------\n"
-    local format="%-25s %-15s\n"
+    local separator="┌───────────────────────────┬─────────────────┐\n"
+    local middle_separator="├───────────────────────────┼─────────────────┤\n"
+    local bottom_separator="└───────────────────────────┴─────────────────┘\n"
+    local format="│ %-25s │ %-15s │\n"
     
     # Check if there are any procedures to display
     if [[ ${#GLOBAL_INSTALLATION_STATUS[@]} -eq 0 ]]; then
         message="No installation procedures found."
     else
+        # Start table with top border
+        message="${separator}"
+        
         # Add table header
-        message=$(printf "${format}" "PROCEDURE" "STATUS")
-        message="${message}${separator}"
+        message="${message}$(printf "${format}" "PROCEDURE" "STATUS")"
+        message="${message}${middle_separator}"
         
         # Build the table with procedure names and their statuses
         for proc_name in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
             status="${GLOBAL_INSTALLATION_STATUS[$proc_name]}"
-            message="${message}$(printf "${format}" "${proc_name}" "${status}")"
+            
+            # Add color indicators based on status
+            status_display="${status}"
+            case "${status}" in
+                "SUCCESS")
+                    status_display="✓ ${status}"
+                    ;;
+                "FAILED")
+                    status_display="✗ ${status}"
+                    ;;
+                "PENDING")
+                    status_display="⧖ ${status}"
+                    ;;
+                "INIT")
+                    status_display="⚙ ${status}"
+                    ;;
+                "SKIPPED")
+                    status_display="⏭ ${status}"
+                    ;;
+            esac
+            
+            message="${message}$(printf "${format}" "${proc_name}" "${status_display}")"
         done
+        
+        # Add bottom border
+        message="${message}${bottom_separator}"
     fi
     
     # Display the dialog with procedure statuses as a table
     dialog --title "Installation Status" --backtitle "Pimp My Ubuntu" \
-           --msgbox "${header}${message}" 20 60
+           --msgbox "${header}${message}" 25 50
     
     return 0
 }

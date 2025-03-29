@@ -84,6 +84,18 @@ chmod +x src/procedures/my_software.sh
 
 All installation logs are stored in `/var/log/pimp_my_ubuntu/install.log`
 
+## Status Indicators
+
+During installation, procedures are marked with the following status indicators:
+
+| Symbol | Status | Description |
+|--------|--------|-------------|
+| ⚙ | INIT | Procedure has been initialized but not yet started |
+| ⧖ | PENDING | Procedure is selected for installation but not yet executed |
+| ✓ | SUCCESS | Procedure completed successfully |
+| ✗ | FAILED | Procedure failed to complete |
+| ⏭ | SKIPPED | Procedure skipped because software is already installed |
+
 ## Contributing
 
 1. Fork the repository

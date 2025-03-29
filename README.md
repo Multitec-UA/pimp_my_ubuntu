@@ -4,13 +4,7 @@ An automated setup script for fresh Ubuntu 24.04 installations. This tool helps 
 
 ## Features
 
-- 🛠️ Interactive software selection menu
-- 📦 Modular installation procedures
-- 🔄 Automatic dependency management
-- 📝 Detailed logging
-- 🔒 Safe execution with error handling
-- 🎨 Beautiful progress indicators
-
+- 🛠️🔄 With this public script you can install custom software in you Linux distribution based on Debian (Ubuntu Recomended) 
 ## Requirements
 
 - Ubuntu >= 24.04 LTS
@@ -33,6 +27,8 @@ Install ZSH, Oh-My-Zsh, plugins (autosuggestions, syntax-highlighting), Powerlev
 curl -fsSL https://raw.github.com/Multitec-UA/pimp_my_ubuntu/main/src/procedures/zsh/zsh.sh | sudo bash
 ```
 
+[View detailed ZSH readme](https://github.com/Multitec-UA/pimp_my_ubuntu/blob/main/src/procedures/zsh/README.md)
+
 ### Install Cursor
 Download cursor, install appimaged and add cursor command to bashrc and zshrc
 
@@ -40,12 +36,16 @@ Download cursor, install appimaged and add cursor command to bashrc and zshrc
 curl -fsSL https://raw.github.com/Multitec-UA/pimp_my_ubuntu/main/src/procedures/cursor/cursor.sh | sudo bash
 ```
 
+[View detailed Cursor readme](https://github.com/Multitec-UA/pimp_my_ubuntu/blob/main/src/procedures/cursor/README.md)
+
 ### Install Grub Customizer
 Update Grub, install grub-customizer and add theme.
 
 ```bash
 curl -fsSL https://raw.github.com/Multitec-UA/pimp_my_ubuntu/main/src/procedures/grub-customizer/grub-customizer.sh | sudo bash
 ```
+
+[View detailed Grub Customizer readme](https://github.com/Multitec-UA/pimp_my_ubuntu/blob/main/src/procedures/grub-customizer/README.md)
 
 # How contribute
 

@@ -87,6 +87,7 @@ _source_lib() {
 # Prepare for installation
 _step_init() {
     # Log all environment variables for debugging
+    global_log_message "DEBUG" "GLOBAL_UTILS_VERSION: ${GLOBAL_UTILS_VERSION}"
     global_log_message "DEBUG" "_PROCEDURES_CONTENT_URL: ${_PROCEDURES_CONTENT_URL}"
     global_log_message "DEBUG" "_REPOSITORY_RAW_URL: ${_REPOSITORY_RAW_URL}"
     global_log_message "DEBUG" "_PROCEDURES_REMOTE_URL: ${_PROCEDURES_REMOTE_URL}"
@@ -122,8 +123,8 @@ _init_procedures_info() {
     
     # Initialize each procedure's status as INIT
     while IFS= read -r proc_name; do
-        global_log_message "DEBUG" "Added procedure '${proc_name}' with status 'INIT'"
         global_set_installation_status "${proc_name}" "INIT"
+        global_log_message "DEBUG" "Added procedure '${proc_name}' with status 'INIT'"
     done <<< "${names}"
     
     global_log_message "DEBUG" "Initialized procedures keys: ${!GLOBAL_INSTALLATION_STATUS[@]}"

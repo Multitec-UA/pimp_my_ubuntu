@@ -51,7 +51,7 @@ main() {
     _init_procedures_info
 
     dialog_show_procedure_status
-    sleep 10
+    sleep 5
 
     _welcome_screen
 

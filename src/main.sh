@@ -16,7 +16,7 @@ readonly DEBUG=${DEBUG:-false}
 # Software-common constants
 readonly _SOFTWARE_COMMAND="main-menu"
 readonly _SOFTWARE_DESCRIPTION="Main menu for Pimp My Ubuntu"
-readonly _SOFTWARE_VERSION="1.0.1"
+readonly _SOFTWARE_VERSION="1.1.4"
 readonly _DEPENDENCIES=("curl" "wget" "dialog" "jq")
 
 # Software-specific constants
@@ -47,20 +47,8 @@ main() {
     global_check_root
 
     _step_init    
-
-    ## DEBUG
-    declare -A GLOBAL_INSTALLATION_STATUS
-    GLOBAL_INSTALLATION_STATUS["1"]="A"
-    GLOBAL_INSTALLATION_STATUS["2"]="B"
-    ## SHOW ALL PROCEDURES
-    echo "DEBUG: MAIN: Procedures keys: ${!GLOBAL_INSTALLATION_STATUS[@]}"
-    echo "DEBUG: MAIN: Procedures values: ${GLOBAL_INSTALLATION_STATUS[@]}"
-    _print_global_installation_status
-    exit 0
   
     _init_procedures_info
-
-
 
     _welcome_screen
 

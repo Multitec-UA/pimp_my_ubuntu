@@ -9,7 +9,7 @@
 # License: MIT
 # =============================================================================
 
-readonly GLOBAL_UTILS_VERSION="1.1.3"
+readonly GLOBAL_UTILS_VERSION="1.1.4"
 
 # Ensure this script is sourced, not executed
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
@@ -97,7 +97,7 @@ global_check_root() {
 global_declare_installation_status() {
     if ! declare -p GLOBAL_INSTALLATION_STATUS >/dev/null 2>&1; then
         # Declare a new associative array
-        declare -A GLOBAL_INSTALLATION_STATUS
+        declare -gA GLOBAL_INSTALLATION_STATUS
         global_log_message "DEBUG" "GLOBAL_INSTALLATION_STATUS declared as global associative array"
     fi
 }
@@ -157,9 +157,20 @@ global_import_installation_status() {
     # Make the array available globally
     # Ensure we declare it as an associative array (-A)
     global_declare_installation_status
+    
+    # Clear existing array values
+    for key in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
+        unset GLOBAL_INSTALLATION_STATUS["$key"]
+    done
+    
+    # Copy imported values to global array
     for key in "${!local_status[@]}"; do
         GLOBAL_INSTALLATION_STATUS["$key"]="${local_status[$key]}"
     done
+    
+    # DEBUG
+    global_log_message "DEBUG" "GLOBAL_INSTALLATION_STATUS_KEYS after import: ${!GLOBAL_INSTALLATION_STATUS[@]}"
+    global_log_message "DEBUG" "GLOBAL_INSTALLATION_STATUS after import: ${GLOBAL_INSTALLATION_STATUS[@]}"
 }
 
 global_get_installation_status() {
@@ -170,10 +181,15 @@ global_get_installation_status() {
     echo "${GLOBAL_INSTALLATION_STATUS[$command]:-}"
 }
 
+# Function to set installation status for a command
 global_set_installation_status() {
     local command=$1
     local status=$2
     global_declare_installation_status
+    
+    # Import existing values first
+    global_import_installation_status
+    
     GLOBAL_INSTALLATION_STATUS["$command"]="$status"
     global_log_message "DEBUG" "GLOBAL_INSTALLATION_STATUS set: [$command]=$status"
     global_export_installation_status

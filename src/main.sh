@@ -16,7 +16,7 @@ readonly DEBUG=${DEBUG:-false}
 # Software-common constants
 readonly _SOFTWARE_COMMAND="main-menu"
 readonly _SOFTWARE_DESCRIPTION="Main menu for Pimp My Ubuntu"
-readonly _SOFTWARE_VERSION="1.1.16"
+readonly _SOFTWARE_VERSION="1.1.18"
 readonly _DEPENDENCIES=("curl" "wget" "dialog" "jq")
 
 # Software-specific constants

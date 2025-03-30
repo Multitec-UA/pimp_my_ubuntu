@@ -9,7 +9,7 @@
 # License: MIT
 # =============================================================================
 
-readonly DIALOG_VERSION="1.1.17"
+readonly DIALOG_VERSION="1.1.18"
 
 # Show welcome screen
 # Returns: 0 if procedures exist, 1 if no procedures found
@@ -131,14 +131,55 @@ dialog_show_procedure_status() {
         return 1
     fi
     
+    # Find the longest procedure name for proper alignment
+    local max_length=0
+    local proc_length=0
+    
+    for proc_name in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
+        proc_length=${#proc_name}
+        if [[ $proc_length -gt $max_length ]]; then
+            max_length=$proc_length
+        fi
+    done
+    
+    # Add padding for visual separation
+    max_length=$((max_length + 3))
+    
     # Create menu items array for dialog
     local menu_items=()
     local tag_num=1
+    local status_display=""
+    local formatted_item=""
     
     # Add each procedure with its status to the menu items
     for proc_name in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
         status="${GLOBAL_INSTALLATION_STATUS[$proc_name]}"
-        menu_items+=("$tag_num" "$(dialog_format_status_message "${proc_name}" "${status}")")
+        
+        # Create status display with symbol
+        case "${status}" in
+            "SUCCESS")
+                status_display="✅ SUCCESS"
+                ;;
+            "FAILED")
+                status_display="❌ FAILED"
+                ;;
+            "PENDING")
+                status_display="⏳ PENDING"
+                ;;
+            "INIT")
+                status_display="⚙️ INIT"
+                ;;
+            "SKIPPED")
+                status_display="⏭️ SKIPPED"
+                ;;
+            *)
+                status_display="${status}"
+                ;;
+        esac
+        
+        # Format item with proper alignment
+        printf -v formatted_item "%-${max_length}s %s" "${proc_name}" "${status_display}"
+        menu_items+=("$tag_num" "$formatted_item")
         ((tag_num++))
     done
     
@@ -147,7 +188,7 @@ dialog_show_procedure_status() {
     [[ $menu_height -lt 12 ]] && menu_height=12
     [[ $menu_height -gt 20 ]] && menu_height=20
     
-    # Display the menu dialog
+    # Display the menu dialog with wider width to accommodate aligned text
     exec 3>&1
     selection=$(dialog --clear \
                       --title "Installation Status" \
@@ -156,7 +197,7 @@ dialog_show_procedure_status() {
                       --ok-label "Continue" \
                       --cancel-label "Cancel" \
                       --menu "Current status of installation procedures:" \
-                      $menu_height 60 ${#GLOBAL_INSTALLATION_STATUS[@]} \
+                      $menu_height 70 ${#GLOBAL_INSTALLATION_STATUS[@]} \
                       "${menu_items[@]}" \
                 2>&1 1>&3)
     

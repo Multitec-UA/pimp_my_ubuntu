@@ -16,7 +16,7 @@ readonly DEBUG=${DEBUG:-false}
 # Software-common constants
 readonly _SOFTWARE_COMMAND="main-menu"
 readonly _SOFTWARE_DESCRIPTION="Main menu for Pimp My Ubuntu"
-readonly _SOFTWARE_VERSION="1.1.19"
+readonly _SOFTWARE_VERSION="1.1.20"
 readonly _DEPENDENCIES=("curl" "wget" "dialog" "jq")
 
 # Software-specific constants
@@ -51,6 +51,7 @@ main() {
     _init_procedures_info
 
     dialog_show_procedure_status
+    exit 0
 
     #_welcome_screen
 

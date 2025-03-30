@@ -9,7 +9,7 @@
 # License: MIT
 # =============================================================================
 
-readonly DIALOG_VERSION="1.1.19"
+readonly DIALOG_VERSION="1.1.20"
 
 # Show welcome screen
 # Returns: 0 if procedures exist, 1 if no procedures found
@@ -154,28 +154,7 @@ dialog_show_procedure_status() {
     # Add each procedure with its status to the menu items
     for proc_name in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
         status="${GLOBAL_INSTALLATION_STATUS[$proc_name]}"
-        
-        # Create status display with symbol
-        case "${status}" in
-            "SUCCESS")
-                status_display="✅ SUCCESS"
-                ;;
-            "FAILED")
-                status_display="❌ FAILED"
-                ;;
-            "PENDING")
-                status_display="⏳ PENDING"
-                ;;
-            "INIT")
-                status_display="⚙️ INIT"
-                ;;
-            "SKIPPED")
-                status_display="⏭️ SKIPPED"
-                ;;
-            *)
-                status_display="${status}"
-                ;;
-        esac
+        status_display=$(get_status_icon "${status}")
         
         # Format item with proper alignment
         printf -v formatted_item "%-${max_length}s %s" "${proc_name}" "${status_display}"
@@ -196,7 +175,7 @@ dialog_show_procedure_status() {
                       --colors \
                       --ok-label "Continue" \
                       --cancel-label "Cancel" \
-                      --msgbox "Current status of installation procedures:" \
+                      --menu "Current status of installation procedures:" \
                       $menu_height 70 ${#GLOBAL_INSTALLATION_STATUS[@]} \
                       "${menu_items[@]}" \
                 2>&1 1>&3)
@@ -228,29 +207,27 @@ dialog_show_procedure_status() {
     return 0
 }
 
-# Format the status message for display
-dialog_format_status_message() {
-    local proc_name="$1"
-    local status="$2"
-    
+# Function to get the status icon based on the status
+get_status_icon() {
+    local status="$1"
     case "${status}" in
         "SUCCESS")
-            echo "${proc_name} [✅ SUCCESS]"
+            echo "✅ SUCCESS"
             ;;
         "FAILED")
-            echo "${proc_name} [❌ FAILED]"
+            echo "❌ FAILED"
             ;;
         "PENDING")
-            echo "${proc_name} [⏳ PENDING]"
+            echo "⏳ PENDING"
             ;;
         "INIT")
-            echo "${proc_name} [⚙️ INIT]"
+            echo "⚙️ INIT"
             ;;
         "SKIPPED")
-            echo "${proc_name} [⏭️ SKIPPED]"
+            echo "⏭️ SKIPPED"
             ;;
         *)
-            echo "${proc_name} [${status}]"
+            echo "${status}"
             ;;
     esac
 }

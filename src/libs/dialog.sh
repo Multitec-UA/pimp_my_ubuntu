@@ -116,62 +116,100 @@ dialog_get_confirmation() {
 
 # Display the current status of all installation procedures
 # Shows a dialog with the list of procedures and their current states
+# Returns: 0 on success, 1 on cancel/ESC
 dialog_show_procedure_status() {
-    local result=""
-    local procedure_count=${#GLOBAL_INSTALLATION_STATUS[@]}
+    # Dialog exit status codes
+    local DIALOG_OK=0
+    local DIALOG_CANCEL=1
+    local DIALOG_ESC=255
     
     # Check if there are any procedures to display
-    if [[ ${procedure_count} -eq 0 ]]; then
+    if [[ ${#GLOBAL_INSTALLATION_STATUS[@]} -eq 0 ]]; then
         dialog --title "Installation Status" \
                --backtitle "Pimp My Ubuntu" \
-               --msgbox "No installation procedures found." 8 40
-        return 0
+               --msgbox "No installation procedures found." 8 45
+        return 1
     fi
     
-    # Create a formatted table with fixed widths
-    result+="INSTALLATION STATUS\n\n"
-    result+="%-20s   %s\n" # Format string for the table
-    result+="----------------------------------------\n"
+    # Create menu items array for dialog
+    local menu_items=()
+    local tag_num=1
     
-    # Add header row
-    result+=$(printf "%-20s   %s\n" "PROCEDURE" "STATUS")
-    result+="----------------------------------------\n"
-    
-    # Add each procedure with its status
+    # Add each procedure with its status to the menu items
     for proc_name in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
         status="${GLOBAL_INSTALLATION_STATUS[$proc_name]}"
         
         # Add indicators based on status
         case "${status}" in
             "SUCCESS")
-                status_display="✅ SUCCESS"
+                menu_items+=("$tag_num" "${proc_name} [✅ SUCCESS]")
                 ;;
             "FAILED")
-                status_display="❌ FAILED"
+                menu_items+=("$tag_num" "${proc_name} [❌ FAILED]")
                 ;;
             "PENDING")
-                status_display="⏳ PENDING"
+                menu_items+=("$tag_num" "${proc_name} [⏳ PENDING]")
                 ;;
             "INIT")
-                status_display="⚙️ INIT"
+                menu_items+=("$tag_num" "${proc_name} [⚙️ INIT]")
                 ;;
             "SKIPPED")
-                status_display="⏭️ SKIPPED"
+                menu_items+=("$tag_num" "${proc_name} [⏭️ SKIPPED]")
                 ;;
             *)
-                status_display="${status}"
+                menu_items+=("$tag_num" "${proc_name} [${status}]")
                 ;;
         esac
         
-        result+=$(printf "%-20s   %s\n" "${proc_name}" "${status_display}")
+        ((tag_num++))
     done
     
-    # Display the dialog with procedure statuses as a table
-    # Use --no-collapse to preserve formatting
-    dialog --title "Installation Status" \
-           --backtitle "Pimp My Ubuntu" \
-           --no-collapse \
-           --msgbox "$result" $((procedure_count + 9)) 50
+    # Calculate appropriate menu height (min 12, max 20)
+    local menu_height=$(( ${#GLOBAL_INSTALLATION_STATUS[@]} + 7 ))
+    [[ $menu_height -lt 12 ]] && menu_height=12
+    [[ $menu_height -gt 20 ]] && menu_height=20
+    
+    # Display the menu dialog
+    exec 3>&1
+    selection=$(dialog --clear \
+                      --title "Installation Status" \
+                      --backtitle "Pimp My Ubuntu" \
+                      --colors \
+                      --extra-button --extra-label "Refresh" \
+                      --ok-label "Close" \
+                      --cancel-label "Back" \
+                      --menu "Current status of installation procedures:" \
+                      $menu_height 60 ${#GLOBAL_INSTALLATION_STATUS[@]} \
+                      "${menu_items[@]}" \
+                2>&1 1>&3)
+    
+    # Get the exit status
+    local exit_status=$?
+    exec 3>&-
+    
+    # Handle the exit status
+    case $exit_status in
+        $DIALOG_OK)
+            # User clicked "Close"
+            return 0
+            ;;
+        $DIALOG_CANCEL)
+            # User clicked "Back"
+            return 1
+            ;;
+        $DIALOG_ESC)
+            # User pressed ESC
+            return 1
+            ;;
+        3) # DIALOG_EXTRA - "Refresh" button
+            # Refresh the display
+            dialog_show_procedure_status
+            ;;
+        *)
+            # Unknown status
+            return 1
+            ;;
+    esac
     
     return 0
 }

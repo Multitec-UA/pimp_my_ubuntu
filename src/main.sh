@@ -68,8 +68,10 @@ main() {
     fi
    
     # Select procedures to install
-    dialog_show_procedure_selector_screen "${!GLOBAL_INSTALLATION_STATUS[@]}")
-    _clean_procedure_list
+    #dialog_show_procedure_selector_screen "${!GLOBAL_INSTALLATION_STATUS[@]}")
+    #_clean_procedure_list
+    
+
     
     # WIP: Show procedures status screen
     dialog_show_procedure_status_screen

@@ -50,7 +50,7 @@ main() {
   
     _init_procedures_info
 
-    #dialog_show_procedure_status
+    dialog_show_procedure_status
 
     #_welcome_screen
 

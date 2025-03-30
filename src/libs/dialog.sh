@@ -9,7 +9,7 @@
 # License: MIT
 # =============================================================================
 
-readonly DIALOG_VERSION="1.1.16"
+readonly DIALOG_VERSION="1.1.17"
 
 # Show welcome screen
 # Returns: 0 if procedures exist, 1 if no procedures found
@@ -153,9 +153,8 @@ dialog_show_procedure_status() {
                       --title "Installation Status" \
                       --backtitle "Pimp My Ubuntu" \
                       --colors \
-                      --extra-button --extra-label "Refresh" \
-                      --ok-label "Close" \
-                      --cancel-label "Back" \
+                      --ok-label "Continue" \
+                      --cancel-label "Cancel" \
                       --menu "Current status of installation procedures:" \
                       $menu_height 60 ${#GLOBAL_INSTALLATION_STATUS[@]} \
                       "${menu_items[@]}" \
@@ -168,20 +167,16 @@ dialog_show_procedure_status() {
     # Handle the exit status
     case $exit_status in
         $DIALOG_OK)
-            # User clicked "Close"
+            # User clicked "Continue"
             return 0
             ;;
         $DIALOG_CANCEL)
-            # User clicked "Back"
+            # User clicked "Cancel"
             return 1
             ;;
         $DIALOG_ESC)
             # User pressed ESC
             return 1
-            ;;
-        3) # DIALOG_EXTRA - "Refresh" button
-            # Refresh the display
-            dialog_show_procedure_status
             ;;
         *)
             # Unknown status

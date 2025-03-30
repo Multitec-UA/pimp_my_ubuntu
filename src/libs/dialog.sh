@@ -9,7 +9,7 @@
 # License: MIT
 # =============================================================================
 
-readonly DIALOG_VERSION="1.1.14"
+readonly DIALOG_VERSION="1.1.16"
 
 # Show welcome screen
 # Returns: 0 if procedures exist, 1 if no procedures found
@@ -138,29 +138,7 @@ dialog_show_procedure_status() {
     # Add each procedure with its status to the menu items
     for proc_name in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
         status="${GLOBAL_INSTALLATION_STATUS[$proc_name]}"
-        
-        # Add indicators based on status
-        case "${status}" in
-            "SUCCESS")
-                menu_items+=("$tag_num" "${proc_name} [✅ SUCCESS]")
-                ;;
-            "FAILED")
-                menu_items+=("$tag_num" "${proc_name} [❌ FAILED]")
-                ;;
-            "PENDING")
-                menu_items+=("$tag_num" "${proc_name} [⏳ PENDING]")
-                ;;
-            "INIT")
-                menu_items+=("$tag_num" "${proc_name} [⚙️ INIT]")
-                ;;
-            "SKIPPED")
-                menu_items+=("$tag_num" "${proc_name} [⏭️ SKIPPED]")
-                ;;
-            *)
-                menu_items+=("$tag_num" "${proc_name} [${status}]")
-                ;;
-        esac
-        
+        menu_items+=("$tag_num" "$(dialog_format_status_message "${proc_name}" "${status}")")
         ((tag_num++))
     done
     
@@ -212,4 +190,31 @@ dialog_show_procedure_status() {
     esac
     
     return 0
+}
+
+# Format the status message for display
+dialog_format_status_message() {
+    local proc_name="$1"
+    local status="$2"
+    
+    case "${status}" in
+        "SUCCESS")
+            echo "${proc_name} [✅ SUCCESS]"
+            ;;
+        "FAILED")
+            echo "${proc_name} [❌ FAILED]"
+            ;;
+        "PENDING")
+            echo "${proc_name} [⏳ PENDING]"
+            ;;
+        "INIT")
+            echo "${proc_name} [⚙️ INIT]"
+            ;;
+        "SKIPPED")
+            echo "${proc_name} [⏭️ SKIPPED]"
+            ;;
+        *)
+            echo "${proc_name} [${status}]"
+            ;;
+    esac
 }

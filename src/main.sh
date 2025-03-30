@@ -68,8 +68,10 @@ main() {
     fi
    
     # Select procedures to install
-    #dialog_show_procedure_selector_screen "${!GLOBAL_INSTALLATION_STATUS[@]}")
-    #_clean_procedure_list
+    local selected_procedures
+    selected_procedures=$(dialog_show_procedure_selector_screen "${!GLOBAL_INSTALLATION_STATUS[@]}")
+    _clean_procedure_list "${selected_procedures}"
+
     
 
     
@@ -176,18 +178,20 @@ _welcome_screen() {
 }
 
 _clean_procedure_list() {
+    local selected_procedures="${1:-}"
     # Update installation status based on selection
     local all_procedures=("${!GLOBAL_INSTALLATION_STATUS[@]}")
     for proc in "${all_procedures[@]}"; do
-        if [[ ! " ${selected} " =~ " ${proc} " ]]; then
-            # Remove procedures that aren't selected
-            global_unset_installation_status "${proc}"
-            global_log_message "DEBUG" "Removed $proc from installation status"
-        else
+        # Check if the procedure is in the selected procedures list
+        if echo "${selected_procedures}" | grep -q "${proc}"; then
             global_log_message "DEBUG" "Keeping $proc in installation list"
             # Set selected procedures to PENDING status
             #global_set_installation_status "${proc}" "PENDING"
             #global_log_message "DEBUG" "Set $proc status to PENDING"
+        else
+            # Remove procedures that aren't selected
+            global_unset_installation_status "${proc}"
+            global_log_message "DEBUG" "Removed $proc from installation status"
         fi
     done
 }

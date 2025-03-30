@@ -9,11 +9,11 @@
 # License: MIT
 # =============================================================================
 
-readonly DIALOG_VERSION="1.1.20"
+readonly DIALOG_VERSION="1.1.21"
 
 # Show welcome screen
 # Returns: 0 if procedures exist, 1 if no procedures found
-dialog_show_welcome() {
+dialog_show_welcome_screen() {
     dialog --title "Pimp My Ubuntu" --backtitle "Installation Script" \
            --msgbox "Welcome to Pimp My Ubuntu!\n\nThis script will help you set up your Ubuntu system with your preferred software and configurations." 10 60
 
@@ -28,7 +28,7 @@ dialog_show_welcome() {
 
 # Show procedure selection screen and update GLOBAL_INSTALLATION_STATUS
 # Returns: 0 on success, 1 if user cancels
-dialog_show_procedure_selector() {
+dialog_show_procedure_selector_screen() {
     local procedures=("$@")
     local choices=()
     local cmd=(dialog --title "Pimp My Ubuntu" --backtitle "Software Selection" \
@@ -61,63 +61,11 @@ dialog_show_procedure_selector() {
     return 0
 }
 
-# Display menu and get user selection
-dialog_show_menu() {
-    local procedures=("$@")
-    local choices=()
-    local cmd=(dialog --title "Pimp My Ubuntu" --backtitle "Software Selection" --separate-output --checklist "Select software to install:" 22 76 16)
-    
-    for proc in "${procedures[@]}"; do
-        local name=$(basename "${proc}" .sh)
-        cmd+=("${name}" "Select to install" off)
-    done
-    
-    # Run dialog and capture both output and exit status
-    choices=$("${cmd[@]}" 2>&1 >/dev/tty) || return $?
-    
-    # Return the selected choices
-    echo "${choices}"
-    return 0
-}
-
-# Display a progress bar
-# Usage: show_progress 45 "Installing..."
-dialog_show_progress() {
-    local percent=$1
-    local message=${2:-""}
-    local w=50 # Width of the progress bar
-    local fill=$((w * percent / 100))
-    local empty=$((w - fill))
-    
-    printf "\r[%s%s] %d%% %s" \
-        "$(printf "#%.0s" $(seq 1 $fill))" \
-        "$(printf "=%.0s" $(seq 1 $empty))" \
-        "$percent" \
-        "$message"
-}
-
-# Get user confirmation
-# Usage: if get_confirmation "Do you want to proceed?"; then echo "Proceeding..."; fi
-dialog_get_confirmation() {
-    local prompt=${1:-"Do you want to continue?"}
-    local response
-    
-    if is_terminal; then
-        read -rp "${prompt} [y/N] " response
-        case "$response" in
-            [yY][eE][sS]|[yY]) return 0 ;;
-            *) return 1 ;;
-        esac
-    else
-        # Non-interactive mode, assume yes
-        return 0
-    fi
-}
 
 # Display the current status of all installation procedures
 # Shows a dialog with the list of procedures and their current states
 # Returns: 0 on success, 1 on cancel/ESC
-dialog_show_procedure_status() {
+dialog_show_procedure_status_screen() {
     # Dialog exit status codes
     local DIALOG_OK=0
     local DIALOG_CANCEL=1
@@ -154,7 +102,7 @@ dialog_show_procedure_status() {
     # Add each procedure with its status to the menu items
     for proc_name in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
         status="${GLOBAL_INSTALLATION_STATUS[$proc_name]}"
-        status_display=$(get_status_icon "${status}")
+        status_display=$(dialog_get_status_icon "${status}")
         
         # Format item with proper alignment
         printf -v formatted_item "%-${max_length}s %s" "${proc_name}" "${status_display}"
@@ -208,7 +156,7 @@ dialog_show_procedure_status() {
 }
 
 # Function to get the status icon based on the status
-get_status_icon() {
+dialog_get_status_icon() {
     local status="$1"
     case "${status}" in
         "SUCCESS")
@@ -221,7 +169,7 @@ get_status_icon() {
             echo "⏳ PENDING"
             ;;
         "INIT")
-            echo "⚙️ INIT"
+            echo "➕ INIT"
             ;;
         "SKIPPED")
             echo "⏭️ SKIPPED"

@@ -39,29 +39,58 @@ GLOBAL_DOWNLOAD_DIR="$GLOBAL_REAL_HOME/Documents/pimp_my_ubuntu"
 
 
 main() {
-    #_source_lib "/src/lib/main_utils.sh"
-    _source_lib "global_utils.sh"
-    _source_lib "dialog.sh"
+
+    # Source libraries
+    if [[ "$DEBUG" == "true" ]]; then
+        # Strict mode
+        set -euo pipefail
+        # Source libraries from local directory
+        source "./src/libs/global_utils.sh"
+        source "./src/libs/dialog.sh"
+    else
+        # Source libraries from remote repository
+        _source_lib "global_utils.sh"
+        _source_lib "dialog.sh"
+    fi  
 
     # Check if the script is running with root privileges
     global_check_root
 
+    # Show  global variables and install basic dependencies
     _step_init    
   
+    # Get procedures information from GitHub
     _init_procedures_info
 
-    dialog_show_procedure_status
+    # Show welcome screen
+    if [[ "$DEBUG" == "false" ]]; then
+        _welcome_screen
+    fi
+   
+    # Select procedures to install
+    dialog_show_procedure_selector_screen "${!GLOBAL_INSTALLATION_STATUS[@]}")
+    _clean_procedure_list
+    
+    # WIP: Show procedures status screen
+    dialog_show_procedure_status_screen
+   # _response=$(dialog_show_procedure_status_screen)
+   # echo "RESPONSE: $_response"
     exit 0
 
-    #_welcome_screen
 
-    _procedure_selector_screen
 
     # Run procedures in the order of selection
-
-    # TODO: fix this loop to run procedures in the order of selection !!!!!!
-    for procedure in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
-        _run_procedure "${procedure}"
+    while true; do
+        local selection
+        global_import_installation_status
+        selection=$(dialog_show_procedure_status_screen)
+        
+        # Check if the user canceled the dialog
+        if [[ $? -ne 0 ]]; then
+            break
+        fi
+        
+        _run_procedure "${selection}"
     done
 
     _print_global_installation_status
@@ -110,6 +139,8 @@ _step_init() {
     global_log_message "DEBUG" "GLOBAL_LOGGING_INITIALIZED: ${GLOBAL_LOGGING_INITIALIZED}"
     global_log_message "INFO" "Starting Main Menu"
     global_log_message "INFO" "Installing basic dependencies"
+
+    # Install basic dependencies
     global_install_apt_package "${_DEPENDENCIES[@]}"
 }
 
@@ -136,29 +167,13 @@ _init_procedures_info() {
 }
 
 _welcome_screen() {
-    if ! dialog_show_welcome; then
+    if ! dialog_show_welcome_screen; then
         global_log_message "ERROR" "No installation procedures found"
         exit 1
     fi
 }
 
-_procedure_selector_screen() {
-    local procedures=()
-    
-    # Get list of available procedures
-    for proc_name in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
-        procedures+=("$proc_name")
-    done
-    
-    # Show selector and get choices
-    local selected
-    selected=$(dialog_show_procedure_selector "${procedures[@]}")
-    
-    if [[ $? -ne 0 ]]; then
-        global_log_message "INFO" "User cancelled the installation."
-        exit 0
-    fi
-    
+_clean_procedure_list() {
     # Update installation status based on selection
     local all_procedures=("${!GLOBAL_INSTALLATION_STATUS[@]}")
     for proc in "${all_procedures[@]}"; do
@@ -167,9 +182,10 @@ _procedure_selector_screen() {
             global_unset_installation_status "${proc}"
             global_log_message "DEBUG" "Removed $proc from installation status"
         else
+            global_log_message "DEBUG" "Keeping $proc in installation list"
             # Set selected procedures to PENDING status
-            global_set_installation_status "${proc}" "PENDING"
-            global_log_message "DEBUG" "Set $proc status to PENDING"
+            #global_set_installation_status "${proc}" "PENDING"
+            #global_log_message "DEBUG" "Set $proc status to PENDING"
         fi
     done
 }
@@ -191,7 +207,7 @@ _run_procedure() {
 
     # Print all installation statuses
     _print_global_installation_status
-    dialog_show_procedure_status
+    dialog_show_procedure_status_screen
 
     global_log_message "INFO" "Starting procedure: ${procedure}"
     

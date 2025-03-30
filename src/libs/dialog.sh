@@ -9,7 +9,7 @@
 # License: MIT
 # =============================================================================
 
-readonly DIALOG_VERSION="1.1.18"
+readonly DIALOG_VERSION="1.1.19"
 
 # Show welcome screen
 # Returns: 0 if procedures exist, 1 if no procedures found
@@ -196,7 +196,7 @@ dialog_show_procedure_status() {
                       --colors \
                       --ok-label "Continue" \
                       --cancel-label "Cancel" \
-                      --menu "Current status of installation procedures:" \
+                      --msgbox "Current status of installation procedures:" \
                       $menu_height 70 ${#GLOBAL_INSTALLATION_STATUS[@]} \
                       "${menu_items[@]}" \
                 2>&1 1>&3)

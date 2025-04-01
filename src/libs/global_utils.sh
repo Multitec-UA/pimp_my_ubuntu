@@ -60,6 +60,7 @@ global_setup_logging() {
         global_ensure_dir "${GLOBAL_LOG_DIR}"
         rm -f "${GLOBAL_LOG_FILE}"
         touch "${GLOBAL_LOG_FILE}"
+        chown "${GLOBAL_REAL_USER}:${GLOBAL_REAL_USER}" "${GLOBAL_LOG_FILE}"
         GLOBAL_LOGGING_INITIALIZED=true
     fi
 }

@@ -55,7 +55,8 @@ global_ensure_dir() {
 
 # Initialize logging system for the application
 global_setup_logging() {
-    if [[ "${GLOBAL_LOGGING_INITIALIZED}" == "false" ]] && [[ "${_SOFTWARE_COMMAND}" == "main-menu" ]]; then
+    if [[ "${GLOBAL_LOGGING_INITIALIZED}" == "false" ]] && \
+       ( [[ ! -f "${GLOBAL_LOG_FILE}" ]] || [[ "${_SOFTWARE_COMMAND}" == "main-menu" ]] ); then
         global_ensure_dir "${GLOBAL_LOG_DIR}"
         rm -f "${GLOBAL_LOG_FILE}"
         touch "${GLOBAL_LOG_FILE}"
@@ -111,11 +112,12 @@ global_setup_installation_status() {
     # Declare a associative array if it not exist yet
     global_declare_installation_status
 
-    # Initialize the status file if it not initialized yet and is main-menu
-    if [[ "${GLOBAL_STATUS_FILE_INITIALIZED}" == "false" ]] && [[ "${_SOFTWARE_COMMAND}" == "main-menu" ]]; then
+    # Initialize the status file if it not initialized yet or is main-menu
+    if [[ "${GLOBAL_STATUS_FILE_INITIALIZED}" == "false" ]] && \
+       ( [[ ! -f "${GLOBAL_TEMP_PATH}" ]] || [[ "${_SOFTWARE_COMMAND}" == "main-menu" ]] ); then
         global_ensure_dir "${GLOBAL_TEMP_PATH}"
         rm -f "${GLOBAL_STATUS_FILE}"
-        touch "${GLOBAL_STATUS_FILE}"
+        touch "${GLOBAL_STATUS_FILE}" 
         GLOBAL_STATUS_FILE_INITIALIZED=true
     fi
 }

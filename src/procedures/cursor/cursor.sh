@@ -166,17 +166,28 @@ _step_post_install() {
     local cursor_function='
 # Cursor IDE launcher function
 cursor() {
-    local cursor_path=$(find $HOME/Applications -name "cursor*.AppImage" -type f | head -n 1)
-    local cursor_args="--no-sandbox"
-    if [ $# -eq 0 ]; then
-        nohup "$cursor_path" $cursor_args >/dev/null 2>&1 &
-        disown
-    else
-        # Convert relative path to absolute
-        local path=$(realpath "$1")
-        nohup "$cursor_path" $cursor_args "$path" >/dev/null 2>&1 &
-        disown
+    # Find the Cursor AppImage in the home directory
+    local cursor_path=$(find $HOME -name "cursor*.AppImage" -type f 2>/dev/null | head -n 1)
+
+    # Check if AppImage was found
+    if [ -z "$cursor_path" ]; then
+        echo "Error: Cursor AppImage not found"
+        return 1
     fi
+
+    # Ensure the AppImage is executable
+    chmod +x "$cursor_path"
+
+    # Launch Cursor - either in current directory or with specified path
+    if [ $# -eq 0 ]; then
+        # No arguments, launch in current directory
+        "$cursor_path" --no-sandbox >/dev/null 2>&1 &
+    else
+        # Convert relative path to absolute and open that location
+        "$cursor_path" --no-sandbox "$(realpath "$1")" >/dev/null 2>&1 &
+    fi
+    # Prevent the process from being killed when terminal closes
+    disown
 }'
 
     # Loop through each shell RC file (bashrc, zshrc)

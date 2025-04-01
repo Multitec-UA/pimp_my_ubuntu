@@ -158,6 +158,13 @@ _step_install_software() {
     return 0
 }
 
+_delete_previous_cursor_function() {
+    local rc_file="${1:-}"
+    if grep -q "cursor()" "${rc_file}"; then
+        sed -i '/cursor()/d' "${rc_file}"
+    fi
+}
+
 # Post-installation configuration
 _step_post_install() {
     global_log_message "INFO" "Configuring ${_SOFTWARE_COMMAND}"
@@ -196,20 +203,21 @@ cursor() {
         if [[ -f "${rc_file}" ]]; then
             # Check if the cursor function is already defined in the RC file
             if ! grep -q "cursor()" "${rc_file}"; then
-                # Append the cursor function to the RC file if not already present
-                echo "${cursor_function}" >> "${rc_file}"
-                # Ensure the RC file has the correct ownership
-                chown "${GLOBAL_REAL_USER}:${GLOBAL_REAL_USER}" "${rc_file}" >>"${GLOBAL_LOG_FILE}" 2>&1
-                
-                # Verify the function was added correctly
-                if grep -q "cursor()" "${rc_file}"; then
-                    global_log_message "INFO" "Successfully added cursor function to ${rc_file}"
-                else
-                    global_log_message "WARNING" "Failed to add cursor function to ${rc_file}"
-                fi
-            else
-                global_log_message "INFO" "Cursor function already exists in ${rc_file}"
+                global_log_message "INFO" "Deleting previous cursor function from ${rc_file}"
+                _delete_previous_cursor_function "${rc_file}"
             fi
+            # Append the cursor function to the RC file if not already present
+            echo "${cursor_function}" >> "${rc_file}"
+            # Ensure the RC file has the correct ownership
+            chown "${GLOBAL_REAL_USER}:${GLOBAL_REAL_USER}" "${rc_file}" >>"${GLOBAL_LOG_FILE}" 2>&1
+            
+            # Verify the function was added correctly
+            if grep -q "cursor()" "${rc_file}"; then
+                global_log_message "INFO" "Successfully added cursor function to ${rc_file}"
+            else
+                global_log_message "WARNING" "Failed to add cursor function to ${rc_file}"
+            fi
+
         fi
     done
     

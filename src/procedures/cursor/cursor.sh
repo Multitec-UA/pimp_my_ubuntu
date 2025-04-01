@@ -22,6 +22,7 @@ readonly _LIBS_REMOTE_URL="${_REPOSITORY_RAW_URL}/src/libs/"
 readonly _SOFTWARE_COMMAND="cursor"
 readonly _SOFTWARE_DESCRIPTION="A modern and powerful IDE built on web technologies"
 readonly _SOFTWARE_VERSION="latest"
+readonly _CURSOR_DOWNLOAD_URL="https://github.com/getcursor/cursor/releases/latest/download/Cursor-x86_64.AppImage"
 
 # Software-specific constants
 readonly _APPLICATIONS_DIR="${GLOBAL_REAL_HOME}/Applications"
@@ -35,34 +36,34 @@ readonly _SHELL_RC_FILES=("${GLOBAL_REAL_HOME}/.bashrc" "${GLOBAL_REAL_HOME}/.zs
 # Main procedure function
 main() {
 
-    # Source global variables and functions
-    _source_lib "global_utils.sh"
+        # Source libraries
+    if [[ "$DEBUG" == "true" ]]; then
+        # Strict mode
+        set -euo pipefail
+        # Source libraries from local directory
+        source "./src/libs/global_utils.sh"
+    else
+        # Source libraries from remote repository
+        _source_lib "global_utils.sh"
+    fi  
+    global_log_message "DEBUG" "Entering main function"
+    global_log_message "INFO" "You can see debug logs in ${GLOBAL_LOG_FILE}"
     
+    # Check if the script is running with root privileges
     global_check_root
 
+    # Show  global variables and install basic dependencies
     _step_init
-
-    if [ "$(global_get_installation_status "${_SOFTWARE_COMMAND}")" == "SKIPPED" ]; then
-        global_log_message "INFO" "${_SOFTWARE_COMMAND} is already installed"
-        _step_post_install
-        _step_cleanup
-        return 0
-    fi
 
     _step_install_dependencies
 
-    if _step_install_software; then
-        _step_post_install
-        global_log_message "INFO" "${_SOFTWARE_COMMAND} installation completed successfully"
-        global_set_installation_status "${_SOFTWARE_COMMAND}" "SUCCESS"
-        _step_cleanup
-        return 0
-    else
-        global_log_message "ERROR" "Failed to install ${_SOFTWARE_COMMAND}"
-        global_set_installation_status "${_SOFTWARE_COMMAND}" "FAILED"
-        _step_cleanup
-        return 1
-    fi
+    _step_install_software
+    _step_post_install
+    global_log_message "INFO" "${_SOFTWARE_COMMAND} installation completed successfully"
+    global_set_installation_status "${_SOFTWARE_COMMAND}" "SUCCESS"
+    _step_cleanup
+    global_log_message "DEBUG" "Exiting main function"
+
 }
 
 # Necessary function to source libraries
@@ -80,10 +81,12 @@ _source_lib() {
         echo "ERROR" "No library file specified to source"
         exit 1
     fi
+    global_log_message "DEBUG" "Exiting _source_lib"
 }
 
 # Prepare for installation
 _step_init() {
+    global_log_message "DEBUG" "Entering _step_init"
     global_log_message "INFO" "Starting installation of ${_SOFTWARE_COMMAND}"
     global_log_message "INFO" "_SOFTWARE_VERSION: ${_SOFTWARE_VERSION}"
     
@@ -102,10 +105,12 @@ _step_init() {
     apt-get -y purge appimagelauncher >>"${GLOBAL_LOG_FILE}" 2>&1 || true
     rm -f "${_USER_CONFIG_DIR}/systemd/user/default.target.wants/appimagelauncherd.service" >>"${GLOBAL_LOG_FILE}" 2>&1 || true
     rm -f "${_USER_LOCAL_DIR}/share/applications/appimage"* >>"${GLOBAL_LOG_FILE}" 2>&1 || true
+    global_log_message "DEBUG" "Exiting _step_init"
 }
 
 # Install dependencies
 _step_install_dependencies() {
+    global_log_message "DEBUG" "Entering _step_install_dependencies"
     global_log_message "INFO" "Installing dependencies for ${_SOFTWARE_COMMAND}"
 
     # Update package lists
@@ -129,10 +134,12 @@ _step_install_dependencies() {
     if ! dpkg -l | grep -q "^ii  libfuse2"; then
         global_install_apt_package "libfuse2"
     fi
+    global_log_message "DEBUG" "Exiting _step_install_dependencies"
 }
 
 # Install the software
 _step_install_software() {
+    global_log_message "DEBUG" "Entering _step_install_software"
     global_log_message "INFO" "Installing ${_SOFTWARE_COMMAND}"
     
     # Install appimaged
@@ -152,21 +159,26 @@ _step_install_software() {
     
     # Download Cursor AppImage
     global_log_message "INFO" "Downloading Cursor AppImage"
-    global_run_as_user curl -L "https://download.cursor.sh/linux/appImage/x64" -o "${_CURSOR_APPIMAGE}" >>"${GLOBAL_LOG_FILE}" 2>&1
+    global_run_as_user curl -L -i -v --tlsv1.2  "${_CURSOR_DOWNLOAD_URL}" -o "${_CURSOR_APPIMAGE}" >>"${GLOBAL_LOG_FILE}" 2>&1
     global_run_as_user chmod +x "${_CURSOR_APPIMAGE}" >>"${GLOBAL_LOG_FILE}" 2>&1
 
+    global_log_message "DEBUG" "Exiting _step_install_software"
     return 0
 }
 
 _delete_previous_cursor_function() {
     local rc_file="${1:-}"
+    global_log_message "DEBUG" "Entering _delete_previous_cursor_function with rc_file: ${rc_file}"
     if grep -q "cursor()" "${rc_file}"; then
+        global_log_message "INFO" "Deleting previous cursor function from ${rc_file}"
         sed -i '/cursor()/d' "${rc_file}"
     fi
+    global_log_message "DEBUG" "Exiting _delete_previous_cursor_function"
 }
 
 # Post-installation configuration
 _step_post_install() {
+    global_log_message "DEBUG" "Entering _step_post_install"
     global_log_message "INFO" "Configuring ${_SOFTWARE_COMMAND}"
     
     # Add cursor function to shell RC files
@@ -174,7 +186,7 @@ _step_post_install() {
 # Cursor IDE launcher function
 cursor() {
     # Find the Cursor AppImage in the home directory
-    local cursor_path=$(find $HOME -name "cursor*.AppImage" -type f 2>/dev/null | head -n 1)
+    local cursor_path=$(find $HOME -name "cursor.AppImage" -type f 2>/dev/null | head -n 1)
 
     # Check if AppImage was found
     if [ -z "$cursor_path" ]; then
@@ -202,8 +214,7 @@ cursor() {
         # Check if the RC file exists
         if [[ -f "${rc_file}" ]]; then
             # Check if the cursor function is already defined in the RC file
-            if ! grep -q "cursor()" "${rc_file}"; then
-                global_log_message "INFO" "Deleting previous cursor function from ${rc_file}"
+            if grep -q "cursor()" "${rc_file}"; then
                 _delete_previous_cursor_function "${rc_file}"
             fi
             # Append the cursor function to the RC file if not already present
@@ -226,10 +237,12 @@ cursor() {
     global_run_as_user XDG_RUNTIME_DIR="/run/user/$(id -u ${GLOBAL_REAL_USER})" "${_APPLICATIONS_DIR}"/appimaged-*.AppImage >>"${GLOBAL_LOG_FILE}" 2>&1 &
     
     global_log_message "INFO" "Installation of ${_SOFTWARE_COMMAND} completed"
+    global_log_message "DEBUG" "Exiting _step_post_install"
 }
 
 # Cleanup after installation
 _step_cleanup() {
+    global_log_message "DEBUG" "Entering _step_cleanup"
     global_log_message "INFO" "Cleaning up after installation of ${_SOFTWARE_COMMAND}"
     
     # Clean apt cache if we installed new packages
@@ -237,6 +250,7 @@ _step_cleanup() {
         global_log_message "DEBUG" "Cleaning apt cache"
         apt-get clean >>"${GLOBAL_LOG_FILE}" 2>&1
     fi
+    global_log_message "DEBUG" "Exiting _step_cleanup"
 }
 
 # Execute main function

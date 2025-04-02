@@ -16,6 +16,15 @@
 # Debug flag - set to true to enable debug messages
 readonly DEBUG=${DEBUG:-false}
 
+# Software-common constants
+readonly _REPOSITORY_RAW_URL="https://raw.github.com/Multitec-UA/pimp_my_ubuntu/main"
+readonly _LIBS_REMOTE_URL="${_REPOSITORY_RAW_URL}/src/libs/"
+readonly _SOFTWARE_COMMAND="cursor"
+readonly _SOFTWARE_DESCRIPTION="A modern and powerful IDE built on web technologies"
+readonly _SOFTWARE_VERSION="latest"
+readonly _CURSOR_DOWNLOAD_URL="https://downloads.cursor.com/production/1649e229afdef8fd1d18ea173f063563f1e722ef/linux/x64/Cursor-0.48.6-x86_64.AppImage"
+
+
 # Necessary function to source libraries
 _source_lib() {
     local file="${1:-}"
@@ -45,17 +54,9 @@ else
     _source_lib "global_utils.sh"
 fi
 
-# Software-common constants
-readonly _REPOSITORY_RAW_URL="https://raw.github.com/Multitec-UA/pimp_my_ubuntu/main"
-readonly _LIBS_REMOTE_URL="${_REPOSITORY_RAW_URL}/src/libs/"
-readonly _SOFTWARE_COMMAND="cursor"
-readonly _SOFTWARE_DESCRIPTION="A modern and powerful IDE built on web technologies"
-readonly _SOFTWARE_VERSION="latest"
-readonly _CURSOR_DOWNLOAD_URL="https://downloads.cursor.com/production/1649e229afdef8fd1d18ea173f063563f1e722ef/linux/x64/Cursor-0.48.6-x86_64.AppImage"
 
 
 # Software-specific constants
-
 readonly _APPLICATIONS_DIR="${GLOBAL_REAL_HOME}/Applications"
 readonly _CURSOR_APPIMAGE="${_APPLICATIONS_DIR}/cursor.AppImage"
 readonly _USER_CONFIG_DIR="${GLOBAL_REAL_HOME}/.config"
@@ -202,7 +203,7 @@ _download_cursor_appimage() {
     global_log_message "INFO" "Downloading Cursor AppImage to ${_CURSOR_APPIMAGE}"
     
     # Download Cursor AppImage
-    global_run_as_user curl -L -i -v --tlsv1.2 "${_CURSOR_DOWNLOAD_URL}" -o "${_CURSOR_APPIMAGE}" >>"${GLOBAL_LOG_FILE}" 2>&1
+    global_run_as_user curl -L -s "${_CURSOR_DOWNLOAD_URL}" -o "${_CURSOR_APPIMAGE}" >>"${GLOBAL_LOG_FILE}" 2>&1
     
     # Check if the downloaded file exists and has minimum size
     if ! global_check_file_size "${_CURSOR_APPIMAGE}"; then
@@ -222,7 +223,7 @@ _delete_previous_cursor_function() {
     global_log_message "DEBUG" "Entering _delete_previous_cursor_function with rc_file: ${rc_file}"
     if grep -q "cursor()" "${rc_file}"; then
         global_log_message "INFO" "Deleting previous cursor function from ${rc_file}"
-        sed -i '/cursor()/d' "${rc_file}"
+        sed -i '/cursor()/,/^}/d' "${rc_file}"
     fi
     global_log_message "DEBUG" "Exiting _delete_previous_cursor_function"
 }
@@ -234,10 +235,9 @@ _step_post_install() {
     
     # Add cursor function to shell RC files
     local cursor_function='
-# Cursor IDE launcher function
 cursor() {
     # Find the Cursor AppImage in the home directory
-    local cursor_path=$(find $HOME -name "cursor.AppImage" -type f 2>/dev/null | head -n 1)
+    local cursor_path=$("$HOME/Applications/cursor.AppImage")
 
     # Check if AppImage was found
     if [ -z "$cursor_path" ]; then

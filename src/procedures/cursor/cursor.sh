@@ -239,7 +239,6 @@ cursor() {
     # Find the Cursor AppImage in the home directory
     local cursor_path=$("$HOME/Applications/cursor.AppImage")
 
-    # Check if AppImage was found
     if [ -z "$cursor_path" ]; then
         echo "Error: Cursor AppImage not found"
         return 1

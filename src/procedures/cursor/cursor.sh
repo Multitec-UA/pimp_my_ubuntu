@@ -16,56 +16,6 @@
 # Debug flag - set to true to enable debug messages
 readonly DEBUG=${DEBUG:-false}
 
-# Software-common constants
-readonly _REPOSITORY_RAW_URL="https://raw.github.com/Multitec-UA/pimp_my_ubuntu/main"
-readonly _LIBS_REMOTE_URL="${_REPOSITORY_RAW_URL}/src/libs/"
-readonly _SOFTWARE_COMMAND="cursor"
-readonly _SOFTWARE_DESCRIPTION="A modern and powerful IDE built on web technologies"
-readonly _SOFTWARE_VERSION="latest"
-readonly _CURSOR_DOWNLOAD_URL="https://github.com/getcursor/cursor/releases/latest/download/Cursor-x86_64.AppImage"
-
-# Software-specific constants
-readonly _APPLICATIONS_DIR="${GLOBAL_REAL_HOME}/Applications"
-readonly _CURSOR_APPIMAGE="${_APPLICATIONS_DIR}/cursor.AppImage"
-readonly _USER_CONFIG_DIR="${GLOBAL_REAL_HOME}/.config"
-readonly _USER_LOCAL_DIR="${GLOBAL_REAL_HOME}/.local"
-readonly _SHELL_RC_FILES=("${GLOBAL_REAL_HOME}/.bashrc" "${GLOBAL_REAL_HOME}/.zshrc")
-
-
-
-# Main procedure function
-main() {
-
-        # Source libraries
-    if [[ "$DEBUG" == "true" ]]; then
-        # Strict mode
-        set -euo pipefail
-        # Source libraries from local directory
-        source "./src/libs/global_utils.sh"
-    else
-        # Source libraries from remote repository
-        _source_lib "global_utils.sh"
-    fi  
-    global_log_message "DEBUG" "Entering main function"
-    global_log_message "INFO" "You can see debug logs in ${GLOBAL_LOG_FILE}"
-    
-    # Check if the script is running with root privileges
-    global_check_root
-
-    # Show  global variables and install basic dependencies
-    _step_init
-
-    _step_install_dependencies
-
-    _step_install_software
-    _step_post_install
-    global_log_message "INFO" "${_SOFTWARE_COMMAND} installation completed successfully"
-    global_set_installation_status "${_SOFTWARE_COMMAND}" "SUCCESS"
-    _step_cleanup
-    global_log_message "DEBUG" "Exiting main function"
-
-}
-
 # Necessary function to source libraries
 _source_lib() {
     local file="${1:-}"
@@ -84,6 +34,85 @@ _source_lib() {
     global_log_message "DEBUG" "Exiting _source_lib"
 }
 
+# Source libraries
+if [[ "$DEBUG" == "true" ]]; then
+    # Strict mode
+    set -euo pipefail
+    # Source libraries from local directory
+    source "./src/libs/global_utils.sh"
+else
+    # Source libraries from remote repository
+    _source_lib "global_utils.sh"
+fi
+
+# Software-common constants
+readonly _REPOSITORY_RAW_URL="https://raw.github.com/Multitec-UA/pimp_my_ubuntu/main"
+readonly _LIBS_REMOTE_URL="${_REPOSITORY_RAW_URL}/src/libs/"
+readonly _SOFTWARE_COMMAND="cursor"
+readonly _SOFTWARE_DESCRIPTION="A modern and powerful IDE built on web technologies"
+readonly _SOFTWARE_VERSION="latest"
+readonly _CURSOR_DOWNLOAD_URL="https://downloads.cursor.com/production/1649e229afdef8fd1d18ea173f063563f1e722ef/linux/x64/Cursor-0.48.6-x86_64.AppImage"
+
+
+# Software-specific constants
+
+readonly _APPLICATIONS_DIR="${GLOBAL_REAL_HOME}/Applications"
+readonly _CURSOR_APPIMAGE="${_APPLICATIONS_DIR}/cursor.AppImage"
+readonly _USER_CONFIG_DIR="${GLOBAL_REAL_HOME}/.config"
+readonly _USER_LOCAL_DIR="${GLOBAL_REAL_HOME}/.local"
+readonly _SHELL_RC_FILES=("${GLOBAL_REAL_HOME}/.bashrc" "${GLOBAL_REAL_HOME}/.zshrc")
+
+
+
+# Main procedure function
+main() {
+
+
+    global_log_message "DEBUG" "Entering main function"
+    
+    # Check if the script is running with root privileges
+    global_check_root
+
+    # Show  global variables and install basic dependencies
+    _show_global_variables
+
+    # Show  global variables and install basic dependencies
+    _step_init
+
+    _step_install_dependencies
+
+    _step_install_software
+    _step_post_install
+    global_log_message "INFO" "${_SOFTWARE_COMMAND} installation completed successfully"
+    global_set_installation_status "${_SOFTWARE_COMMAND}" "SUCCESS"
+    _step_cleanup
+    global_log_message "DEBUG" "Exiting main function"
+
+}
+
+
+
+# Show global variables
+_show_global_variables() {
+    global_log_message "DEBUG" "_REPOSITORY_RAW_URL: ${_REPOSITORY_RAW_URL}"
+    global_log_message "DEBUG" "_LIBS_REMOTE_URL: ${_LIBS_REMOTE_URL}"
+    global_log_message "DEBUG" "_SOFTWARE_COMMAND: ${_SOFTWARE_COMMAND}"
+    global_log_message "DEBUG" "_SOFTWARE_DESCRIPTION: ${_SOFTWARE_DESCRIPTION}"
+    global_log_message "DEBUG" "_SOFTWARE_VERSION: ${_SOFTWARE_VERSION}"
+    global_log_message "DEBUG" "_CURSOR_DOWNLOAD_URL: ${_CURSOR_DOWNLOAD_URL}"
+    global_log_message "DEBUG" "_CURSOR_APPIMAGE: ${_CURSOR_APPIMAGE}"
+    global_log_message "DEBUG" "_APPLICATIONS_DIR: ${_APPLICATIONS_DIR}"
+    global_log_message "DEBUG" "_USER_CONFIG_DIR: ${_USER_CONFIG_DIR}"
+    global_log_message "DEBUG" "_USER_LOCAL_DIR: ${_USER_LOCAL_DIR}"
+    global_log_message "DEBUG" "_SHELL_RC_FILES: ${_SHELL_RC_FILES[@]}"
+    global_log_message "DEBUG" "GLOBAL_REAL_USER: ${GLOBAL_REAL_USER}"
+    global_log_message "DEBUG" "GLOBAL_REAL_HOME: ${GLOBAL_REAL_HOME}"  
+    global_log_message "DEBUG" "GLOBAL_LOG_FILE: ${GLOBAL_LOG_FILE}"
+    global_log_message "DEBUG" "GLOBAL_TEMP_PATH: ${GLOBAL_TEMP_PATH}"
+    global_log_message "DEBUG" "GLOBAL_STATUS_FILE: ${GLOBAL_STATUS_FILE}"
+    global_log_message "DEBUG" "GLOBAL_STATUS_FILE_INITIALIZED: ${GLOBAL_STATUS_FILE_INITIALIZED}"
+    global_log_message "DEBUG" "GLOBAL_INSTALLATION_STATUS: ${GLOBAL_INSTALLATION_STATUS[@]}"
+}
 # Prepare for installation
 _step_init() {
     global_log_message "DEBUG" "Entering _step_init"
@@ -157,12 +186,34 @@ _step_install_software() {
         sysctl -p /etc/sysctl.d/99-cursor.conf >>"${GLOBAL_LOG_FILE}" 2>&1
     fi
     
-    # Download Cursor AppImage
-    global_log_message "INFO" "Downloading Cursor AppImage"
-    global_run_as_user curl -L -i -v --tlsv1.2  "${_CURSOR_DOWNLOAD_URL}" -o "${_CURSOR_APPIMAGE}" >>"${GLOBAL_LOG_FILE}" 2>&1
-    global_run_as_user chmod +x "${_CURSOR_APPIMAGE}" >>"${GLOBAL_LOG_FILE}" 2>&1
+    # Download and verify Cursor AppImage
+    if ! _download_cursor_appimage; then
+        global_log_message "ERROR" "Failed to download Cursor AppImage"
+        return 1
+    fi
 
     global_log_message "DEBUG" "Exiting _step_install_software"
+    return 0
+}
+
+# Function to download and verify Cursor AppImage
+_download_cursor_appimage() {
+    global_log_message "DEBUG" "Entering _download_cursor_appimage"
+    global_log_message "INFO" "Downloading Cursor AppImage to ${_CURSOR_APPIMAGE}"
+    
+    # Download Cursor AppImage
+    global_run_as_user curl -L -i -v --tlsv1.2 "${_CURSOR_DOWNLOAD_URL}" -o "${_CURSOR_APPIMAGE}" >>"${GLOBAL_LOG_FILE}" 2>&1
+    
+    # Check if the downloaded file exists and has minimum size
+    if ! global_check_file_size "${_CURSOR_APPIMAGE}"; then
+        global_log_message "ERROR" "Failed to download Cursor AppImage or file is corrupted"
+        return 1
+    fi
+    
+    # Make the file executable
+    global_run_as_user chmod +x "${_CURSOR_APPIMAGE}" >>"${GLOBAL_LOG_FILE}" 2>&1
+    
+    global_log_message "DEBUG" "Exiting _download_cursor_appimage"
     return 0
 }
 

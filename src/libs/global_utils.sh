@@ -98,6 +98,7 @@ global_check_root() {
         echo "Please run: sudo $0" >&2
         exit 1
     fi
+    global_log_message "INFO" "You can see debug logs in ${GLOBAL_LOG_FILE}"
 }
 
 global_declare_installation_status() {
@@ -380,4 +381,35 @@ global_download_media() {
         global_log_message "ERROR" "No media file specified to download"
         return 1
     fi
+}
+
+# Function to check file size and existence
+# Usage: global_check_file_size "file_path"
+# Returns: 0 if file exists and is >= 50 bytes, 1 otherwise
+global_check_file_size() {
+    local file_path="${1:-}"
+    
+    if [[ -z "${file_path}" ]]; then
+        global_log_message "ERROR" "No file path specified"
+        return 1
+    fi
+    
+    if [[ ! -f "${file_path}" ]]; then
+        global_log_message "ERROR" "File does not exist: ${file_path}"
+        return 1
+    fi
+    
+    local file_size=$(stat -c %s "${file_path}" 2>/dev/null)
+    if [[ $? -ne 0 ]]; then
+        global_log_message "ERROR" "Failed to get file size for: ${file_path}"
+        return 1
+    fi
+    
+    if [[ ${file_size} -lt 1048576 ]]; then
+        global_log_message "ERROR" "File size is less than 1 megabyte: ${file_path} (${file_size} bytes)"
+        return 1
+    fi
+    
+    global_log_message "DEBUG" "File size check passed: ${file_path} (${file_size} bytes)"
+    return 0
 }

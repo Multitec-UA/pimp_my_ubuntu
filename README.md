@@ -11,14 +11,35 @@ An automated setup script for fresh Ubuntu 24.04 installations. This tool helps 
 - Root/sudo privileges
 - Internet connection
 
-## How to use
 
-### Pimp My Ubuntu
+
+<br>
+<br>
+
+---
+
+# Use Pimp My Ubuntu
+
 Execute his command to use de Pimp My Ubuntu main menu.
 
 ```bash
 curl -fsSL https://raw.github.com/Multitec-UA/pimp_my_ubuntu/main/src/main.sh | sudo bash
 ```
+<div style="background-color: yellow; color: black; padding: 10px; font-size: 1.2em;">
+    <strong>↑ ↑ ↑ ↑ ↑ ↑ Execute this command start main menu   ↑ ↑ ↑ ↑ ↑ ↑ </strong>
+</div>
+
+
+
+<br>
+<br>
+<br>
+
+---
+
+
+
+# Install software individually
 
 ### Install ZSH
 Install ZSH, Oh-My-Zsh, plugins (autosuggestions, syntax-highlighting), Powerlevel10k theme and Meslo Nerd Fonts.
@@ -46,6 +67,8 @@ curl -fsSL https://raw.github.com/Multitec-UA/pimp_my_ubuntu/main/src/procedures
 ```
 
 [View detailed Grub Customizer readme](https://github.com/Multitec-UA/pimp_my_ubuntu/blob/main/src/procedures/grub-customizer/README.md)
+
+<br>
 
 # How contribute
 

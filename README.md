@@ -1,4 +1,4 @@
-# Pimp My Ubuntu 🚀
+# Pimp My Ubuntu 🧞‍♀️
 
 An automated setup script for fresh Ubuntu 24.04 installations. This tool helps you quickly set up your Ubuntu system with your preferred software and configurations.
 
@@ -138,4 +138,4 @@ MIT License - See LICENSE file for details
 
 ## Authors
 
-- Multitec-UA Team
+- Multitec-UA Team with ❤️

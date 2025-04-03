@@ -21,8 +21,9 @@ readonly _REPOSITORY_RAW_URL="https://raw.github.com/Multitec-UA/pimp_my_ubuntu/
 readonly _LIBS_REMOTE_URL="${_REPOSITORY_RAW_URL}/src/libs/"
 readonly _SOFTWARE_COMMAND="cursor"
 readonly _SOFTWARE_DESCRIPTION="A modern and powerful IDE with AI integrated"
-readonly _SOFTWARE_VERSION="0.48.6"
-readonly _CURSOR_DOWNLOAD_URL="https://downloads.cursor.com/production/1649e229afdef8fd1d18ea173f063563f1e722ef/linux/x64/Cursor-0.48.6-x86_64.AppImage"
+readonly _SOFTWARE_VERSION="0.48.7"
+readonly _CURSOR_DOWNLOAD_URL="https://downloads.cursor.com/production/1d623c4cc1d3bb6e0fe4f1d5434b47b958b05876/linux/x64/Cursor-0.48.7-x86_64.AppImage"
+
 
 
 # Necessary function to source libraries

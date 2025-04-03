@@ -73,7 +73,7 @@ main() {
     _clean_procedure_list "${selected_procedures}"
 
     
-
+    #User --mixedgauge for show progress bar when automatic is selected
     
     # WIP: Show procedures status screen
     dialog_show_procedure_status_screen

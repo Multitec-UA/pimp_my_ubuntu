@@ -413,3 +413,29 @@ global_check_file_size() {
     global_log_message "DEBUG" "File size check passed: ${file_path} (${file_size} bytes)"
     return 0
 }
+
+
+global_press_any_key() {
+    local timeout
+    if [[ "${DEBUG}" == "true" ]]; then
+        timeout=600
+    else
+        timeout=10
+    fi
+    
+    local message="Press any key to continue or wait ${timeout} seconds... "
+    echo # Add a newline before the prompt for better spacing
+
+    # Use read with timeout, prompt, single char, silent, raw
+    # If read returns 0, a key was pressed within the timeout
+    # If read returns non-zero (> 128 for timeout), the timeout occurred
+    if read -t $timeout -n 1 -s -r -p "$message"; then
+        echo # Key was pressed, print a newline after the prompt
+        global_log_message "DEBUG" "Key pressed, continuing."
+    else
+        # Timeout occurred
+        echo # Print a newline to move past the prompt
+        echo "Timeout reached, continuing automatically."
+        global_log_message "DEBUG" "Timeout reached (${timeout}s), continuing automatically."
+    fi
+}

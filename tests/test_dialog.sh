@@ -86,7 +86,7 @@ test_procedure_selector() {
 }
 
 test_status_screen() {
-    echo "--- Testing dialog_show_procedure_status_screen ---"
+    echo "--- Testing dialog_show_procedure_selector_status_screen ---"
 
     echo "Test Case 1: With various statuses"
     GLOBAL_INSTALLATION_STATUS=(
@@ -98,7 +98,7 @@ test_status_screen() {
         ["UnknownStatusTask"]="UNKNOWN"
     )
     echo "Displaying status screen (requires manual interaction)..."
-    dialog_show_procedure_status_screen
+    dialog_show_procedure_selector_status_screen
     local status=$?
 
      if [[ $status -eq 0 ]]; then
@@ -113,7 +113,7 @@ test_status_screen() {
     echo "Test Case 2: No procedures"
     GLOBAL_INSTALLATION_STATUS=()
     echo "Displaying status screen with no procedures..."
-    dialog_show_procedure_status_screen
+    dialog_show_procedure_selector_status_screen
      if [[ $? -eq 1 ]]; then
         echo "Status screen (no procedures) displayed error correctly (visual check needed)."
     else

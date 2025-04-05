@@ -36,7 +36,7 @@ else
 fi
 
 GLOBAL_DOWNLOAD_DIR="$GLOBAL_REAL_HOME/Documents/pimp_my_ubuntu"
-
+MAIN_DIALOG_MENU_SELECTION=""
 
 main() {
 
@@ -58,6 +58,7 @@ main() {
 
     # Show  global variables and install basic dependencies
     _step_init    
+
   
     # Get procedures information from GitHub
     _init_procedures_info
@@ -73,28 +74,28 @@ main() {
     _clean_procedure_list "${selected_procedures}"
 
     
-    #User --mixedgauge for show progress bar when automatic is selected
-    
-    # WIP: Show procedures status screen
-    dialog_show_procedure_status_screen
-   # _response=$(dialog_show_procedure_status_screen)
-   # echo "RESPONSE: $_response"
-    exit 0
+
+    # TODO: AUTOMATIC
+    #if [[ "$MAIN_DIALOG_MENU_SELECTION" == "automatic" ]]; then
+    # --mixedgauge for show progress bar when automatic is selected
 
 
 
-    # Run procedures in the order of selection
+    # MANUALLY
+    # Show procedures status screen selector 
+    # MAIN_DIALOG_MENU_SELECTION save each iteration user selection
     while true; do
-        local selection
         global_import_installation_status
-        selection=$(dialog_show_procedure_status_screen)
-        
-        # Check if the user canceled the dialog
-        if [[ $? -ne 0 ]]; then
-            break
+        dialog_show_procedure_selector_status_screen
+        global_log_message "DEBUG" "GLOBAL_INSTALLATION_STATUS_ALL: ${!GLOBAL_INSTALLATION_STATUS[@]}"
+        global_log_message "DEBUG" "GLOBAL_INSTALLATION_STATUS_SELECTED: $MAIN_DIALOG_MENU_SELECTION : ${GLOBAL_INSTALLATION_STATUS[${MAIN_DIALOG_MENU_SELECTION}]}"
+
+        global_press_any_key
+        if [[ "${GLOBAL_INSTALLATION_STATUS[${MAIN_DIALOG_MENU_SELECTION}]}" != "SUCCESS" ]]; then
+            _run_procedure "${MAIN_DIALOG_MENU_SELECTION}"
         fi
-        
-        _run_procedure "${selection}"
+        global_press_any_key
+
     done
 
     _print_global_installation_status
@@ -202,7 +203,7 @@ _print_global_installation_status() {
 
     global_import_installation_status
     for proc_name in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
-        global_log_message "INFO" "[${proc_name}] ${GLOBAL_INSTALLATION_STATUS[${proc_name}]}"
+        global_log_message "INFO" "${proc_name}: ${GLOBAL_INSTALLATION_STATUS[${proc_name}]}"
     done
     global_log_message "INFO" "For more details, check the log file ${GLOBAL_LOG_FILE}"
     echo -e "\n"
@@ -213,10 +214,8 @@ _run_procedure() {
 
     # Print all installation statuses
     _print_global_installation_status
-    dialog_show_procedure_status_screen
 
     global_log_message "INFO" "Starting procedure: ${procedure}"
-    
 
     curl -fsSL "${_PROCEDURES_REMOTE_URL}${procedure}/${procedure}.sh" | bash
     

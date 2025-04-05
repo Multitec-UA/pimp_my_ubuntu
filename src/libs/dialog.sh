@@ -65,7 +65,7 @@ dialog_show_procedure_selector_screen() {
 # Display the current status of all installation procedures
 # Shows a dialog with the list of procedures and their current states
 # Returns: 0 on success, 1 on cancel/ESC
-dialog_show_procedure_status_screen() {
+dialog_show_procedure_selector_status_screen() {
     # Dialog exit status codes
     local DIALOG_OK=0
     local DIALOG_CANCEL=1
@@ -132,6 +132,9 @@ dialog_show_procedure_status_screen() {
     local exit_status=$?
     exec 3>&-
     
+    # Update the MAIN_DIALOG_MENU_SELECTION array
+    MAIN_DIALOG_MENU_SELECTION=(${menu_items[$selection]})
+
     # Handle the exit status
     case $exit_status in
         $DIALOG_OK)

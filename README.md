@@ -70,6 +70,33 @@ curl -fsSL https://raw.github.com/Multitec-UA/pimp_my_ubuntu/main/src/procedures
 
 <br>
 
+# Advanced Usage Options
+
+### Debug Mode
+
+You can enable debug mode by setting the `DEBUG` environment variable to `true` when running any of the installation commands. This will:
+
+- Display all detailed DEBUG log messages in the terminal
+- Skip the welcome screen for faster access to installation options
+- Extend timeout periods for key presses from 10 seconds to 600 seconds (10 minutes)
+- Continue to write all logs to `/var/log/pimp_my_ubuntu/install.log`
+
+To run the main menu in debug mode:
+
+```bash
+curl -fsSL https://raw.github.com/Multitec-UA/pimp_my_ubuntu/main/src/main.sh | sudo -E DEBUG=true bash
+```
+
+To install individual software in debug mode (example with ZSH):
+
+```bash
+curl -fsSL https://raw.github.com/Multitec-UA/pimp_my_ubuntu/main/src/procedures/zsh/zsh.sh | sudo -E DEBUG=true bash
+```
+
+The `-E` flag for sudo preserves environment variables when executing the command as root.
+
+<br>
+
 # How contribute
 
 ## Directory Structure

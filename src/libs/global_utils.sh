@@ -55,6 +55,7 @@ global_ensure_dir() {
 
 # Initialize logging system for the application
 global_setup_logging() {
+    # Don't log the start of this function to avoid bootstrapping issues
     if [[ "${GLOBAL_LOGGING_INITIALIZED}" == "false" ]] && \
        ( [[ ! -f "${GLOBAL_LOG_FILE}" ]] || [[ "${_SOFTWARE_COMMAND}" == "main-menu" ]] ); then
         global_ensure_dir "${GLOBAL_LOG_DIR}"
@@ -68,6 +69,8 @@ global_setup_logging() {
 # Log a message with timestamp and level
 # Usage: global_log_message "INFO" "Starting installation"
 global_log_message() {
+    # No start log here to avoid infinite recursion
+    
     # Initialize logging if this is the first call form main menu
     global_setup_logging
 
@@ -88,6 +91,8 @@ global_log_message() {
     if [[ "${DEBUG}" == "true" ]] || [[ "${level}" != "DEBUG" ]]; then
         echo -e "${log_entry}"
     fi
+    
+    # Don't add end debug message to this function to avoid infinite recursion
 }
 
 
@@ -104,13 +109,13 @@ global_check_root() {
 global_declare_installation_status() {
     if ! declare -p GLOBAL_INSTALLATION_STATUS >/dev/null 2>&1; then
         declare -gA GLOBAL_INSTALLATION_STATUS
-        global_log_message "DEBUG" "GLOBAL_INSTALLATION_STATUS declared as global associative array"
     fi
 }
 
 
 # Initialize logging system for the application
 global_setup_installation_status() {
+    global_log_message "DEBUG" "GF: --> global_setup_installation_status"
     # Declare a associative array if it not exist yet
     global_declare_installation_status
 
@@ -122,11 +127,13 @@ global_setup_installation_status() {
         touch "${GLOBAL_STATUS_FILE}" 
         GLOBAL_STATUS_FILE_INITIALIZED=true
     fi
+    global_log_message "DEBUG" "GF: <-- global_setup_installation_status"
 }
 
 # Function to serialize and export the installation status array
 # Usage: global_export_installation_status
 global_export_installation_status() {
+    global_log_message "DEBUG" "GF: --> global_export_installation_status"
     local serialized=""
 
     global_setup_installation_status
@@ -152,11 +159,13 @@ global_export_installation_status() {
     # Verify serialized content
     global_log_message "DEBUG" "Serialized content: $(cat $temp_status_file)"
     global_log_message "DEBUG" "Exported installation status to file: ${temp_status_file}"
+    global_log_message "DEBUG" "GF: <-- global_export_installation_status"
 }
 
 # Function to import and deserialize the installation status array
 # Usage: global_import_installation_status
 global_import_installation_status() {
+    global_log_message "DEBUG" "GF: --> global_import_installation_status"
     # Create a local associative array
     declare -A local_status
     
@@ -195,12 +204,14 @@ global_import_installation_status() {
     # DEBUG
     global_log_message "DEBUG" "GLOBAL_INSTALLATION_STATUS_KEYS after import: ${!GLOBAL_INSTALLATION_STATUS[@]}"
     global_log_message "DEBUG" "GLOBAL_INSTALLATION_STATUS after import: ${GLOBAL_INSTALLATION_STATUS[@]}"
+    global_log_message "DEBUG" "GF: <-- global_import_installation_status"
 }
 
 # Function to get installation status for a command
 # Ensure exsist variable and file, import existing values and return value
 # Usage: global_get_installation_status "command_name"
 global_get_installation_status() {
+    global_log_message "DEBUG" "GF: --> global_get_installation_status"
     local command=$1
     
     # Import existing values first
@@ -208,12 +219,14 @@ global_get_installation_status() {
     
     # Use parameter expansion with default to avoid unbound variable error
     echo "${GLOBAL_INSTALLATION_STATUS[$command]:-}"
+    global_log_message "DEBUG" "GF: <-- global_get_installation_status"
 }
 
 # Function to set installation status for a command
 # Ensure exsist variable and file, import existing values and set value
 # Usage: global_set_installation_status "command_name" "status"
 global_set_installation_status() {
+    global_log_message "DEBUG" "GF: --> global_set_installation_status"
     local command=$1
     local status=$2
     global_declare_installation_status
@@ -224,20 +237,24 @@ global_set_installation_status() {
     GLOBAL_INSTALLATION_STATUS["$command"]="$status"
     global_log_message "DEBUG" "GLOBAL_INSTALLATION_STATUS set: [$command]=$status"
     global_export_installation_status
+    global_log_message "DEBUG" "GF: <-- global_set_installation_status"
 }
 
 # Function to remove a command from the installation status array
 # Usage: global_remove_installation_status "command_name"
 global_unset_installation_status() {
+    global_log_message "DEBUG" "GF: --> global_unset_installation_status"
     local command=$1
     unset GLOBAL_INSTALLATION_STATUS["$command"]
     global_export_installation_status
+    global_log_message "DEBUG" "GF: <-- global_unset_installation_status"
 }
 
 # Check if software is already installed using multiple methods
 # Usage: global_check_if_installed "software_name"
 # Returns: 0 if installed, 1 if not installed
 global_check_if_installed() {
+    global_log_message "DEBUG" "GF: --> global_check_if_installed"
     local software=$1
     local log_prefix="[CHECK] ${software}"
     
@@ -247,36 +264,42 @@ global_check_if_installed() {
     # Method 1: Check if it's an APT package
     if dpkg -l "${software}" &> /dev/null; then
         global_log_message "DEBUG" "${log_prefix}: Found as APT package"
+        global_log_message "DEBUG" "GF: <-- global_check_if_installed"
         return 0
     fi
     
     # Method 2: Try running the command with --version or -v (common patterns)
     if "${software}" --version &> /dev/null || "${software}" -v &> /dev/null; then
         global_log_message "DEBUG" "${log_prefix}: Responds to --version or -v flag"
+        global_log_message "DEBUG" "GF: <-- global_check_if_installed"
         return 0
     fi
     
     # Method 3: Check if executable exists in PATH
     if command -v "${software}" &> /dev/null; then
         global_log_message "DEBUG" "${log_prefix}: Found in PATH"
+        global_log_message "DEBUG" "GF: <-- global_check_if_installed"
         return 0
     fi
     
     # Method 4: Check if it's a snap package
     if snap list 2>/dev/null | grep -q "^${software} "; then
         global_log_message "DEBUG" "${log_prefix}: Found as Snap package"
+        global_log_message "DEBUG" "GF: <-- global_check_if_installed"
         return 0
     fi
     
     # Method 5: Check if it's a flatpak
     if command -v flatpak &> /dev/null && flatpak list --app 2>/dev/null | grep -q "${software}"; then
         global_log_message "DEBUG" "${log_prefix}: Found as Flatpak"
+        global_log_message "DEBUG" "GF: <-- global_check_if_installed"
         return 0
     fi
     
     # Method 6: Check systemd services
     if systemctl list-unit-files --type=service 2>/dev/null | grep -q "${software}.service"; then
         global_log_message "DEBUG" "${log_prefix}: Found as systemd service"
+        global_log_message "DEBUG" "GF: <-- global_check_if_installed"
         return 0
     fi
     
@@ -284,11 +307,13 @@ global_check_if_installed() {
     if [ -f "/usr/share/applications/${software}.desktop" ] || \
        [ -f "$GLOBAL_REAL_HOME/.local/share/applications/${software}.desktop" ]; then
         global_log_message "DEBUG" "${log_prefix}: Found desktop entry"
+        global_log_message "DEBUG" "GF: <-- global_check_if_installed"
         return 0
     fi
     
     # If we made it here, the software was not found
     global_log_message "DEBUG" "${log_prefix}: Not found"
+    global_log_message "DEBUG" "GF: <-- global_check_if_installed"
     return 1
 }
 
@@ -297,6 +322,7 @@ global_check_if_installed() {
 # Usage: global_install_apt_package "package1" "package2" ...
 # Returns: 0 if all packages successfully installed, 1 if any installation failed
 global_install_apt_package() {
+    global_log_message "DEBUG" "GF: --> global_install_apt_package"
     local packages=("$@")
     local max_attempts=3
     local failed_packages=()
@@ -345,14 +371,17 @@ global_install_apt_package() {
     
     if [ ${#failed_packages[@]} -gt 0 ]; then
         global_log_message "ERROR" "Failed to install packages: ${failed_packages[*]}"
+        global_log_message "DEBUG" "GF: <-- global_install_apt_package"
         return 1
     fi
     
+    global_log_message "DEBUG" "GF: <-- global_install_apt_package"
     return 0
 }
 
 # Function to download media files from repo
 global_download_media() {
+    global_log_message "DEBUG" "GF: --> global_download_media"
     local header="Accept: application/vnd.github.v3.raw"
     local file_path="${1:-}"
     local destination_dir="$GLOBAL_REAL_HOME/Documents/pimp_my_ubuntu"
@@ -375,10 +404,12 @@ global_download_media() {
         # Ensure the downloaded file is owned by the real user
         chown "${GLOBAL_REAL_USER}:${GLOBAL_REAL_USER}" "${output_file}"  >>"${GLOBAL_LOG_FILE}" 2>&1
         
+        global_log_message "DEBUG" "GF: <-- global_download_media"
         return $curl_status
     else
 
         global_log_message "ERROR" "No media file specified to download"
+        global_log_message "DEBUG" "GF: <-- global_download_media"
         return 1
     fi
 }
@@ -387,35 +418,42 @@ global_download_media() {
 # Usage: global_check_file_size "file_path"
 # Returns: 0 if file exists and is >= 50 bytes, 1 otherwise
 global_check_file_size() {
+    global_log_message "DEBUG" "GF: --> global_check_file_size"
     local file_path="${1:-}"
     
     if [[ -z "${file_path}" ]]; then
         global_log_message "ERROR" "No file path specified"
+        global_log_message "DEBUG" "GF: <-- global_check_file_size"
         return 1
     fi
     
     if [[ ! -f "${file_path}" ]]; then
         global_log_message "ERROR" "File does not exist: ${file_path}"
+        global_log_message "DEBUG" "GF: <-- global_check_file_size"
         return 1
     fi
     
     local file_size=$(stat -c %s "${file_path}" 2>/dev/null)
     if [[ $? -ne 0 ]]; then
         global_log_message "ERROR" "Failed to get file size for: ${file_path}"
+        global_log_message "DEBUG" "GF: <-- global_check_file_size"
         return 1
     fi
     
     if [[ ${file_size} -lt 1048576 ]]; then
         global_log_message "ERROR" "File size is less than 1 megabyte: ${file_path} (${file_size} bytes)"
+        global_log_message "DEBUG" "GF: <-- global_check_file_size"
         return 1
     fi
     
     global_log_message "DEBUG" "File size check passed: ${file_path} (${file_size} bytes)"
+    global_log_message "DEBUG" "GF: <-- global_check_file_size"
     return 0
 }
 
 
 global_press_any_key() {
+    global_log_message "DEBUG" "GF: --> global_press_any_key"
     local timeout
     if [[ "${DEBUG}" == "true" ]]; then
         timeout=600
@@ -438,4 +476,5 @@ global_press_any_key() {
         echo "Timeout reached, continuing automatically."
         global_log_message "DEBUG" "Timeout reached (${timeout}s), continuing automatically."
     fi
+    global_log_message "DEBUG" "GF: <-- global_press_any_key"
 }

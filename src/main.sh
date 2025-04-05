@@ -53,6 +53,7 @@ main() {
         _source_lib "dialog.sh"
     fi  
 
+    global_log_message "DEBUG" "MF: --> main"
     # Check if the script is running with root privileges
     global_check_root
 
@@ -102,10 +103,12 @@ main() {
 
     
     global_log_message "INFO" "Finished Pimp My Ubuntu installation script\n"
+    global_log_message "DEBUG" "MF: <-- main"
 }
 
 # Necessary function to source libraries
 _source_lib() {
+    global_log_message "DEBUG" "MF: --> _source_lib"
     local file="${1:-}"
     
     if [[ -n "${file}" ]]; then
@@ -119,11 +122,13 @@ _source_lib() {
         echo "ERROR" "No library file specified to source"
         exit 1
     fi
+    global_log_message "DEBUG" "MF: <-- _source_lib"
 }
 
 
 # Prepare for installation
 _step_init() {
+    global_log_message "DEBUG" "MF: --> _step_init"
     # Log all environment variables for debugging
     global_log_message "DEBUG" "GLOBAL_UTILS_VERSION: ${GLOBAL_UTILS_VERSION}"
     global_log_message "DEBUG" "DIALOG_UTILS_VERSION: ${DIALOG_VERSION}"
@@ -147,11 +152,13 @@ _step_init() {
 
     # Install basic dependencies
     global_install_apt_package "${_DEPENDENCIES[@]}"
+    global_log_message "DEBUG" "MF: <-- _step_init"
 }
 
 # Initialize procedures information
 # Fetches procedures from repository and initializes their status
 _init_procedures_info() {
+    global_log_message "DEBUG" "MF: --> _init_procedures_info"
     global_log_message "INFO" "Initializing procedures information"
         
     # Get procedures list from GitHub API
@@ -169,16 +176,20 @@ _init_procedures_info() {
     done <<< "${names}"
     
     global_log_message "DEBUG" "All procedures initialized with INIT status"
+    global_log_message "DEBUG" "MF: <-- _init_procedures_info"
 }
 
 _welcome_screen() {
+    global_log_message "DEBUG" "MF: --> _welcome_screen"
     if ! dialog_show_welcome_screen; then
         global_log_message "ERROR" "No installation procedures found"
         exit 1
     fi
+    global_log_message "DEBUG" "MF: <-- _welcome_screen"
 }
 
 _clean_procedure_list() {
+    global_log_message "DEBUG" "MF: --> _clean_procedure_list"
     local selected_procedures="${1:-}"
     # Update installation status based on selection
     local all_procedures=("${!GLOBAL_INSTALLATION_STATUS[@]}")
@@ -195,21 +206,25 @@ _clean_procedure_list() {
             global_log_message "DEBUG" "Removed $proc from installation status"
         fi
     done
+    global_log_message "DEBUG" "MF: <-- _clean_procedure_list"
 }
 
 _print_global_installation_status() {
+    global_log_message "DEBUG" "MF: --> _print_global_installation_status"
     echo -e "\n"
     global_log_message "INFO" "Current installation status:"
 
-    global_import_installation_status
+    #global_import_installation_status
     for proc_name in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
         global_log_message "INFO" "${proc_name}: ${GLOBAL_INSTALLATION_STATUS[${proc_name}]}"
     done
     global_log_message "INFO" "For more details, check the log file ${GLOBAL_LOG_FILE}"
     echo -e "\n"
+    global_log_message "DEBUG" "MF: <-- _print_global_installation_status"
 }
 
 _run_procedure() {
+    global_log_message "DEBUG" "MF: --> _run_procedure"
     local procedure="${1:-}"
 
     # Print all installation statuses
@@ -224,7 +239,7 @@ _run_procedure() {
     local bash_status="${exit_statuses[1]}"
     
     global_log_message "INFO" "Procedure ${procedure} completed with status: ${bash_status} (curl status: ${curl_status})"
-
+    global_log_message "DEBUG" "MF: <-- _run_procedure"
 }
 
 

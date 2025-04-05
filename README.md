@@ -2,6 +2,9 @@
 
 An automated setup script for fresh Ubuntu 24.04 installations. This tool helps you quickly set up your Ubuntu system with your preferred software and configurations.
 
+YOU DO NOT NEED TO CLONE THIS REPOSITORY! USE THE FOLLOWING CURL COMMANDS
+
+
 ## Features
 
 - 🛠️🔄 With this public script you can install custom software in you Linux distribution based on Debian (Ubuntu Recomended) 

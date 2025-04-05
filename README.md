@@ -95,6 +95,25 @@ curl -fsSL https://raw.github.com/Multitec-UA/pimp_my_ubuntu/main/src/procedures
 
 The `-E` flag for sudo preserves environment variables when executing the command as root.
 
+### Local Development Mode
+
+If you've cloned the repository and want to run scripts using your local files instead of downloading them from GitHub, you can use the `LOCAL=true` option:
+
+```bash
+# Clone the repository first
+git clone https://github.com/Multitec-UA/pimp_my_ubuntu.git
+cd pimp_my_ubuntu
+
+# Run with local libraries
+sudo LOCAL=true DEBUG=true bash ./src/main.sh
+```
+
+When `LOCAL=true` is set:
+- The script will use library files from your local `./src/libs/` directory
+- Changes you make to the local files will be used during execution
+- This is especially useful for development and testing your contributions
+- You can combine with DEBUG mode: `sudo -E LOCAL=true DEBUG=true bash ./src/main.sh`
+
 <br>
 
 # How contribute

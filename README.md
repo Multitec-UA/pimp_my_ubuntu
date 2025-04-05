@@ -25,17 +25,14 @@ Execute his command to use de Pimp My Ubuntu main menu.
 ```bash
 curl -fsSL https://raw.github.com/Multitec-UA/pimp_my_ubuntu/main/src/main.sh | sudo bash
 ```
-<div style="background-color: yellow; color: black; padding: 10px; font-size: 1.2em;">
-    <strong>↑ ↑ ↑ ↑ ↑ ↑ Execute this command start main menu   ↑ ↑ ↑ ↑ ↑ ↑ </strong>
+<div style="background-color: yellow; color: black; padding: 10px; font-size: 1.2em; text-align: center;">
+    <strong>↑ ↑ ↑ ↑ ↑ ↑ Execute this command start main menu ↑ ↑ ↑ ↑ ↑ ↑ </strong>
 </div>
 
 
-
-<br>
-<br>
-<br>
-
 ---
+<br>
+<br>
 
 
 

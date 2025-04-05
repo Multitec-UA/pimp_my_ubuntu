@@ -15,6 +15,7 @@
 
 # Debug flag - set to true to enable debug messages
 readonly DEBUG=${DEBUG:-false}
+readonly LOCAL=${LOCAL:-false}
 
 # Software-common constants
 readonly _REPOSITORY_RAW_URL="https://raw.github.com/Multitec-UA/pimp_my_ubuntu/main"
@@ -45,7 +46,7 @@ _source_lib() {
 }
 
 # Source libraries
-if [[ "$DEBUG" == "true" ]]; then
+if [[ "$LOCAL" == "true" ]]; then
     # Strict mode
     set -euo pipefail
     # Source libraries from local directory

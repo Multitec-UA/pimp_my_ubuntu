@@ -15,6 +15,7 @@
 
 # Debug flag - set to true to enable debug messages
 readonly DEBUG=${DEBUG:-false}
+readonly LOCAL=${LOCAL:-false}
 
 # Software-common constants
 readonly _REPOSITORY_RAW_URL="https://raw.github.com/Multitec-UA/pimp_my_ubuntu/main"

@@ -15,6 +15,7 @@
 
 # Debug flag - set to true to enable debug messages
 readonly DEBUG=${DEBUG:-false}
+readonly LOCAL=${LOCAL:-false}
 
 # Software-common constants
 readonly _SOFTWARE_COMMAND="SOFTWARE_COMMAND_HERE"

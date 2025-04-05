@@ -12,6 +12,7 @@
 
 # Debug flag - set to true to enable debug messages
 readonly DEBUG=${DEBUG:-false}
+readonly LOCAL=${LOCAL:-false}
 
 # Software-common constants
 readonly _SOFTWARE_COMMAND="main-menu"
@@ -41,7 +42,7 @@ MAIN_DIALOG_MENU_SELECTION=""
 main() {
 
     # Source libraries
-    if [[ "$DEBUG" == "true" ]]; then
+    if [[ "$LOCAL" == "true" ]]; then
         # Strict mode
         set -euo pipefail
         # Source libraries from local directory

@@ -112,6 +112,7 @@ global_declare_installation_status() {
     fi
 }
 
+# INSTALLATION STATUS FUNCTIONS ------------------------------------------------
 
 # Initialize logging system for the application
 global_setup_installation_status() {
@@ -249,6 +250,9 @@ global_unset_installation_status() {
     global_export_installation_status
     global_log_message "DEBUG" "GF: <-- global_unset_installation_status"
 }
+
+# END INSTALLATION STATUS FUNCTIONS ------------------------------------------------
+
 
 # Check if software is already installed using multiple methods
 # Usage: global_check_if_installed "software_name"

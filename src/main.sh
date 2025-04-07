@@ -73,7 +73,7 @@ main() {
     # Select procedures to install
     local selected_procedures
     selected_procedures=$(dialog_show_procedure_selector_screen "${!GLOBAL_INSTALLATION_STATUS[@]}")
-    _clean_procedure_list "${selected_procedures}"
+    _remove_no_selected_procedures "${selected_procedures}"
 
     
 
@@ -142,6 +142,7 @@ _step_init() {
     global_log_message "DEBUG" "_SOFTWARE_DESCRIPTION: ${_SOFTWARE_DESCRIPTION}"
     global_log_message "DEBUG" "_DEPENDENCIES: ${_DEPENDENCIES[*]}"
     global_log_message "DEBUG" "DEBUG_MODE: ${DEBUG}"
+    global_log_message "DEBUG" "LOCAL_MODE: ${LOCAL}"
     global_log_message "DEBUG" "GLOBAL_LOG_DIR: ${GLOBAL_LOG_DIR}"
     global_log_message "DEBUG" "GLOBAL_LOG_FILE: ${GLOBAL_LOG_FILE}"
     global_log_message "DEBUG" "GLOBAL_REAL_USER: ${GLOBAL_REAL_USER}"
@@ -189,8 +190,8 @@ _welcome_screen() {
     global_log_message "DEBUG" "MF: <-- _welcome_screen"
 }
 
-_clean_procedure_list() {
-    global_log_message "DEBUG" "MF: --> _clean_procedure_list"
+_remove_no_selected_procedures() {
+    global_log_message "DEBUG" "MF: --> _remove_no_selected_procedures"
     local selected_procedures="${1:-}"
     # Update installation status based on selection
     local all_procedures=("${!GLOBAL_INSTALLATION_STATUS[@]}")
@@ -207,7 +208,7 @@ _clean_procedure_list() {
             global_log_message "DEBUG" "Removed $proc from installation status"
         fi
     done
-    global_log_message "DEBUG" "MF: <-- _clean_procedure_list"
+    global_log_message "DEBUG" "MF: <-- _remove_no_selected_procedures"
 }
 
 _print_global_installation_status() {

@@ -235,7 +235,7 @@ global_set_installation_status() {
     global_import_installation_status
     
     GLOBAL_INSTALLATION_STATUS["$command"]="$status"
-    global_log_message "DEBUG" "GLOBAL_INSTALLATION_STATUS set: [$command]=$status"
+    global_log_message "DEBUG" "GLOBAL_INSTALLATION_STATUS set: $command: $status"
     global_export_installation_status
     global_log_message "DEBUG" "GF: <-- global_set_installation_status"
 }
@@ -243,8 +243,8 @@ global_set_installation_status() {
 # Function to remove a command from the installation status array
 # Usage: global_remove_installation_status "command_name"
 global_unset_installation_status() {
-    global_log_message "DEBUG" "GF: --> global_unset_installation_status"
     local command=$1
+    global_log_message "DEBUG" "GF: --> global_unset_installation_status [$command]"
     unset GLOBAL_INSTALLATION_STATUS["$command"]
     global_export_installation_status
     global_log_message "DEBUG" "GF: <-- global_unset_installation_status"

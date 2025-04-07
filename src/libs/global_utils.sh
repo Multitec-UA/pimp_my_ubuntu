@@ -9,7 +9,7 @@
 # License: MIT
 # =============================================================================
 
-readonly GLOBAL_UTILS_VERSION="1.1.5"
+readonly GLOBAL_UTILS_VERSION="1.2.1"
 
 # Ensure this script is sourced, not executed
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
@@ -106,149 +106,130 @@ global_check_root() {
     global_log_message "INFO" "You can see debug logs in ${GLOBAL_LOG_FILE}"
 }
 
-global_declare_installation_status() {
-    if ! declare -p GLOBAL_INSTALLATION_STATUS >/dev/null 2>&1; then
-        declare -gA GLOBAL_INSTALLATION_STATUS
-    fi
-}
+
 
 # INSTALLATION STATUS FUNCTIONS ------------------------------------------------
 
 # Initialize logging system for the application
-global_setup_installation_status() {
-    global_log_message "DEBUG" "GF: --> global_setup_installation_status"
-    # Declare a associative array if it not exist yet
-    global_declare_installation_status
+global_create_proc_status_file() {
+    global_log_message "DEBUG" "GF: --> global_create_proc_status_file"
 
     # Initialize the status file if it not initialized yet or is main-menu
-    if [[ "${GLOBAL_STATUS_FILE_INITIALIZED}" == "false" ]] && \
-       ( [[ ! -f "${GLOBAL_TEMP_PATH}" ]] || [[ "${_SOFTWARE_COMMAND}" == "main-menu" ]] ); then
-        global_ensure_dir "${GLOBAL_TEMP_PATH}"
-        rm -f "${GLOBAL_STATUS_FILE}"
-        touch "${GLOBAL_STATUS_FILE}" 
-        GLOBAL_STATUS_FILE_INITIALIZED=true
+    if [[ "${GLOBAL_STATUS_FILE_INITIALIZED}" == "false" ]]; then
+        if [[ ! -f "${GLOBAL_STATUS_FILE}" ]] || [[ "${_SOFTWARE_COMMAND}" == "main-menu" ]]; then
+            global_log_message "DEBUG" "GF: --> Creating status file"
+            global_ensure_dir "${GLOBAL_TEMP_PATH}"
+            rm -f "${GLOBAL_STATUS_FILE}"
+            touch "${GLOBAL_STATUS_FILE}" 
+            GLOBAL_STATUS_FILE_INITIALIZED=true
+        fi
     fi
-    global_log_message "DEBUG" "GF: <-- global_setup_installation_status"
+    global_log_message "DEBUG" "GF: <-- global_create_proc_status_file"
 }
 
-# Function to serialize and export the installation status array
-# Usage: global_export_installation_status
-global_export_installation_status() {
-    global_log_message "DEBUG" "GF: --> global_export_installation_status"
-    local serialized=""
-
-    global_setup_installation_status
+# Function to serialize and store the installation status array
+global_write_proc_status_file() {
+    global_log_message "DEBUG" "GF: --> global_write_proc_status_file"
+    local temp_status_array=$1
     local temp_status_file="$GLOBAL_STATUS_FILE"
+
+    # Ensure procedure status file exists
+    global_create_proc_status_file
     
-    # Debug existing array content
-    global_log_message "DEBUG" "Exporting keys: ${!GLOBAL_INSTALLATION_STATUS[@]}"
-    global_log_message "DEBUG" "Exporting values: ${GLOBAL_INSTALLATION_STATUS[@]}"
-    
-    for key in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
-        local value="${GLOBAL_INSTALLATION_STATUS[$key]}"
+    # Serialize the installation status array
+    local serialized=""
+    for key in "${!temp_status_array[@]}"; do
+        local value="${temp_status_array[$key]}"
         # Create a string like "key1:value1;key2:value2"
         serialized+="${key}:${value};"
-        global_log_message "DEBUG" "Serializing: ${key}:${value}"
     done
     
-    # Write to temporary file instead of environment variable
-    echo "$serialized" > "$temp_status_file"
+    # Write serialized data to the status file
+    echo "$serialized" > "$GLOBAL_STATUS_FILE"
     
-    # Ensure the file has appropriate permissions
-    chmod 644 "$temp_status_file"
-    
-    # Verify serialized content
-    global_log_message "DEBUG" "Serialized content: $(cat $temp_status_file)"
-    global_log_message "DEBUG" "Exported installation status to file: ${temp_status_file}"
-    global_log_message "DEBUG" "GF: <-- global_export_installation_status"
+    global_log_message "DEBUG" "GF: <-- global_write_proc_status_file"
+    return 0
 }
 
-# Function to import and deserialize the installation status array
-# Usage: global_import_installation_status
-global_import_installation_status() {
-    global_log_message "DEBUG" "GF: --> global_import_installation_status"
+# Function deserialize the installation status array from file
+global_read_proc_status_file() {
+    global_log_message "DEBUG" "GF: --> global_read_proc_status_file"
     # Create a local associative array
-    declare -A local_status
+    declare -A temp_status_array
     
-    # Ensure declare it as an associative array (-A) and ensure file exists
-    global_setup_installation_status
     local temp_status_file="$GLOBAL_STATUS_FILE"
     
     if [[ -f "$temp_status_file" ]]; then
+        # Read the serialized data from the status file
         local serialized=$(cat "$temp_status_file")
-        
+        # Set the field separator to semicolon for parsing the key-value pairs
         local IFS=";"
+        # Iterate through each key-value pair in the serialized string
         for pair in $serialized; do
-        if [[ -n "$pair" ]]; then
-            key="${pair%%:*}"
-            value="${pair#*:}"
-            local_status["$key"]="$value"
-            global_log_message "DEBUG" "Imported status: ${key}=${value}"
-        fi
+            # Only process non-empty pairs
+            if [[ -n "$pair" ]]; then
+                # Extract the key (everything before the first colon)
+                key="${pair%%:*}"
+                # Extract the value (everything after the first colon)
+                value="${pair#*:}"
+                # Store the key-value pair in the temporary associative array
+                temp_status_array["$key"]="$value"
+            fi
         done
     else
         global_log_message "WARNING" "No installation status file found at ${temp_status_file}"
     fi
-    
-
-    
-    # Clear existing array values
-    for key in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
-        unset GLOBAL_INSTALLATION_STATUS["$key"]
-    done
-    
-    # Copy imported values to global array
-    for key in "${!local_status[@]}"; do
-        GLOBAL_INSTALLATION_STATUS["$key"]="${local_status[$key]}"
-    done
-    
-    # DEBUG
-    global_log_message "DEBUG" "GLOBAL_INSTALLATION_STATUS_KEYS after import: ${!GLOBAL_INSTALLATION_STATUS[@]}"
-    global_log_message "DEBUG" "GLOBAL_INSTALLATION_STATUS after import: ${GLOBAL_INSTALLATION_STATUS[@]}"
-    global_log_message "DEBUG" "GF: <-- global_import_installation_status"
+        
+    global_log_message "DEBUG" "GF: <-- global_read_proc_status_file"
+    echo "$temp_status_array"
 }
 
-# Function to get installation status for a command
-# Ensure exsist variable and file, import existing values and return value
-# Usage: global_get_installation_status "command_name"
-global_get_installation_status() {
-    global_log_message "DEBUG" "GF: --> global_get_installation_status"
-    local command=$1
+# Function to get installation status of specific procedure
+# Usage: global_get_proc_status "procedure_name"
+global_get_proc_status() {
+    global_log_message "DEBUG" "GF: --> global_get_proc_status"
+    local procedure=$1
     
-    # Import existing values first
-    global_import_installation_status
+    # Get procedure status from file
+    temp_status_array=$(global_read_proc_status_file)
     
+    global_log_message "DEBUG" "GF: <-- global_get_proc_status"
     # Use parameter expansion with default to avoid unbound variable error
-    echo "${GLOBAL_INSTALLATION_STATUS[$command]:-}"
-    global_log_message "DEBUG" "GF: <-- global_get_installation_status"
+    echo "${temp_status_array[$procedure]:-}"
 }
 
-# Function to set installation status for a command
-# Ensure exsist variable and file, import existing values and set value
-# Usage: global_set_installation_status "command_name" "status"
-global_set_installation_status() {
-    global_log_message "DEBUG" "GF: --> global_set_installation_status"
-    local command=$1
+# Function to set installation status of specific procedure
+# Usage: global_set_proc_status "procedure_name" "status"
+global_set_proc_status() {
+    global_log_message "DEBUG" "GF: --> global_set_proc_status"
+    local procedure=$1
     local status=$2
-    global_declare_installation_status
+    global_declare_proc_status
     
-    # Import existing values first
-    global_import_installation_status
+    # Get procedure status from file
+    temp_status_array=$(global_read_proc_status_file)
     
-    GLOBAL_INSTALLATION_STATUS["$command"]="$status"
-    global_log_message "DEBUG" "GLOBAL_INSTALLATION_STATUS set: $command: $status"
-    global_export_installation_status
-    global_log_message "DEBUG" "GF: <-- global_set_installation_status"
+    temp_status_array["$procedure"]="$status"
+    global_write_proc_status_file
+
+    global_log_message "DEBUG" "GF: <-- global_set_proc_status"
+    return 0
 }
 
-# Function to remove a command from the installation status array
-# Usage: global_remove_installation_status "command_name"
-global_unset_installation_status() {
-    local command=$1
-    global_log_message "DEBUG" "GF: --> global_unset_installation_status [$command]"
-    unset GLOBAL_INSTALLATION_STATUS["$command"]
-    global_export_installation_status
-    global_log_message "DEBUG" "GF: <-- global_unset_installation_status"
+# Function to remove a procedure from the installation status array
+# Usage: global_remove_proc_status "procedure_name"
+global_remove_proc_status() {
+    global_log_message "DEBUG" "GF: --> global_remove_proc_status [$procedure]"
+    local procedure=$1
+
+    # Get procedure status from file    
+    temp_status_array=$(global_read_proc_status_file)
+    
+    unset temp_status_array["$procedure"]
+    global_write_proc_status_file
+
+    global_log_message "DEBUG" "GF: <-- global_remove_proc_status"
+    return 0
 }
 
 # END INSTALLATION STATUS FUNCTIONS ------------------------------------------------

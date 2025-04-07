@@ -27,6 +27,7 @@ readonly _PROCEDURES_REMOTE_URL="${_REPOSITORY_RAW_URL}/src/procedures/"
 readonly _LIBS_REMOTE_URL="${_REPOSITORY_RAW_URL}/src/libs/"
 
 
+# TODO: Check if this is needed
 # Get the real user's home directory (works with sudo)
 if [[ -n "${SUDO_USER:-}" ]]; then
     GLOBAL_REAL_USER="${SUDO_USER}"
@@ -204,7 +205,7 @@ _remove_no_selected_procedures() {
             #global_log_message "DEBUG" "Set $proc status to PENDING"
         else
             # Remove procedures that aren't selected
-            global_unset_installation_status "${proc}"
+            global_remove_proc_status "${proc}"
             global_log_message "DEBUG" "Removed $proc from installation status"
         fi
     done

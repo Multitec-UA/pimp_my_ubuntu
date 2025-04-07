@@ -41,7 +41,7 @@ main() {
 
     _step_init
 
-    if [[ "$(global_get_installation_status "${_SOFTWARE_COMMAND}")" == "SKIPPED" ]]; then
+    if [[ "$(global_get_proc_status "${_SOFTWARE_COMMAND}")" == "SKIPPED" ]]; then
         global_log_message "INFO" "${_SOFTWARE_COMMAND} is already installed"
         _step_post_install
         _step_cleanup
@@ -154,7 +154,7 @@ _step_cleanup() {
     fi
     
     # Clean apt cache if we installed new packages
-    if [[ "$(global_get_installation_status "${_SOFTWARE_COMMAND}")" == "SUCCESS" ]]; then
+    if [[ "$(global_get_proc_status "${_SOFTWARE_COMMAND}")" == "SUCCESS" ]]; then
         global_log_message "DEBUG" "Cleaning apt cache"
         apt-get clean >>"${GLOBAL_LOG_FILE}" 2>&1
     fi

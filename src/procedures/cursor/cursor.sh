@@ -298,7 +298,7 @@ _step_cleanup() {
     global_log_message "INFO" "Cleaning up after installation of ${_SOFTWARE_COMMAND}"
     
     # Clean apt cache if we installed new packages
-    if [[ "$(global_get_installation_status "${_SOFTWARE_COMMAND}")" == "SUCCESS" ]]; then
+    if [[ "$(global_get_proc_status "${_SOFTWARE_COMMAND}")" == "SUCCESS" ]]; then
         global_log_message "DEBUG" "Cleaning apt cache"
         apt-get clean >>"${GLOBAL_LOG_FILE}" 2>&1
     fi

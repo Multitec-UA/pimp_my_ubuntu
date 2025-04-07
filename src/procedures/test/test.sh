@@ -47,7 +47,7 @@ main() {
     echo "TEST: GLOBAL_INSTALLATION_STATUS: ${GLOBAL_INSTALLATION_STATUS[@]}"
     echo "TEST: GLOBAL_INSTALLATION_STATUS_KEYS: ${!GLOBAL_INSTALLATION_STATUS[@]}"
 
-    echo "TEST: STATUS: $(global_get_installation_status ${_SOFTWARE_COMMAND})"
+    echo "TEST: STATUS: $(global_get_proc_status ${_SOFTWARE_COMMAND})"
     echo "TEST: GLOBAL_INSTALLATION_STATUS: ${GLOBAL_INSTALLATION_STATUS[@]}"
     exit 0
 }
@@ -122,7 +122,7 @@ _step_cleanup() {
     fi
     
     # Clean apt cache if we installed new packages
-    if [[ "$(global_get_installation_status "${_SOFTWARE_COMMAND}")" == "SUCCESS" ]]; then
+    if [[ "$(global_get_proc_status "${_SOFTWARE_COMMAND}")" == "SUCCESS" ]]; then
         global_log_message "DEBUG" "Cleaning apt cache"
         apt-get clean >>"${GLOBAL_LOG_FILE}" 2>&1
     fi

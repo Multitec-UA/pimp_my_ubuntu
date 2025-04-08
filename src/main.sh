@@ -205,7 +205,7 @@ _remove_no_selected_procedures() {
             #global_log_message "DEBUG" "Set $proc status to PENDING"
         else
             # Remove procedures that aren't selected
-            global_remove_proc_status "${proc}"
+            global_unset_proc_status "${proc}"
             global_log_message "DEBUG" "Removed $proc from installation status"
         fi
     done

@@ -9,6 +9,13 @@
 # License: MIT
 # =============================================================================
 
+# Exit immediately if a command exits with a non-zero status.
+# Treat unset variables as an error when substituting.
+# Pipelines return the exit status of the last command that failed.
+# set -e  # Be cautious with this, might uncomment later if appropriate
+set -u
+set -o pipefail
+
 readonly GLOBAL_UTILS_VERSION="1.2.1"
 
 # Ensure this script is sourced, not executed
@@ -50,18 +57,41 @@ global_run_as_user() {
 global_ensure_dir() {
     local dir=$1
     mkdir -p "${dir}"
+    if [[ $? -ne 0 ]]; then
+        global_log_message "ERROR" "Failed to create directory: ${dir}"
+        return 1
+    fi
     chown "${GLOBAL_REAL_USER}:${GLOBAL_REAL_USER}" "${dir}"
+    if [[ $? -ne 0 ]]; then
+        global_log_message "ERROR" "Failed to set ownership for directory: ${dir}"
+        return 1
+    fi
 }
 
 # Initialize logging system for the application
 global_setup_logging() {
     # Don't log the start of this function to avoid bootstrapping issues
     if [[ "${GLOBAL_LOGGING_INITIALIZED}" == "false" ]] && \
-       ( [[ ! -f "${GLOBAL_LOG_FILE}" ]] || [[ "${_SOFTWARE_COMMAND}" == "main-menu" ]] ); then
-        global_ensure_dir "${GLOBAL_LOG_DIR}"
+       ( [[ ! -f "${GLOBAL_LOG_FILE}" ]] || [[ "${_SOFTWARE_COMMAND:-}" == "main-menu" ]] ); then
+        global_ensure_dir "${GLOBAL_LOG_DIR}" || return 1 # Propagate error from ensure_dir
         rm -f "${GLOBAL_LOG_FILE}"
+        if [[ $? -ne 0 ]]; then
+             # Log potentially to stderr if logging isn't setup yet
+            echo "[$(date '+%Y-%m-%d %H:%M:%S')] [ERROR] Failed to remove old log file: ${GLOBAL_LOG_FILE}" >&2
+            return 1 # Still attempt to proceed, but log error
+        fi
         touch "${GLOBAL_LOG_FILE}"
+        if [[ $? -ne 0 ]]; then
+             # Log potentially to stderr if logging isn't setup yet
+            echo "[$(date '+%Y-%m-%d %H:%M:%S')] [ERROR] Failed to create log file: ${GLOBAL_LOG_FILE}" >&2
+            return 1
+        fi
         chown "${GLOBAL_REAL_USER}:${GLOBAL_REAL_USER}" "${GLOBAL_LOG_FILE}"
+        if [[ $? -ne 0 ]]; then
+             # Log potentially to stderr if logging isn't setup yet
+            echo "[$(date '+%Y-%m-%d %H:%M:%S')] [ERROR] Failed to set ownership for log file: ${GLOBAL_LOG_FILE}" >&2
+            # Log failure but allow initialization to proceed if file was created
+        fi
         GLOBAL_LOGGING_INITIALIZED=true
     fi
 }
@@ -87,10 +117,15 @@ global_log_message() {
     # Write to log file
     echo -e "${log_entry}" >> "${GLOBAL_LOG_FILE}"
 
-    # Print to terminal based on debug level
-    if [[ "${DEBUG}" == "true" ]] || [[ "${level}" != "DEBUG" ]]; then
+    # Print to terminal based on level
+    if [[ "${level}" == "INFO" ]]; then
+        # Print to terminal in stdout
         echo -e "${log_entry}"
+    else
+        # Print to terminal in stderr
+        echo -e "${log_entry}" >&2
     fi
+    
     
     # Don't add end debug message to this function to avoid infinite recursion
 }
@@ -116,11 +151,21 @@ global_create_proc_status_file() {
 
     # Initialize the status file if it not initialized yet or is main-menu
     if [[ "${GLOBAL_STATUS_FILE_INITIALIZED}" == "false" ]]; then
-        if [[ ! -f "${GLOBAL_STATUS_FILE}" ]] || [[ "${_SOFTWARE_COMMAND}" == "main-menu" ]]; then
+        if [[ ! -f "${GLOBAL_STATUS_FILE}" ]] || [[ "${_SOFTWARE_COMMAND:-}" == "main-menu" ]]; then
             global_log_message "DEBUG" "GF: --> Creating status file"
-            global_ensure_dir "${GLOBAL_TEMP_PATH}"
+            global_ensure_dir "${GLOBAL_TEMP_PATH}" || return 1 # Propagate error from ensure_dir
             rm -f "${GLOBAL_STATUS_FILE}"
-            touch "${GLOBAL_STATUS_FILE}" 
+            if [[ $? -ne 0 ]]; then
+                global_log_message "ERROR" "Failed to remove old status file: ${GLOBAL_STATUS_FILE}"
+                # Proceeding might be okay, but log the error
+            fi
+            touch "${GLOBAL_STATUS_FILE}"
+            if [[ $? -ne 0 ]]; then
+                global_log_message "ERROR" "Failed to create status file: ${GLOBAL_STATUS_FILE}"
+                global_log_message "DEBUG" "GF: <-- global_create_proc_status_file"
+                return 1
+            fi
+            # No chown needed here as ensure_dir handles parent, and touch respects umask
             GLOBAL_STATUS_FILE_INITIALIZED=true
         fi
     fi
@@ -128,40 +173,50 @@ global_create_proc_status_file() {
 }
 
 # Function to serialize and store the installation status array
+# Usage: global_write_proc_status_file "temp_status_array"
 global_write_proc_status_file() {
     global_log_message "DEBUG" "GF: --> global_write_proc_status_file"
-    local temp_status_array=$1
+    local -n write_array_ref=${1:-}  # Use nameref to access the array indirectly
     local temp_status_file="$GLOBAL_STATUS_FILE"
 
+    if [[ -z "${!write_array_ref[@]}" ]]; then  # Check if the referenced array is empty
+        global_log_message "ERROR" "Procedure or status is empty"
+        global_log_message "DEBUG" "GF: <-- global_write_proc_status_file"
+        return 1
+    fi
+
     # Ensure procedure status file exists
-    global_create_proc_status_file
+    global_create_proc_status_file || return 1 # Ensure file/dir exists before writing
     
     # Serialize the installation status array
     local serialized=""
-    for key in "${!temp_status_array[@]}"; do
-        local value="${temp_status_array[$key]}"
+    for key in "${!write_array_ref[@]}"; do  # Iterate over the keys of the referenced array
+        local value="${write_array_ref[$key]}"  # Access values using the nameref
         # Create a string like "key1:value1;key2:value2"
         serialized+="${key}:${value};"
     done
     
     # Write serialized data to the status file
     echo "$serialized" > "$GLOBAL_STATUS_FILE"
+    if [[ $? -ne 0 ]]; then
+        global_log_message "ERROR" "Failed to write to status file: ${GLOBAL_STATUS_FILE}"
+        global_log_message "DEBUG" "GF: <-- global_write_proc_status_file"
+        return 1
+    fi
     
     global_log_message "DEBUG" "GF: <-- global_write_proc_status_file"
-    return 0
 }
 
 # Function deserialize the installation status array from file
+# Usage: global_read_proc_status_file "temp_status_array"
 global_read_proc_status_file() {
     global_log_message "DEBUG" "GF: --> global_read_proc_status_file"
-    # Create a local associative array
-    declare -A temp_status_array
+    # Use nameref to access the array indirectly, using a different local name
+    local -n read_array_ref=${1:-}
     
-    local temp_status_file="$GLOBAL_STATUS_FILE"
-    
-    if [[ -f "$temp_status_file" ]]; then
+    if [[ -f "$GLOBAL_STATUS_FILE" ]]; then
         # Read the serialized data from the status file
-        local serialized=$(cat "$temp_status_file")
+        local serialized=$(cat "$GLOBAL_STATUS_FILE")
         # Set the field separator to semicolon for parsing the key-value pairs
         local IFS=";"
         # Iterate through each key-value pair in the serialized string
@@ -173,15 +228,14 @@ global_read_proc_status_file() {
                 # Extract the value (everything after the first colon)
                 value="${pair#*:}"
                 # Store the key-value pair in the temporary associative array
-                temp_status_array["$key"]="$value"
+                read_array_ref["$key"]="$value"
             fi
         done
     else
-        global_log_message "WARNING" "No installation status file found at ${temp_status_file}"
+        global_log_message "WARNING" "No installation status file found at ${GLOBAL_STATUS_FILE}"
     fi
-        
+ 
     global_log_message "DEBUG" "GF: <-- global_read_proc_status_file"
-    echo "$temp_status_array"
 }
 
 # Function to get installation status of specific procedure
@@ -189,13 +243,13 @@ global_read_proc_status_file() {
 global_get_proc_status() {
     global_log_message "DEBUG" "GF: --> global_get_proc_status"
     local procedure=$1
-    
+    declare -A _temp_status_array_ref
     # Get procedure status from file
-    temp_status_array=$(global_read_proc_status_file)
+    global_read_proc_status_file "_temp_status_array_ref"
     
     global_log_message "DEBUG" "GF: <-- global_get_proc_status"
     # Use parameter expansion with default to avoid unbound variable error
-    echo "${temp_status_array[$procedure]:-}"
+    echo "${_temp_status_array_ref[$procedure]:-}"
 }
 
 # Function to set installation status of specific procedure
@@ -204,31 +258,45 @@ global_set_proc_status() {
     global_log_message "DEBUG" "GF: --> global_set_proc_status"
     local procedure=$1
     local status=$2
-    global_declare_proc_status
+
+    if [[ -z "${procedure:-}" ]] || [[ -z "${status:-}" ]]; then
+        global_log_message "ERROR" "Procedure or status is empty"
+        global_log_message "DEBUG" "GF: <-- global_set_proc_status"
+        return 1
+    fi
+    #Create the status file if it doesn't exist
+    global_create_proc_status_file
     
-    # Get procedure status from file
-    temp_status_array=$(global_read_proc_status_file)
+    # Get procedure stored status from file
+    # Declare a local associative array and pass its name to global_read_proc_status_file
+    declare -A temp_status_array
+    global_read_proc_status_file "temp_status_array"
     
+    # Set the status of the procedure
     temp_status_array["$procedure"]="$status"
-    global_write_proc_status_file
+
+    # Write the status to the file
+    global_write_proc_status_file "temp_status_array"
 
     global_log_message "DEBUG" "GF: <-- global_set_proc_status"
     return 0
 }
 
 # Function to remove a procedure from the installation status array
-# Usage: global_remove_proc_status "procedure_name"
-global_remove_proc_status() {
-    global_log_message "DEBUG" "GF: --> global_remove_proc_status [$procedure]"
+# Usage: global_unset_proc_status "procedure_name"
+global_unset_proc_status() {
+    global_log_message "DEBUG" "GF: --> global_unset_proc_status"
     local procedure=$1
 
-    # Get procedure status from file    
-    temp_status_array=$(global_read_proc_status_file)
+    # Get procedure status from file
+    # Declare a local associative array and pass its name to global_read_proc_status_file
+    declare -A temp_status_array
+    global_read_proc_status_file "temp_status_array"
     
     unset temp_status_array["$procedure"]
-    global_write_proc_status_file
+    global_write_proc_status_file "temp_status_array"
 
-    global_log_message "DEBUG" "GF: <-- global_remove_proc_status"
+    global_log_message "DEBUG" "GF: <-- global_unset_proc_status"
     return 0
 }
 
@@ -383,14 +451,22 @@ global_download_media() {
         local output_file="${GLOBAL_DOWNLOAD_DIR}/$(basename "${file_path}")"
 
         # Use raw URL for GitHub content instead of API
-        curl -fsSL "${_REPOSITORY_RAW_URL}/${file_path}" -o "${output_file}"  >>"${GLOBAL_LOG_FILE}" 2>&1
-        local curl_status=$?
-        
+        # Log curl errors to the main log file as well as stderr
+        if ! curl -fsSL "${_REPOSITORY_RAW_URL}/${file_path}" -o "${output_file}" >>"${GLOBAL_LOG_FILE}" 2>&1; then
+             local curl_status=$?
+             global_log_message "ERROR" "curl failed with status ${curl_status} downloading ${file_path}"
+             global_log_message "DEBUG" "GF: <-- global_download_media"
+             return $curl_status
+        fi
+
         # Ensure the downloaded file is owned by the real user
-        chown "${GLOBAL_REAL_USER}:${GLOBAL_REAL_USER}" "${output_file}"  >>"${GLOBAL_LOG_FILE}" 2>&1
-        
+        if ! chown "${GLOBAL_REAL_USER}:${GLOBAL_REAL_USER}" "${output_file}" >>"${GLOBAL_LOG_FILE}" 2>&1; then
+             global_log_message "WARNING" "Failed to set ownership for downloaded file: ${output_file}"
+             # Continue even if chown fails, but log warning
+        fi
+
         global_log_message "DEBUG" "GF: <-- global_download_media"
-        return $curl_status
+        return 0 # Explicitly return 0 on success
     else
 
         global_log_message "ERROR" "No media file specified to download"

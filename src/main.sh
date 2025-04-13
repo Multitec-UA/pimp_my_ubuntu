@@ -38,7 +38,6 @@ else
 fi
 
 GLOBAL_DOWNLOAD_DIR="$GLOBAL_REAL_HOME/Documents/pimp_my_ubuntu"
-MAIN_DIALOG_MENU_SELECTION=""
 
 main() {
 
@@ -71,11 +70,21 @@ main() {
         _welcome_screen
     fi
    
+   #TODO: Remove this
+   _print_global_installation_status
+
+    # Get procedures from file
+    declare -A GLOBAL_INSTALLATION_STATUS
+    global_read_proc_status_file "GLOBAL_INSTALLATION_STATUS"
+
     # Select procedures to install
     local selected_procedures
     selected_procedures=$(dialog_show_procedure_selector_screen "${!GLOBAL_INSTALLATION_STATUS[@]}")
     _remove_no_selected_procedures "${selected_procedures}"
 
+
+   #TODO: Remove this
+   _print_global_installation_status
     
 
     # TODO: AUTOMATIC
@@ -87,14 +96,21 @@ main() {
     # MANUALLY
     # Show procedures status screen selector 
     # MAIN_DIALOG_MENU_SELECTION save each iteration user selection
+    MAIN_DIALOG_MENU_SELECTION=""
     while true; do
-        global_import_installation_status
-        dialog_show_procedure_selector_status_screen
-        global_log_message "DEBUG" "GLOBAL_INSTALLATION_STATUS_ALL: ${!GLOBAL_INSTALLATION_STATUS[@]}"
-        global_log_message "DEBUG" "GLOBAL_INSTALLATION_STATUS_SELECTED: $MAIN_DIALOG_MENU_SELECTION : ${GLOBAL_INSTALLATION_STATUS[${MAIN_DIALOG_MENU_SELECTION}]}"
+        # Update procedures from file
+        declare -A _run_temp_installation_status
+        global_read_proc_status_file "_run_temp_installation_status"
+
+        #TODO: Remove this
+        _print_global_installation_status
+        
+        dialog_show_procedure_selector_status_screen "_run_temp_installation_status"
+        global_log_message "DEBUG" "GLOBAL_INSTALLATION_STATUS_ALL: ${!_run_temp_installation_status[@]}"
+        global_log_message "DEBUG" "GLOBAL_INSTALLATION_STATUS_SELECTED: $MAIN_DIALOG_MENU_SELECTION : ${_run_temp_installation_status[${MAIN_DIALOG_MENU_SELECTION}]}"
 
         global_press_any_key
-        if [[ "${GLOBAL_INSTALLATION_STATUS[${MAIN_DIALOG_MENU_SELECTION}]}" != "SUCCESS" ]]; then
+        if [[ "${_run_temp_installation_status[${MAIN_DIALOG_MENU_SELECTION}]}" != "SUCCESS" ]]; then
             _run_procedure "${MAIN_DIALOG_MENU_SELECTION}"
         fi
         global_press_any_key
@@ -174,7 +190,7 @@ _init_procedures_info() {
     
     # Initialize each procedure's status as INIT
     while IFS= read -r proc_name; do
-        global_set_installation_status "${proc_name}" "INIT"
+        global_set_proc_status "${proc_name}" "INIT"
         global_log_message "DEBUG" "Added procedure '${proc_name}' with status 'INIT'"
     done <<< "${names}"
     
@@ -201,7 +217,7 @@ _remove_no_selected_procedures() {
         if echo "${selected_procedures}" | grep -q "${proc}"; then
             global_log_message "DEBUG" "Keeping $proc in installation list"
             # Set selected procedures to PENDING status
-            #global_set_installation_status "${proc}" "PENDING"
+            #global_set_proc_status "${proc}" "PENDING"
             #global_log_message "DEBUG" "Set $proc status to PENDING"
         else
             # Remove procedures that aren't selected
@@ -215,11 +231,16 @@ _remove_no_selected_procedures() {
 _print_global_installation_status() {
     global_log_message "DEBUG" "MF: --> _print_global_installation_status"
     echo -e "\n"
+
+    # Ger procedures from file
+    declare -A _print_installation_status
+    global_read_proc_status_file "_print_installation_status"
+
     global_log_message "INFO" "Current installation status:"
 
-    #global_import_installation_status
-    for proc_name in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
-        global_log_message "INFO" "${proc_name}: ${GLOBAL_INSTALLATION_STATUS[${proc_name}]}"
+    # Print all installation statuses
+    for proc_name in "${!_print_installation_status[@]}"; do
+        global_log_message "INFO" "${proc_name}: ${_print_installation_status[${proc_name}]}"
     done
     global_log_message "INFO" "For more details, check the log file ${GLOBAL_LOG_FILE}"
     echo -e "\n"

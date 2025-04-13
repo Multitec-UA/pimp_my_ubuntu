@@ -208,6 +208,7 @@ global_write_proc_status_file() {
 }
 
 # Function deserialize the installation status array from file
+# declare -A result_array_read
 # Usage: global_read_proc_status_file "temp_status_array"
 global_read_proc_status_file() {
     global_log_message "DEBUG" "GF: --> global_read_proc_status_file"
@@ -290,11 +291,11 @@ global_unset_proc_status() {
 
     # Get procedure status from file
     # Declare a local associative array and pass its name to global_read_proc_status_file
-    declare -A temp_status_array
-    global_read_proc_status_file "temp_status_array"
+    declare -A _unset_temp_status_array
+    global_read_proc_status_file "_unset_temp_status_array"
     
-    unset temp_status_array["$procedure"]
-    global_write_proc_status_file "temp_status_array"
+    unset _unset_temp_status_array["$procedure"]
+    global_write_proc_status_file "_unset_temp_status_array"
 
     global_log_message "DEBUG" "GF: <-- global_unset_proc_status"
     return 0

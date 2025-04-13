@@ -18,7 +18,7 @@ dialog_show_welcome_screen() {
            --msgbox "Welcome to Pimp My Ubuntu!\n\nThis script will help you set up your Ubuntu system with your preferred software and configurations." 10 60
 
     # Check if there are any procedures to install
-    if [[ ${#GLOBAL_INSTALLATION_STATUS[@]} -eq 0 ]]; then
+    if [[ ${#_dialog_proc_status[@]} -eq 0 ]]; then
         dialog --title "Error" --backtitle "Pimp My Ubuntu" \
                --msgbox "No installation procedures found!" 8 40
         return 1
@@ -26,7 +26,7 @@ dialog_show_welcome_screen() {
     return 0
 }
 
-# Show procedure selection screen and update GLOBAL_INSTALLATION_STATUS
+# Show procedure selection screen and update _dialog_proc_status
 # Returns: 0 on success, 1 if user cancels
 dialog_show_procedure_selector_screen() {
     local procedures=("$@")
@@ -64,15 +64,18 @@ dialog_show_procedure_selector_screen() {
 
 # Display the current status of all installation procedures
 # Shows a dialog with the list of procedures and their current states
+# Usage: dialog_show_procedure_selector_status_screen "name_of_the_array"
 # Returns: 0 on success, 1 on cancel/ESC
 dialog_show_procedure_selector_status_screen() {
     # Dialog exit status codes
     local DIALOG_OK=0
     local DIALOG_CANCEL=1
     local DIALOG_ESC=255
+
+    local -n _dialog_show_proc_status=${1:-}
     
     # Check if there are any procedures to display
-    if [[ ${#GLOBAL_INSTALLATION_STATUS[@]} -eq 0 ]]; then
+    if [[ ${#_dialog_show_proc_status[@]} -eq 0 ]]; then
         dialog --title "Installation Status" \
                --backtitle "Pimp My Ubuntu" \
                --msgbox "No installation procedures found." 8 45
@@ -83,7 +86,7 @@ dialog_show_procedure_selector_status_screen() {
     local max_length=0
     local proc_length=0
     
-    for proc_name in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
+    for proc_name in "${!_dialog_show_proc_status[@]}"; do
         proc_length=${#proc_name}
         if [[ $proc_length -gt $max_length ]]; then
             max_length=$proc_length
@@ -100,8 +103,8 @@ dialog_show_procedure_selector_status_screen() {
     local formatted_item=""
     
     # Add each procedure with its status to the menu items
-    for proc_name in "${!GLOBAL_INSTALLATION_STATUS[@]}"; do
-        status="${GLOBAL_INSTALLATION_STATUS[$proc_name]}"
+    for proc_name in "${!_dialog_show_proc_status[@]}"; do
+        status="${_dialog_show_proc_status[$proc_name]}"
         status_display=$(dialog_get_status_icon "${status}")
         
         # Format item with proper alignment
@@ -111,7 +114,7 @@ dialog_show_procedure_selector_status_screen() {
     done
     
     # Calculate appropriate menu height (min 12, max 20)
-    local menu_height=$(( ${#GLOBAL_INSTALLATION_STATUS[@]} + 7 ))
+    local menu_height=$(( ${#_dialog_show_proc_status[@]} + 7 ))
     [[ $menu_height -lt 12 ]] && menu_height=12
     [[ $menu_height -gt 20 ]] && menu_height=20
     
@@ -124,7 +127,7 @@ dialog_show_procedure_selector_status_screen() {
                       --ok-label "Continue" \
                       --cancel-label "Cancel" \
                       --menu "Current status of installation procedures:" \
-                      $menu_height 70 ${#GLOBAL_INSTALLATION_STATUS[@]} \
+                      $menu_height 70 ${#_dialog_show_proc_status[@]} \
                       "${menu_items[@]}" \
                 2>&1 1>&3)
     

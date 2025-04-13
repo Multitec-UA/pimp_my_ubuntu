@@ -53,12 +53,12 @@ main() {
     if _step_install_software; then
         _step_post_install
         global_log_message "INFO" "${_SOFTWARE_COMMAND} installation completed successfully"
-        global_set_installation_status "${_SOFTWARE_COMMAND}" "SUCCESS"
+        global_set_proc_status "${_SOFTWARE_COMMAND}" "SUCCESS"
         _step_cleanup
         return 0
     else
         global_log_message "ERROR" "Failed to install ${_SOFTWARE_COMMAND}"
-        global_set_installation_status "${_SOFTWARE_COMMAND}" "FAILED"
+        global_set_proc_status "${_SOFTWARE_COMMAND}" "FAILED"
         _step_cleanup
         return 1
     fi
@@ -90,7 +90,7 @@ _step_init() {
     global_log_message "INFO" "_SOFTWARE_VERSION: ${_SOFTWARE_VERSION}"
     
     if global_check_if_installed "${_SOFTWARE_COMMAND}"; then
-        global_set_installation_status "${_SOFTWARE_COMMAND}" "SKIPPED"
+        global_set_proc_status "${_SOFTWARE_COMMAND}" "SKIPPED"
         return 0
     fi
 }

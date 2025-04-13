@@ -42,8 +42,8 @@ main() {
     
     global_check_root
     echo "TEST: GLOBAL_INSTALLATION_STATUS: ${GLOBAL_INSTALLATION_STATUS[@]}"
-    global_set_installation_status "${_SOFTWARE_COMMAND}" "SUCCESS"
-    global_set_installation_status "debug" "FAILED"
+    global_set_proc_status "${_SOFTWARE_COMMAND}" "SUCCESS"
+    global_set_proc_status "debug" "FAILED"
     echo "TEST: GLOBAL_INSTALLATION_STATUS: ${GLOBAL_INSTALLATION_STATUS[@]}"
     echo "TEST: GLOBAL_INSTALLATION_STATUS_KEYS: ${!GLOBAL_INSTALLATION_STATUS[@]}"
 
@@ -76,7 +76,7 @@ _step_init() {
     global_log_message "INFO" "_SOFTWARE_VERSION: ${_SOFTWARE_VERSION}"
     
     if global_check_if_installed "${_SOFTWARE_COMMAND}"; then
-        global_set_installation_status "${_SOFTWARE_COMMAND}" "SKIPPED"
+        global_set_proc_status "${_SOFTWARE_COMMAND}" "SKIPPED"
         return 0
     fi
 }

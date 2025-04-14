@@ -45,18 +45,6 @@ _source_lib() {
     global_log_message "DEBUG" "Exiting _source_lib"
 }
 
-# Source libraries
-if [[ "$LOCAL" == "true" ]]; then
-    # Strict mode
-    set -euo pipefail
-    # Source libraries from local directory
-    source "./src/libs/global_utils.sh"
-else
-    # Source libraries from remote repository
-    _source_lib "global_utils.sh"
-fi
-
-
 
 # Software-specific constants
 readonly _APPLICATIONS_DIR="${GLOBAL_REAL_HOME}/Applications"
@@ -238,6 +226,7 @@ _step_post_install() {
     # Add cursor function to shell RC files
     local cursor_function='
 cursor() {
+    local folder_path="${1:-}"
     # Find the Cursor AppImage in the home directory
     local cursor_path="$HOME/Applications/cursor.AppImage"
 
@@ -245,11 +234,12 @@ cursor() {
     chmod +x "$cursor_path"
 
     # Launch Cursor - either in current directory or with specified path
+    if [[ -z "$folder_path" ]]; then
         # No arguments, launch in current directory
         "$cursor_path" --no-sandbox >/dev/null 2>&1 &
     else
         # Convert relative path to absolute and open that location
-        "$cursor_path" --no-sandbox "$(realpath "$1")" >/dev/null 2>&1 &
+        "$cursor_path" --no-sandbox "$(realpath "$folder_path")" >/dev/null 2>&1 &
     fi
     # Prevent the process from being killed when terminal closes
     disown
@@ -298,6 +288,18 @@ _step_cleanup() {
     fi
     global_log_message "DEBUG" "Exiting _step_cleanup"
 }
+
+# Source libraries
+if [[ "$LOCAL" == "true" ]]; then
+    # Strict mode
+    set -euo pipefail
+    # Source libraries from local directory
+    source "./src/libs/global_utils.sh"
+else
+    # Source libraries from remote repository
+    _source_lib "global_utils.sh"
+fi
+
 
 # Execute main function
 main "$@"

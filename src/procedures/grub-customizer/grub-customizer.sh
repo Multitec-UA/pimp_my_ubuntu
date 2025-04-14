@@ -36,8 +36,6 @@ readonly _MEDIA_PATH="/src/procedures/grub-customizer/media"
 # Main procedure function
 main() {
 
-    # Source global variables and functions
-    _source_lib "global_utils.sh"
     
     global_check_root
 
@@ -173,6 +171,17 @@ _install_grub_theme() {
     
     global_log_message "INFO" "GRUB theme installation completed. Changes will take effect after next reboot."
 }
+
+# Source global variables and functions
+if [[ "$LOCAL" == "true" ]]; then
+    # Strict mode
+    set -euo pipefail
+    # Source libraries from local directory
+    source "./src/libs/global_utils.sh"
+else
+    # Source libraries from remote repository
+    _source_lib "global_utils.sh"
+fi  
 
 # Execute main function
 main "$@"

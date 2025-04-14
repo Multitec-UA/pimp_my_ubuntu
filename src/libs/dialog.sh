@@ -17,12 +17,6 @@ dialog_show_welcome_screen() {
     dialog --title "Pimp My Ubuntu" --backtitle "Installation Script" \
            --msgbox "Welcome to Pimp My Ubuntu!\n\nThis script will help you set up your Ubuntu system with your preferred software and configurations." 10 60
 
-    # Check if there are any procedures to install
-    if [[ ${#_dialog_proc_status[@]} -eq 0 ]]; then
-        dialog --title "Error" --backtitle "Pimp My Ubuntu" \
-               --msgbox "No installation procedures found!" 8 40
-        return 1
-    fi
     return 0
 }
 

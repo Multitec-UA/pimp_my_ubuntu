@@ -121,8 +121,11 @@ global_log_message() {
     if [[ "${level}" == "INFO" ]]; then
         # Print to terminal in stdout
         echo -e "${log_entry}"
-    else
+    elif [[ "${level}" != "DEBUG" ]]; then
         # Print to terminal in stderr
+        echo -e "${log_entry}" >&2
+    elif [[ "${DEBUG}" == "true" ]]; then
+        # Print DEBUG to terminal in stderr
         echo -e "${log_entry}" >&2
     fi
     

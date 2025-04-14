@@ -103,7 +103,6 @@ main() {
         
         dialog_show_procedure_selector_status_screen "_main_proc_list"
 
-        global_press_any_key
         if [[ "${_main_proc_list[${MAIN_DIALOG_MENU_SELECTION}]}" != "SUCCESS" ]]; then
             _run_procedure "${MAIN_DIALOG_MENU_SELECTION}"
         fi
@@ -192,10 +191,9 @@ _init_procedures_info() {
 
 _welcome_screen() {
     global_log_message "DEBUG" "MF: --> _welcome_screen"
-    if ! dialog_show_welcome_screen; then
-        global_log_message "ERROR" "No installation procedures found"
-        exit 1
-    fi
+    
+    dialog_show_welcome_screen
+
     global_log_message "DEBUG" "MF: <-- _welcome_screen"
 }
 
@@ -255,13 +253,13 @@ _run_procedure() {
 
     global_log_message "INFO" "Starting procedure: ${procedure}"
 
-    curl -fsSL "${_PROCEDURES_REMOTE_URL}${procedure}/${procedure}.sh" | bash
+    if [[ "$LOCAL" == "true" ]]; then
+        ./src/procedures/${procedure}/${procedure}.sh
+    else
+        curl -fsSL "${_PROCEDURES_REMOTE_URL}${procedure}/${procedure}.sh" | bash
+    fi
     
-    local exit_statuses=("${PIPESTATUS[@]}")
-    local curl_status="${exit_statuses[0]}"
-    local bash_status="${exit_statuses[1]}"
-    
-    global_log_message "INFO" "Procedure ${procedure} completed with status: ${bash_status} (curl status: ${curl_status})"
+    global_log_message "INFO" "Procedure ${procedure} finished"
     global_log_message "DEBUG" "MF: <-- _run_procedure"
 }
 

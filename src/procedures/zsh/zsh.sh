@@ -35,8 +35,6 @@ readonly _MESLO_FONT_BASE_URL="https://github.com/romkatv/powerlevel10k-media/ra
 
 # Main procedure function
 main() {
-    # Source global variables and functions
-    _source_lib "global_utils.sh"
     
     global_check_root
 
@@ -242,6 +240,17 @@ _configure_zshrc() {
     # Set proper ownership for the downloaded file
     chown "${GLOBAL_REAL_USER}:${GLOBAL_REAL_USER}" "${GLOBAL_REAL_HOME}/.p10k.zsh"
 }
+
+# Source global variables and functions
+if [[ "$LOCAL" == "true" ]]; then
+    # Strict mode
+    set -euo pipefail
+    # Source libraries from local directory
+    source "./src/libs/global_utils.sh"
+else
+    # Source libraries from remote repository
+    _source_lib "global_utils.sh"
+fi 
 
 # Execute main function
 main "$@"

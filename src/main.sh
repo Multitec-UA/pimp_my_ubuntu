@@ -126,7 +126,6 @@ main() {
 
 # Necessary function to source libraries
 _source_lib() {
-    global_log_message "DEBUG" "MF: --> _source_lib"
     local file="${1:-}"
     
     if [[ -n "${file}" ]]; then
@@ -140,7 +139,6 @@ _source_lib() {
         echo "ERROR" "No library file specified to source"
         exit 1
     fi
-    global_log_message "DEBUG" "MF: <-- _source_lib"
 }
 
 

@@ -17,7 +17,7 @@ readonly LOCAL=${LOCAL:-false}
 # Software-common constants
 readonly _SOFTWARE_COMMAND="main-menu"
 readonly _SOFTWARE_DESCRIPTION="Main menu for Pimp My Ubuntu"
-readonly _SOFTWARE_VERSION="1.1.21"
+readonly _SOFTWARE_VERSION="0.1.22"
 readonly _DEPENDENCIES=("curl" "wget" "dialog" "jq")
 
 # Software-specific constants

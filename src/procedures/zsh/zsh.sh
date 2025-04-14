@@ -47,6 +47,7 @@ main() {
         global_log_message "INFO" "${_SOFTWARE_COMMAND} installation completed successfully"
         global_set_proc_status "${_SOFTWARE_COMMAND}" "SUCCESS"
         _step_cleanup
+        global_log_message "INFO" "Please log out and log back in for changes to take effect"
         return 0
     else
         global_log_message "ERROR" "Failed to install ${_SOFTWARE_COMMAND}"
@@ -138,10 +139,32 @@ _step_post_install() {
     
     # Configure .zshrc with plugins and theme
     _configure_zshrc
+
+    # Configure cursor fonts
+    _configure_cursor_fonts
     
     global_log_message "INFO" "ZSH configuration completed"
     global_log_message "INFO" "Please log out and log back in for changes to take effect"
     global_log_message "INFO" "After logging back in, you'll be prompted to configure Powerlevel10k"
+}
+
+# Configure cursor fonts
+_configure_cursor_fonts() {
+    global_log_message "INFO" "Configuring cursor fonts"
+
+    # Add MesloLGS NF font to cursor fonts
+    _cursor_settings="${GLOBAL_REAL_HOME}/.config/Cursor/User/settings.json"
+    if [[ -f "${_cursor_settings}" ]]; then
+        # Use jq to add or update the setting, preserving the file
+        if command -v jq >/dev/null 2>&1; then
+            jq '. + {"terminal.integrated.fontFamily": "MesloLGS NF"}' "${_cursor_settings}" > "${_cursor_settings}.tmp" && mv "${_cursor_settings}.tmp" "${_cursor_settings}"
+            global_log_message "INFO" "Set terminal.integrated.fontFamily to MesloLGS NF in ${_cursor_settings}"
+        else
+            global_log_message "ERROR" "jq is not installed. Cannot modify ${_cursor_settings}. Please install jq (e.g., sudo apt install jq)."
+        fi
+    else
+        global_log_message "WARNING" "Cursor settings file not found: ${_cursor_settings}"
+    fi
 }
 
 # Cleanup after installation

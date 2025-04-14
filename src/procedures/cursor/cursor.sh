@@ -239,18 +239,12 @@ _step_post_install() {
     local cursor_function='
 cursor() {
     # Find the Cursor AppImage in the home directory
-    local cursor_path=$("$HOME/Applications/cursor.AppImage")
-
-    if [ -z "$cursor_path" ]; then
-        echo "Error: Cursor AppImage not found"
-        return 1
-    fi
+    local cursor_path="$HOME/Applications/cursor.AppImage"
 
     # Ensure the AppImage is executable
     chmod +x "$cursor_path"
 
     # Launch Cursor - either in current directory or with specified path
-    if [ $# -eq 0 ]; then
         # No arguments, launch in current directory
         "$cursor_path" --no-sandbox >/dev/null 2>&1 &
     else

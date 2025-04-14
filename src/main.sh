@@ -74,17 +74,15 @@ main() {
    _print_global_installation_status
 
     # Get procedures from file
-    declare -A GLOBAL_INSTALLATION_STATUS
-    global_read_proc_status_file "GLOBAL_INSTALLATION_STATUS"
+    declare -A _main_proc_list
+    global_read_proc_status_file "_main_proc_list"
 
     # Select procedures to install
     local selected_procedures
-    selected_procedures=$(dialog_show_procedure_selector_screen "${!GLOBAL_INSTALLATION_STATUS[@]}")
+    selected_procedures=$(dialog_show_procedure_selector_screen "${!_main_proc_list[@]}")
     _remove_no_selected_procedures "${selected_procedures}"
 
 
-   #TODO: Remove this
-   _print_global_installation_status
     
 
     # TODO: AUTOMATIC
@@ -99,18 +97,14 @@ main() {
     MAIN_DIALOG_MENU_SELECTION=""
     while true; do
         # Update procedures from file
-        declare -A _run_temp_installation_status
-        global_read_proc_status_file "_run_temp_installation_status"
-
-        #TODO: Remove this
-        _print_global_installation_status
+        unset _main_proc_list
+        declare -A _main_proc_list
+        global_read_proc_status_file "_main_proc_list"
         
-        dialog_show_procedure_selector_status_screen "_run_temp_installation_status"
-        global_log_message "DEBUG" "GLOBAL_INSTALLATION_STATUS_ALL: ${!_run_temp_installation_status[@]}"
-        global_log_message "DEBUG" "GLOBAL_INSTALLATION_STATUS_SELECTED: $MAIN_DIALOG_MENU_SELECTION : ${_run_temp_installation_status[${MAIN_DIALOG_MENU_SELECTION}]}"
+        dialog_show_procedure_selector_status_screen "_main_proc_list"
 
         global_press_any_key
-        if [[ "${_run_temp_installation_status[${MAIN_DIALOG_MENU_SELECTION}]}" != "SUCCESS" ]]; then
+        if [[ "${_main_proc_list[${MAIN_DIALOG_MENU_SELECTION}]}" != "SUCCESS" ]]; then
             _run_procedure "${MAIN_DIALOG_MENU_SELECTION}"
         fi
         global_press_any_key
@@ -210,8 +204,14 @@ _welcome_screen() {
 _remove_no_selected_procedures() {
     global_log_message "DEBUG" "MF: --> _remove_no_selected_procedures"
     local selected_procedures="${1:-}"
+
+    
+    unset _main_proc_list
+    declare -A _main_proc_list
+    global_read_proc_status_file "_main_proc_list"
+
     # Update installation status based on selection
-    local all_procedures=("${!GLOBAL_INSTALLATION_STATUS[@]}")
+    local all_procedures=("${!_main_proc_list[@]}")
     for proc in "${all_procedures[@]}"; do
         # Check if the procedure is in the selected procedures list
         if echo "${selected_procedures}" | grep -q "${proc}"; then
@@ -233,14 +233,15 @@ _print_global_installation_status() {
     echo -e "\n"
 
     # Ger procedures from file
-    declare -A _print_installation_status
-    global_read_proc_status_file "_print_installation_status"
+    unset _main_proc_list
+    declare -A _main_proc_list
+    global_read_proc_status_file "_main_proc_list"
 
     global_log_message "INFO" "Current installation status:"
 
     # Print all installation statuses
-    for proc_name in "${!_print_installation_status[@]}"; do
-        global_log_message "INFO" "${proc_name}: ${_print_installation_status[${proc_name}]}"
+    for proc_name in "${!_main_proc_list[@]}"; do
+        global_log_message "INFO" "${proc_name}: ${_main_proc_list[${proc_name}]}"
     done
     global_log_message "INFO" "For more details, check the log file ${GLOBAL_LOG_FILE}"
     echo -e "\n"

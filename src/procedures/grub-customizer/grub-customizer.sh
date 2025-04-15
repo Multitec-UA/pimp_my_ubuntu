@@ -22,7 +22,8 @@ readonly _SOFTWARE_COMMAND="grub-customizer"
 readonly _SOFTWARE_DESCRIPTION="Grub Customizer is a tool for managing GRUB bootloader settings and install a theme"
 readonly _SOFTWARE_VERSION="1.0.0"
 readonly _DEPENDENCIES=("curl" "wget" "coreutils")
-readonly _REPOSITORY_RAW_URL="https://raw.github.com/Multitec-UA/pimp_my_ubuntu/main"
+readonly _REPOSITORY_TAG="v0.1.0"
+readonly _REPOSITORY_RAW_URL="https://raw.github.com/Multitec-UA/pimp_my_ubuntu/refs/tags/${_REPOSITORY_TAG}/"
 readonly _LIBS_REMOTE_URL="${_REPOSITORY_RAW_URL}/src/libs/"
 
 # Software-specific constants

@@ -17,7 +17,7 @@ This procedure installs and configures ZSH with Oh-My-Zsh, plugins, and the Powe
 Run this command to install ZSH with all configurations:
 
 ```bash
-curl -fsSL https://raw.github.com/Multitec-UA/pimp_my_ubuntu/main/src/procedures/zsh/zsh.sh | sudo bash
+curl -fsSL https://raw.github.com/Multitec-UA/pimp_my_ubuntu/refs/tags/v0.1.0/src/procedures/zsh/zsh.sh | sudo bash
 ```
 
 ## What It Does

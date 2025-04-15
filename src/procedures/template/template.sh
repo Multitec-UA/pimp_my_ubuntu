@@ -22,7 +22,8 @@ readonly _SOFTWARE_COMMAND="SOFTWARE_COMMAND_HERE"
 readonly _SOFTWARE_DESCRIPTION="SOFTWARE_DESCRIPTION_HERE"
 readonly _SOFTWARE_VERSION="1.0.0"
 readonly _DEPENDENCIES=("dependency1" "dependency2" "dependency3")
-readonly _REPOSITORY_RAW_URL="https://raw.github.com/Multitec-UA/pimp_my_ubuntu/main"
+readonly _REPOSITORY_TAG="v0.1.0"
+readonly _REPOSITORY_RAW_URL="https://raw.github.com/Multitec-UA/pimp_my_ubuntu/refs/tags/${_REPOSITORY_TAG}/"
 readonly _LIBS_REMOTE_URL="${_REPOSITORY_RAW_URL}/src/libs/"
 
 # Software-specific constants

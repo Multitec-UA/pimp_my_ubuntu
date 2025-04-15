@@ -22,7 +22,8 @@ readonly _SOFTWARE_COMMAND="zsh"
 readonly _SOFTWARE_DESCRIPTION="ZSH with Oh-My-Zsh, plugins, and Powerlevel10k theme"
 readonly _SOFTWARE_VERSION="1.0.0"
 readonly _DEPENDENCIES=("git" "curl" "fontconfig")
-readonly _REPOSITORY_RAW_URL="https://raw.github.com/Multitec-UA/pimp_my_ubuntu/main"
+readonly _REPOSITORY_TAG="v0.1.0"
+readonly _REPOSITORY_RAW_URL="https://raw.github.com/Multitec-UA/pimp_my_ubuntu/refs/tags/${_REPOSITORY_TAG}/"
 readonly _LIBS_REMOTE_URL="${_REPOSITORY_RAW_URL}/src/libs/"
 
 # Software-specific constants

@@ -37,7 +37,7 @@ The installation script (`cursor.sh`) makes the following changes to your system
 To install Cursor IDE:
 
 ```bash
-curl -fsSL https://raw.github.com/Multitec-UA/pimp_my_ubuntu/main/src/procedures/cursor/cursor.sh | sudo bash
+curl -fsSL https://raw.github.com/Multitec-UA/pimp_my_ubuntu/refs/tags/v0.1.0/src/procedures/cursor/cursor.sh | sudo bash
 ```
 
 

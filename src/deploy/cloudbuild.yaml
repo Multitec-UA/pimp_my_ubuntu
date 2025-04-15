@@ -1,0 +1,115 @@
+steps:
+  # Step 1: Update README based on Tag
+  - name: 'ubuntu'
+    id: UpdateReadme
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        echo "Build triggered by tag: $TAG_NAME"
+        if [[ "$TAG_NAME" == rv* ]]; then
+          echo "Tag '$TAG_NAME' matches release pattern 'rv*', proceeding with README update."
+          if [[ -f "README.md" ]]; then
+            echo "Updating tag URLs in README.md to use tag '$TAG_NAME'..."
+            # Use a different delimiter for sed just in case $TAG_NAME has slashes
+            sed -i "s|refs/tags/v[0-9]\+\.[0-9]\+\.[0-9]\+|refs/tags/$TAG_NAME|g" README.md
+            echo "README.md update complete."
+            # Set an output variable to indicate success for the next step
+            echo "README_UPDATED=true" > /workspace/status.txt
+          else
+            echo "Error: README.md not found in the root directory."
+            exit 1
+          fi
+        else
+          echo "Tag '$TAG_NAME' does not match release pattern 'rv*', skipping README update."
+          echo "README_UPDATED=false" > /workspace/status.txt
+        fi
+
+  # Step 2: Fetch SSH Key, Configure Git, Commit, and Push (only if README was updated)
+  - name: 'gcr.io/cloud-builders/git'
+    id: CommitAndPush
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        # Check if the previous step indicated an update
+        source /workspace/status.txt
+        if [[ "$README_UPDATED" != "true" ]]; then
+          echo "Skipping commit and push because README was not updated."
+          exit 0
+        fi
+
+        echo "Setting up SSH for Git..."
+        # Fetch the SSH key from Secret Manager
+        gcloud secrets versions access latest --secret="${_SECRET_ID}" --project="$PROJECT_ID" > /root/.ssh/id_rsa
+        chmod 600 /root/.ssh/id_rsa
+
+        # Set SSH config to use the key and disable strict host checking for github.com
+        cat <<EOF > /root/.ssh/config
+        Host github.com
+          HostName github.com
+          User git
+          IdentityFile /root/.ssh/id_rsa
+          StrictHostKeyChecking no
+        EOF
+        chmod 600 /root/.ssh/config
+
+        echo "Configuring Git user..."
+        git config --global user.email "${_GIT_USER_EMAIL}"
+        git config --global user.name "${_GIT_USER_NAME}"
+
+        # Checkout the target branch
+        # We assume the tag points to a commit on this branch
+        echo "Checking out branch ${_TARGET_BRANCH}..."
+        # Detach HEAD first to avoid conflicts if already on the branch somehow
+        git checkout --detach
+        git checkout "${_TARGET_BRANCH}"
+        # Reset to the commit associated with the tag, ensuring we are on the right base
+        git reset --hard "$COMMIT_SHA"
+
+        echo "Committing updated README.md..."
+        # Check if README.md was actually modified
+        if ! git diff --quiet README.md; then
+          git add README.md
+          git commit -m "Update README tag URLs to $TAG_NAME [Cloud Build]"
+
+          echo "Pushing changes to origin/${_TARGET_BRANCH}..."
+          # Push the commit to the target branch
+          git push origin "HEAD:${_TARGET_BRANCH}"
+          echo "Push complete."
+        else
+          echo "No changes detected in README.md, skipping commit and push."
+        fi
+    secretEnv: ['SSH_KEY'] # Reference the secret volume setup below (optional but good practice)
+
+# Define user-defined substitutions for configuration
+substitutions:
+  _SECRET_ID: github-deploy-key # Default secret ID (matches setup steps)
+  _GIT_USER_EMAIL: 'your-email@example.com' # <-- REPLACE with your desired commit email
+  _GIT_USER_NAME: 'Cloud Build CI' # <-- REPLACE with your desired commit user name
+  _TARGET_BRANCH: main # <-- REPLACE with the branch you want to push updates to (e.g., main, master)
+
+# Make the secret available to the build step
+# secrets:
+# - kmsKeyName: projects/$PROJECT_ID/locations/global/keyRings/your-keyring/cryptoKeys/your-key # Optional: For CMEK encryption
+#   secretManager:
+#   - versionName: projects/$PROJECT_ID/secrets/${_SECRET_ID}/versions/latest
+#     env: 'SSH_KEY' # Environment variable name (used in secretEnv above)
+
+options:
+  # Request permissions to access Secret Manager
+  serviceAccount: 'projects/$PROJECT_ID/serviceAccounts/[PROJECT_NUMBER]@cloudbuild.gserviceaccount.com' # Optional but recommended to be explicit
+  requestedVerifyOption: VERIFIED # Security scanning level
+
+# Note: This cloudbuild.yaml only modifies the README.md within the build environment.
+# To save the modified file, configure Cloud Build artifacts or add steps to push it back to the repo (requires auth setup).
+
+# To configure the trigger in Google Cloud Build:
+# 1. Go to the Cloud Build Triggers page in the Google Cloud Console.
+# 2. Create a new trigger.
+# 3. Select your source repository.
+# 4. For the Event, choose 'Push new tag'.
+# 5. In the Tag (regex) field, enter '^rv.*$' to match tags starting with 'rv'.
+# 6. For Configuration, select 'Cloud Build configuration file (yaml or json)'.
+# 7. Set the Cloud Build configuration file location to 'src/deploy/cloudbuild.yaml' (relative to your repository root).
+# 8. Save the trigger. 

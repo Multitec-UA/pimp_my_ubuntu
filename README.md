@@ -26,7 +26,7 @@ YOU DO NOT NEED TO CLONE THIS REPOSITORY! USE THE FOLLOWING CURL COMMANDS TO INS
 Execute his command to use de Pimp My Ubuntu main menu.
 
 ```bash
-curl -fsSL https://raw.github.com/Multitec-UA/pimp_my_ubuntu/main/src/main.sh | sudo bash
+curl -fsSL https://raw.github.com/Multitec-UA/pimp_my_ubuntu/refs/tags/v0.1.0/src/main.sh | sudo bash
 ```
 <div style="background-color: yellow; color: black; padding: 10px; font-size: 1.2em; text-align: center;">
     <strong>↑ ↑ ↑ ↑ ↑ ↑ Execute this command start main menu ↑ ↑ ↑ ↑ ↑ ↑ </strong>
@@ -45,7 +45,7 @@ curl -fsSL https://raw.github.com/Multitec-UA/pimp_my_ubuntu/main/src/main.sh | 
 Install ZSH, Oh-My-Zsh, plugins (autosuggestions, syntax-highlighting), Powerlevel10k theme and Meslo Nerd Fonts.
 
 ```bash
-curl -fsSL https://raw.github.com/Multitec-UA/pimp_my_ubuntu/main/src/procedures/zsh/zsh.sh | sudo bash
+curl -fsSL https://raw.github.com/Multitec-UA/pimp_my_ubuntu/refs/tags/v0.1.0/src/procedures/zsh/zsh.sh | sudo bash
 ```
 
 [View detailed ZSH readme](https://github.com/Multitec-UA/pimp_my_ubuntu/blob/main/src/procedures/zsh/README.md)
@@ -54,7 +54,7 @@ curl -fsSL https://raw.github.com/Multitec-UA/pimp_my_ubuntu/main/src/procedures
 Download cursor, install appimaged and add cursor command to bashrc and zshrc
 
 ```bash
-curl -fsSL https://raw.github.com/Multitec-UA/pimp_my_ubuntu/main/src/procedures/cursor/cursor.sh | sudo bash
+curl -fsSL https://raw.github.com/Multitec-UA/pimp_my_ubuntu/refs/tags/v0.1.0/src/procedures/cursor/cursor.sh | sudo bash
 ```
 
 [View detailed Cursor readme](https://github.com/Multitec-UA/pimp_my_ubuntu/blob/main/src/procedures/cursor/README.md)
@@ -63,7 +63,7 @@ curl -fsSL https://raw.github.com/Multitec-UA/pimp_my_ubuntu/main/src/procedures
 Update Grub, install grub-customizer and add theme.
 
 ```bash
-curl -fsSL https://raw.github.com/Multitec-UA/pimp_my_ubuntu/main/src/procedures/grub-customizer/grub-customizer.sh | sudo bash
+curl -fsSL https://raw.github.com/Multitec-UA/pimp_my_ubuntu/refs/tags/v0.1.0/src/procedures/grub-customizer/grub-customizer.sh | sudo bash
 ```
 
 [View detailed Grub Customizer readme](https://github.com/Multitec-UA/pimp_my_ubuntu/blob/main/src/procedures/grub-customizer/README.md)
@@ -84,13 +84,13 @@ You can enable debug mode by setting the `DEBUG` environment variable to `true` 
 To run the main menu in debug mode:
 
 ```bash
-curl -fsSL https://raw.github.com/Multitec-UA/pimp_my_ubuntu/main/src/main.sh | sudo -E DEBUG=true bash
+curl -fsSL https://raw.github.com/Multitec-UA/pimp_my_ubuntu/refs/tags/v0.1.0/src/main.sh | sudo -E DEBUG=true bash
 ```
 
 To install individual software in debug mode (example with ZSH):
 
 ```bash
-curl -fsSL https://raw.github.com/Multitec-UA/pimp_my_ubuntu/main/src/procedures/zsh/zsh.sh | sudo -E DEBUG=true bash
+curl -fsSL https://raw.github.com/Multitec-UA/pimp_my_ubuntu/refs/tags/v0.1.0/src/procedures/zsh/zsh.sh | sudo -E DEBUG=true bash
 ```
 
 The `-E` flag for sudo preserves environment variables when executing the command as root.

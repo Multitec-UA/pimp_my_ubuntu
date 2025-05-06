@@ -46,6 +46,18 @@ _source_lib() {
     global_log_message "DEBUG" "Exiting _source_lib"
 }
 
+# Source libraries
+if [[ "$LOCAL" == "true" ]]; then
+    # Strict mode
+    set -euo pipefail
+    # Source libraries from local directory
+    source "./src/libs/global_utils.sh"
+else
+    # Source libraries from remote repository
+    _source_lib "global_utils.sh"
+fi
+
+
 
 # Software-specific constants
 readonly _APPLICATIONS_DIR="${GLOBAL_REAL_HOME}/Applications"
@@ -290,18 +302,6 @@ _step_cleanup() {
     fi
     global_log_message "DEBUG" "Exiting _step_cleanup"
 }
-
-# Source libraries
-if [[ "$LOCAL" == "true" ]]; then
-    # Strict mode
-    set -euo pipefail
-    # Source libraries from local directory
-    source "./src/libs/global_utils.sh"
-else
-    # Source libraries from remote repository
-    _source_lib "global_utils.sh"
-fi
-
 
 # Execute main function
 main "$@"

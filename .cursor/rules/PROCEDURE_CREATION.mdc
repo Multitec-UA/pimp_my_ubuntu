@@ -1,0 +1,539 @@
+---
+alwaysApply: true
+---
+
+# AI Prompt: Creating New Procedures for Pimp My Ubuntu
+
+## Project Overview
+
+**Pimp My Ubuntu** is an automated setup script for Ubuntu 24.04+ that helps users quickly configure their systems with preferred software and configurations. The project uses a modular approach where each software installation is called a "procedure."
+
+## Project Structure & Methodology
+
+### Directory Structure
+```
+pimp_my_ubuntu/
+├── src/
+│   ├── main.sh                    # Main menu script
+│   ├── libs/                      # Shared libraries
+│   │   ├── global_utils.sh        # Core utilities and logging
+│   │   └── dialog.sh              # UI components
+│   └── procedures/                # Installation procedures
+│       ├── template/              # Template for new procedures
+│       │   ├── template.sh        # Script template
+│       │   └── README.md          # Documentation template
+│       ├── zsh/                   # Example: ZSH installation
+│       ├── cursor/                # Example: Cursor IDE installation
+│       └── grub-customizer/       # Example: GRUB customizer
+```
+
+### How Procedures Work
+
+1. **Remote Execution**: Procedures can be run via curl from GitHub releases
+2. **Local Development**: Can be run locally with `LOCAL=true` flag
+3. **Status Tracking**: Each procedure has status (INIT, PENDING, SUCCESS, FAILED, SKIPPED)
+4. **Centralized Logging**: All output goes to `/var/log/pimp_my_ubuntu/install.log`
+5. **Menu Integration**: Procedures automatically appear in the main menu
+
+## Your Task: Create a New Procedure
+
+### Instructions
+
+When asked to create a new procedure, follow these steps:
+
+1. **Create the procedure directory**: `src/procedures/[software-name]/`
+2. **Copy and modify the template**: Use `src/procedures/template/template.sh` as base
+3. **Create documentation**: Write a comprehensive README.md
+4. **Follow the established patterns**: Use the same structure as existing procedures
+
+### Mandatory Script Structure
+
+#### 1. Header Section
+```bash
+#!/usr/bin/env bash
+
+# =============================================================================
+# Pimp My Ubuntu - [Software Name] Installation Procedure
+# =============================================================================
+# Description: [Brief description of what this installs]
+# Author: Multitec-UA
+# Repository: https://github.com/Multitec-UA/pimp_my_ubuntu
+# License: MIT
+#
+# COMMON INSTRUCTIONS:
+# 1. Dont use echo. Use global_log_message instead.
+# 2. Send all output to log file. command >>"${GLOBAL_LOG_FILE}" 2>&1
+# =============================================================================
+
+# Debug flag - set to true to enable debug messages
+readonly DEBUG=${DEBUG:-false}
+readonly LOCAL=${LOCAL:-false}
+
+# Software-common constants
+readonly _SOFTWARE_COMMAND="[command-name]"
+readonly _SOFTWARE_DESCRIPTION="[description]"
+readonly _SOFTWARE_VERSION="1.0.0"
+readonly _DEPENDENCIES=("dependency1" "dependency2")
+readonly _REPOSITORY_TAG="v0.1.0"
+readonly _REPOSITORY_RAW_URL="https://raw.github.com/Multitec-UA/pimp_my_ubuntu/refs/tags/${_REPOSITORY_TAG}/"
+readonly _LIBS_REMOTE_URL="${_REPOSITORY_RAW_URL}/src/libs/"
+```
+
+#### 2. Required Functions
+
+**main()** - Entry point and flow control
+```bash
+main() {
+    # Source global variables and functions
+    _source_lib "global_utils.sh"
+    
+    global_check_root
+    _step_init
+
+    if [[ "$(global_get_proc_status "${_SOFTWARE_COMMAND}")" == "SKIPPED" ]]; then
+        global_log_message "INFO" "${_SOFTWARE_COMMAND} is already installed"
+        _step_post_install
+        _step_cleanup
+        return 0
+    fi
+
+    _step_install_dependencies
+
+    if _step_install_software; then
+        _step_post_install
+        global_log_message "INFO" "${_SOFTWARE_COMMAND} installation completed successfully"
+        global_set_proc_status "${_SOFTWARE_COMMAND}" "SUCCESS"
+        _step_cleanup
+        return 0
+    else
+        global_log_message "ERROR" "Failed to install ${_SOFTWARE_COMMAND}"
+        global_set_proc_status "${_SOFTWARE_COMMAND}" "FAILED"
+        _step_cleanup
+        return 1
+    fi
+}
+```
+
+**_source_lib()** - Library sourcing (copy exactly from template)
+
+**_step_init()** - Check if software is already installed
+```bash
+_step_init() {
+    global_log_message "INFO" "Starting installation of ${_SOFTWARE_COMMAND}"
+    global_log_message "INFO" "_SOFTWARE_VERSION: ${_SOFTWARE_VERSION}"
+    
+    if global_check_if_installed "${_SOFTWARE_COMMAND}"; then
+        global_set_proc_status "${_SOFTWARE_COMMAND}" "SKIPPED"
+        return 0
+    fi
+}
+```
+
+**_step_install_dependencies()** - Install prerequisites
+```bash
+_step_install_dependencies() {
+    global_log_message "INFO" "Installing dependencies for ${_SOFTWARE_COMMAND}"
+    apt-get update >>"${GLOBAL_LOG_FILE}" 2>&1
+    global_install_apt_package "${_DEPENDENCIES[@]}"
+}
+```
+
+**_step_install_software()** - Main installation logic
+```bash
+_step_install_software() {
+    global_log_message "INFO" "Installing ${_SOFTWARE_COMMAND}"
+    
+    # Your installation logic here
+    # Examples:
+    # - global_install_apt_package "${_SOFTWARE_COMMAND}"
+    # - wget, curl downloads
+    # - Manual compilation
+    # - Snap/Flatpak installations
+    
+    return 0  # Return 0 on success, 1 on failure
+}
+```
+
+**_step_post_install()** - Configuration after installation
+```bash
+_step_post_install() {
+    global_log_message "INFO" "Post installation of ${_SOFTWARE_COMMAND}"
+    
+    # Configuration steps:
+    # - Copy config files
+    # - Set up user environments
+    # - Start services
+    # - Desktop integration
+}
+```
+
+**_step_cleanup()** - Clean up temporary files
+```bash
+_step_cleanup() {
+    global_log_message "INFO" "Cleaning up after installation of ${_SOFTWARE_COMMAND}"
+    
+    # Clean downloaded files, temp directories, apt cache
+    if [[ "$(global_get_proc_status "${_SOFTWARE_COMMAND}")" == "SUCCESS" ]]; then
+        apt-get clean >>"${GLOBAL_LOG_FILE}" 2>&1
+    fi
+}
+```
+
+### Available Global Utilities
+
+#### Logging
+- `global_log_message "LEVEL" "message"` - Levels: INFO, ERROR, WARNING, DEBUG
+- Always redirect command output: `command >>"${GLOBAL_LOG_FILE}" 2>&1`
+
+#### Package Management
+- `global_install_apt_package "package1" "package2"` - Install and verify APT packages
+- `global_check_if_installed "software"` - Check if software is installed
+
+#### Status Management
+- `global_set_proc_status "name" "status"` - Set procedure status
+- `global_get_proc_status "name"` - Get procedure status
+
+#### File Operations
+- `global_download_media "path"` - Download files from repository
+- `global_check_file_size "file"` - Verify downloaded file integrity
+- `global_ensure_dir "directory"` - Create directory with proper ownership
+
+#### User Management
+- `global_run_as_user command` - Run commands as the real user (not root)
+- `GLOBAL_REAL_USER` - The actual user (when script runs with sudo)
+- `GLOBAL_REAL_HOME` - The user's home directory
+
+### README.md Template
+
+Create a comprehensive README.md in your procedure folder:
+
+```markdown
+# [Software Name] Installation Procedure
+
+Brief description of what this procedure installs and configures.
+
+## What's Included
+
+- ✅ Item 1
+- ✅ Item 2
+- ✅ Item 3
+
+## Usage
+
+```bash
+curl -fsSL https://raw.github.com/Multitec-UA/pimp_my_ubuntu/refs/tags/v0.1.0/src/procedures/[folder]/[script].sh | sudo bash
+```
+
+## What It Does
+
+1. Step 1 description
+2. Step 2 description
+3. Step 3 description
+
+## After Installation
+
+Instructions for the user after installation completes.
+
+## Troubleshooting
+
+Common issues and solutions.
+```
+
+### Best Practices
+
+1. **Error Handling**: Check return codes and handle failures gracefully
+2. **User Experience**: Provide clear log messages about what's happening
+3. **Idempotency**: Script should work if run multiple times
+4. **Security**: Verify downloads, use official sources, minimal permissions
+5. **Performance**: Clean up after installation, minimize resource usage
+
+### Testing
+
+- Test with `DEBUG=true` for verbose logging
+- Test with `LOCAL=true` for local development
+- Verify the procedure appears in the main menu
+- Test that the software is properly detected as installed
+
+### Media Files
+
+If your procedure needs additional files (configs, themes, etc.):
+1. Place them in `src/procedures/[name]/media/`
+2. Use `global_download_media "src/procedures/[name]/media/file.ext"`
+3. Files will be downloaded to `$GLOBAL_DOWNLOAD_DIR`
+
+### Constants to Update
+
+Always update these constants in your script:
+- `_SOFTWARE_COMMAND` - The main command/executable name
+- `_SOFTWARE_DESCRIPTION` - Brief description
+- `_DEPENDENCIES` - Array of required APT packages
+- Add any software-specific URLs or configuration values
+
+Remember: The goal is to create a fully automated, user-friendly installation that follows the established patterns and integrates seamlessly with the existing Pimp My Ubuntu ecosystem.# AI Prompt: Creating New Procedures for Pimp My Ubuntu
+
+## Project Overview
+
+**Pimp My Ubuntu** is an automated setup script for Ubuntu 24.04+ that helps users quickly configure their systems with preferred software and configurations. The project uses a modular approach where each software installation is called a "procedure."
+
+## Project Structure & Methodology
+
+### Directory Structure
+```
+pimp_my_ubuntu/
+├── src/
+│   ├── main.sh                    # Main menu script
+│   ├── libs/                      # Shared libraries
+│   │   ├── global_utils.sh        # Core utilities and logging
+│   │   └── dialog.sh              # UI components
+│   └── procedures/                # Installation procedures
+│       ├── template/              # Template for new procedures
+│       │   ├── template.sh        # Script template
+│       │   └── README.md          # Documentation template
+│       ├── zsh/                   # Example: ZSH installation
+│       ├── cursor/                # Example: Cursor IDE installation
+│       └── grub-customizer/       # Example: GRUB customizer
+```
+
+### How Procedures Work
+
+1. **Remote Execution**: Procedures can be run via curl from GitHub releases
+2. **Local Development**: Can be run locally with `LOCAL=true` flag
+3. **Status Tracking**: Each procedure has status (INIT, PENDING, SUCCESS, FAILED, SKIPPED)
+4. **Centralized Logging**: All output goes to `/var/log/pimp_my_ubuntu/install.log`
+5. **Menu Integration**: Procedures automatically appear in the main menu
+
+## Your Task: Create a New Procedure
+
+### Instructions
+
+When asked to create a new procedure, follow these steps:
+
+1. **Create the procedure directory**: `src/procedures/[software-name]/`
+2. **Copy and modify the template**: Use `src/procedures/template/template.sh` as base
+3. **Create documentation**: Write a comprehensive README.md
+4. **Follow the established patterns**: Use the same structure as existing procedures
+
+### Mandatory Script Structure
+
+#### 1. Header Section
+```bash
+#!/usr/bin/env bash
+
+# =============================================================================
+# Pimp My Ubuntu - [Software Name] Installation Procedure
+# =============================================================================
+# Description: [Brief description of what this installs]
+# Author: Multitec-UA
+# Repository: https://github.com/Multitec-UA/pimp_my_ubuntu
+# License: MIT
+#
+# COMMON INSTRUCTIONS:
+# 1. Dont use echo. Use global_log_message instead.
+# 2. Send all output to log file. command >>"${GLOBAL_LOG_FILE}" 2>&1
+# =============================================================================
+
+# Debug flag - set to true to enable debug messages
+readonly DEBUG=${DEBUG:-false}
+readonly LOCAL=${LOCAL:-false}
+
+# Software-common constants
+readonly _SOFTWARE_COMMAND="[command-name]"
+readonly _SOFTWARE_DESCRIPTION="[description]"
+readonly _SOFTWARE_VERSION="1.0.0"
+readonly _DEPENDENCIES=("dependency1" "dependency2")
+readonly _REPOSITORY_TAG="v0.1.0"
+readonly _REPOSITORY_RAW_URL="https://raw.github.com/Multitec-UA/pimp_my_ubuntu/refs/tags/${_REPOSITORY_TAG}/"
+readonly _LIBS_REMOTE_URL="${_REPOSITORY_RAW_URL}/src/libs/"
+```
+
+#### 2. Required Functions
+
+**main()** - Entry point and flow control
+```bash
+main() {
+    # Source global variables and functions
+    _source_lib "global_utils.sh"
+    
+    global_check_root
+    _step_init
+
+    if [[ "$(global_get_proc_status "${_SOFTWARE_COMMAND}")" == "SKIPPED" ]]; then
+        global_log_message "INFO" "${_SOFTWARE_COMMAND} is already installed"
+        _step_post_install
+        _step_cleanup
+        return 0
+    fi
+
+    _step_install_dependencies
+
+    if _step_install_software; then
+        _step_post_install
+        global_log_message "INFO" "${_SOFTWARE_COMMAND} installation completed successfully"
+        global_set_proc_status "${_SOFTWARE_COMMAND}" "SUCCESS"
+        _step_cleanup
+        return 0
+    else
+        global_log_message "ERROR" "Failed to install ${_SOFTWARE_COMMAND}"
+        global_set_proc_status "${_SOFTWARE_COMMAND}" "FAILED"
+        _step_cleanup
+        return 1
+    fi
+}
+```
+
+**_source_lib()** - Library sourcing (copy exactly from template)
+
+**_step_init()** - Check if software is already installed
+```bash
+_step_init() {
+    global_log_message "INFO" "Starting installation of ${_SOFTWARE_COMMAND}"
+    global_log_message "INFO" "_SOFTWARE_VERSION: ${_SOFTWARE_VERSION}"
+    
+    if global_check_if_installed "${_SOFTWARE_COMMAND}"; then
+        global_set_proc_status "${_SOFTWARE_COMMAND}" "SKIPPED"
+        return 0
+    fi
+}
+```
+
+**_step_install_dependencies()** - Install prerequisites
+```bash
+_step_install_dependencies() {
+    global_log_message "INFO" "Installing dependencies for ${_SOFTWARE_COMMAND}"
+    apt-get update >>"${GLOBAL_LOG_FILE}" 2>&1
+    global_install_apt_package "${_DEPENDENCIES[@]}"
+}
+```
+
+**_step_install_software()** - Main installation logic
+```bash
+_step_install_software() {
+    global_log_message "INFO" "Installing ${_SOFTWARE_COMMAND}"
+    
+    # Your installation logic here
+    # Examples:
+    # - global_install_apt_package "${_SOFTWARE_COMMAND}"
+    # - wget, curl downloads
+    # - Manual compilation
+    # - Snap/Flatpak installations
+    
+    return 0  # Return 0 on success, 1 on failure
+}
+```
+
+**_step_post_install()** - Configuration after installation
+```bash
+_step_post_install() {
+    global_log_message "INFO" "Post installation of ${_SOFTWARE_COMMAND}"
+    
+    # Configuration steps:
+    # - Copy config files
+    # - Set up user environments
+    # - Start services
+    # - Desktop integration
+}
+```
+
+**_step_cleanup()** - Clean up temporary files
+```bash
+_step_cleanup() {
+    global_log_message "INFO" "Cleaning up after installation of ${_SOFTWARE_COMMAND}"
+    
+    # Clean downloaded files, temp directories, apt cache
+    if [[ "$(global_get_proc_status "${_SOFTWARE_COMMAND}")" == "SUCCESS" ]]; then
+        apt-get clean >>"${GLOBAL_LOG_FILE}" 2>&1
+    fi
+}
+```
+
+### Available Global Utilities
+
+#### Logging
+- `global_log_message "LEVEL" "message"` - Levels: INFO, ERROR, WARNING, DEBUG
+- Always redirect command output: `command >>"${GLOBAL_LOG_FILE}" 2>&1`
+
+#### Package Management
+- `global_install_apt_package "package1" "package2"` - Install and verify APT packages
+- `global_check_if_installed "software"` - Check if software is installed
+
+#### Status Management
+- `global_set_proc_status "name" "status"` - Set procedure status
+- `global_get_proc_status "name"` - Get procedure status
+
+#### File Operations
+- `global_download_media "path"` - Download files from repository
+- `global_check_file_size "file"` - Verify downloaded file integrity
+- `global_ensure_dir "directory"` - Create directory with proper ownership
+
+#### User Management
+- `global_run_as_user command` - Run commands as the real user (not root)
+- `GLOBAL_REAL_USER` - The actual user (when script runs with sudo)
+- `GLOBAL_REAL_HOME` - The user's home directory
+
+### README.md Template
+
+Create a comprehensive README.md in your procedure folder:
+
+```markdown
+# [Software Name] Installation Procedure
+
+Brief description of what this procedure installs and configures.
+
+## What's Included
+
+- ✅ Item 1
+- ✅ Item 2
+- ✅ Item 3
+
+## Usage
+
+```bash
+curl -fsSL https://raw.github.com/Multitec-UA/pimp_my_ubuntu/refs/tags/v0.1.0/src/procedures/[folder]/[script].sh | sudo bash
+```
+
+## What It Does
+
+1. Step 1 description
+2. Step 2 description
+3. Step 3 description
+
+## After Installation
+
+Instructions for the user after installation completes.
+
+## Troubleshooting
+
+Common issues and solutions.
+```
+
+### Best Practices
+
+1. **Error Handling**: Check return codes and handle failures gracefully
+2. **User Experience**: Provide clear log messages about what's happening
+3. **Idempotency**: Script should work if run multiple times
+4. **Security**: Verify downloads, use official sources, minimal permissions
+5. **Performance**: Clean up after installation, minimize resource usage
+
+### Testing
+
+- Test with `DEBUG=true` for verbose logging
+- Test with `LOCAL=true` for local development
+- Verify the procedure appears in the main menu
+- Test that the software is properly detected as installed
+
+### Media Files
+
+If your procedure needs additional files (configs, themes, etc.):
+1. Place them in `src/procedures/[name]/media/`
+2. Use `global_download_media "src/procedures/[name]/media/file.ext"`
+3. Files will be downloaded to `$GLOBAL_DOWNLOAD_DIR`
+
+### Constants to Update
+
+Always update these constants in your script:
+- `_SOFTWARE_COMMAND` - The main command/executable name
+- `_SOFTWARE_DESCRIPTION` - Brief description
+- `_DEPENDENCIES` - Array of required APT packages
+- Add any software-specific URLs or configuration values
+
+Remember: The goal is to create a fully automated, user-friendly installation that follows the established patterns and integrates seamlessly with the existing Pimp My Ubuntu ecosystem.

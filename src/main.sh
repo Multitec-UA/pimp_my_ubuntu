@@ -72,7 +72,7 @@ main() {
     fi
    
    #TODO: Remove this
-   _print_global_installation_status
+   #_print_global_installation_status
 
     # Get procedures from file
     declare -A _main_proc_list
@@ -171,19 +171,29 @@ _step_init() {
 _init_procedures_info() {
     global_log_message "DEBUG" "MF: --> _init_procedures_info"
     global_log_message "INFO" "Initializing procedures information"
-        
-    # Get procedures list from GitHub API
-    local procedures_json
-    procedures_json=$(curl -fsSL "${_PROCEDURES_CONTENT_URL}")
     
-    # Parse procedure names from JSON response and filter out template
     local names
-    names=$(echo "${procedures_json}" | jq -r '.[].name | select(. != "template")')
+    
+    if [[ "$LOCAL" == "true" ]]; then
+        # Get procedures from local directories
+        global_log_message "DEBUG" "Getting procedures from local directories"
+        names=$(find ./src/procedures/ -maxdepth 1 -type d -not -name "procedures" -not -name "template" | sed 's|.*/||')
+    else
+        # Get procedures list from GitHub API
+        global_log_message "DEBUG" "Getting procedures from GitHub API"
+        local procedures_json
+        procedures_json=$(curl -fsSL "${_PROCEDURES_CONTENT_URL}")
+        
+        # Parse procedure names from JSON response and filter out template
+        names=$(echo "${procedures_json}" | jq -r '.[].name | select(. != "template")')
+    fi
     
     # Initialize each procedure's status as INIT
     while IFS= read -r proc_name; do
-        global_set_proc_status "${proc_name}" "INIT"
-        global_log_message "DEBUG" "Added procedure '${proc_name}' with status 'INIT'"
+        if [[ -n "$proc_name" ]]; then
+            global_set_proc_status "${proc_name}" "INIT"
+            global_log_message "DEBUG" "Added procedure '${proc_name}' with status 'INIT'"
+        fi
     done <<< "${names}"
     
     global_log_message "DEBUG" "All procedures initialized with INIT status"

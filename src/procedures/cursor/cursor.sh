@@ -46,6 +46,18 @@ _source_lib() {
     global_log_message "DEBUG" "Exiting _source_lib"
 }
 
+# Source libraries
+if [[ "$LOCAL" == "true" ]]; then
+    # Strict mode
+    set -euo pipefail
+    # Source libraries from local directory
+    source "./src/libs/global_utils.sh"
+else
+    # Source libraries from remote repository
+    _source_lib "global_utils.sh"
+fi
+
+
 
 # Software-specific constants
 readonly _APPLICATIONS_DIR="${GLOBAL_REAL_HOME}/Applications"
@@ -248,13 +260,14 @@ cursor() {
 
     # Loop through each shell RC file (bashrc, zshrc)
     for rc_file in "${_SHELL_RC_FILES[@]}"; do
+        global_log_message "DEBUG" "Reading ${rc_file} file"
         # Check if the RC file exists
         if [[ -f "${rc_file}" ]]; then
-            # Check if the cursor function is already defined in the RC file
+            global_log_message "DEBUG" "Check if the cursor function is already defined in the RC file"
             if grep -q "cursor()" "${rc_file}"; then
                 _delete_previous_cursor_function "${rc_file}"
             fi
-            # Append the cursor function to the RC file if not already present
+            global_log_message "DEBUG" "Append the cursor function to the RC file if not already present"
             echo "${cursor_function}" >> "${rc_file}"
             # Ensure the RC file has the correct ownership
             chown "${GLOBAL_REAL_USER}:${GLOBAL_REAL_USER}" "${rc_file}" >>"${GLOBAL_LOG_FILE}" 2>&1
@@ -289,18 +302,6 @@ _step_cleanup() {
     fi
     global_log_message "DEBUG" "Exiting _step_cleanup"
 }
-
-# Source libraries
-if [[ "$LOCAL" == "true" ]]; then
-    # Strict mode
-    set -euo pipefail
-    # Source libraries from local directory
-    source "./src/libs/global_utils.sh"
-else
-    # Source libraries from remote repository
-    _source_lib "global_utils.sh"
-fi
-
 
 # Execute main function
 main "$@"

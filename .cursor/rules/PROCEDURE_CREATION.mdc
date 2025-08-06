@@ -253,6 +253,10 @@ Common issues and solutions.
 - Test with `LOCAL=true` for local development
 - Verify the procedure appears in the main menu
 - Test that the software is properly detected as installed
+- To run and test the main menu with your new procedure, execute from the project root:
+  ```bash
+  sudo LOCAL=true DEBUG=true bash ./src/main.sh
+  ```
 
 ### Media Files
 
@@ -520,6 +524,10 @@ Common issues and solutions.
 - Test with `LOCAL=true` for local development
 - Verify the procedure appears in the main menu
 - Test that the software is properly detected as installed
+- To run and test the main menu with your new procedure, execute from the project root:
+  ```bash
+  sudo LOCAL=true DEBUG=true bash ./src/main.sh
+  ```
 
 ### Media Files
 

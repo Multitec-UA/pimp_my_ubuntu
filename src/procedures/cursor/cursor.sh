@@ -25,6 +25,7 @@ readonly _SOFTWARE_COMMAND="cursor"
 readonly _SOFTWARE_DESCRIPTION="A modern and powerful IDE with AI integrated"
 readonly _SOFTWARE_VERSION="1.3.9"
 readonly _CURSOR_DOWNLOAD_URL="https://downloads.cursor.com/production/54c27320fab08c9f5dd5873f07fca101f7a3e076/linux/x64/Cursor-1.3.9-x86_64.AppImage"
+## TODO: update to .deb installation method https://downloads.cursor.com/production/b753cece5c67c47cb5637199a5a5de2b7100c18f/linux/x64/deb/amd64/deb/cursor_1.6.35_amd64.deb
 
 
 
